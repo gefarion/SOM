@@ -85,7 +85,7 @@ Integer = (
     "Range Creation"
     to: upper = (
         | range |
-        range := Array new: upper - self + 1.
+        range := IntegerArray new: upper - self + 1.
         self to: upper do: [ :i | range at: i put: i ].
         ^range
     )

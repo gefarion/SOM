@@ -48,7 +48,7 @@ Sort = Benchmark (
     randomArray: size = (
         | array |
         Random initialize.
-        array := Array new: size withAll: [ Random next ].
+        array := IntegerArray new: size withAll: [ Random next ].
         smallest := largest := array at: 1.
         array do: [ :elm |
             (elm > largest)  ifTrue: [ largest  := elm ].
