@@ -1,6 +1,6 @@
 "
 
-$Id: Pair.som 27 2009-07-31 11:17:53Z michael.haupt $
+$Id: Array.som 29 2009-07-31 11:28:44Z michael.haupt $
 
 Copyright (c) 2001-2013 see AUTHORS file
 
@@ -23,29 +23,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-Pair = (
-
-    | key value |
+Handle = (
+	| target |
+    "Accessing"
+    target 				= ( ^target )
+    target: anObject 	= ( target := anObject )
     
-    key = ( ^key )
-    value = ( ^value )
+    ----------------------------
     
-    "Private"
-    key: aKey = ( key := aKey )
-    value: aValue = ( value := aValue )
-        
-    "Printing"
-    print = ( '[' print. key print. '=>' print. value print. ']' print )
-    println = ( self print. '' println )
+    | semanticsForDelegating semanticsForInstances |
     
-    ----
+    "Accessing"
+    semanticsForDelegating 				= ( ^semanticsForDelegating )
+    semanticsForDelegating: anObject	= ( semanticsForDelegating := anObject ) 
     
-    withKey: aKey andValue: aValue = (
-        | newPair |
-        newPair := super new.
-        newPair key: aKey.
-        newPair value: aValue.
-        ^newPair
+    semanticsForInstances				= ( ^semanticsForInstances )
+    semanticsForInstances: anObject 	= ( semanticsForInstances := anObject )
+    
+    initialize 							= (
+		self semanticsForInstances: 
+					(EnvironmentMO 
+							operationalSemantics: ImmutableSemanticsMO new 
+							message: ImmutableMessageMO new 
+							layout: nil
+					).
+		self semanticsForDelegating: 
+					(EnvironmentMO 
+							operationalSemantics: ImmutableSemanticsMO new 
+							message: ImmutableMessageMO new 
+							layout: nil
+					).			
+	)
+    
+    target: anObject = (
+    	^(self new target: anObject) installEnvironment: self semanticsForInstances
     )
-    
-)
+ )

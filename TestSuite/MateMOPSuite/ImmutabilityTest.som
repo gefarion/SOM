@@ -1,7 +1,4 @@
 "
-
-$Id: Pair.som 27 2009-07-31 11:17:53Z michael.haupt $
-
 Copyright (c) 2001-2013 see AUTHORS file
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,29 +20,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-Pair = (
 
-    | key value |
+ImmutabilityTest = TestCase (
     
-    key = ( ^key )
-    value = ( ^value )
+"	testObjectImmutability = (
+        | object value environment |
+		environment := EnvironmentMO 
+							operationalSemantics: ImmutableSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object := Pair new.
+		object key:1.
+		self assert: object key equals: 1.
+		object installEnvironment: environment.
+		object key: 2.
+		self assert: object key equals: 1.
+		object installEnvironment: nil.
+		object key: 2.
+		self assert: object key equals: 2.
+    )"
     
-    "Private"
-    key: aKey = ( key := aKey )
-    value: aValue = ( value := aValue )
-        
-    "Printing"
-    print = ( '[' print. key print. '=>' print. value print. ']' print )
-    println = ( self print. '' println )
-    
-    ----
-    
-    withKey: aKey andValue: aValue = (
-        | newPair |
-        newPair := super new.
-        newPair key: aKey.
-        newPair value: aValue.
-        ^newPair
-    )
-    
+	testReferenceImmutabilty = (
+        | object readOnlyReference |
+		Handle initialize.
+		object := Pair new.
+		readOnlyReference := object readOnly.
+		object key: 1.
+		self assert: object key equals: 1.
+		readOnlyReference key: 2.
+		self assert: object key equals: 1.
+		object key: 2.
+		self assert: object key equals: 2.
+		self assert: readOnlyReference equals: object.
+		self assert: readOnlyReference key equals: 2.
+	)
 )

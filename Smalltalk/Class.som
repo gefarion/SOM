@@ -32,7 +32,8 @@ Class = (
     asString = ( ^self name asString )
     
     "Allocation"
-    new = primitive
+    new = ( ^ self basicNew initialize )
+    basicNew = primitive
     
     "Meta Information"
     superclass = primitive
