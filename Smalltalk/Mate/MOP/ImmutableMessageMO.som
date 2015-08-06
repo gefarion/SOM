@@ -37,4 +37,8 @@ ImmutableMessageMO = MessageMO (
 		^nil.
 		"^self error: 'Method ', aSymbol asString, 'not found since Class: ', aClass asString."  
 	)
+	
+	activate: aMethod withArguments: arguments = (
+		^self target perform: aMethod withArguments: arguments
+	)
 )
