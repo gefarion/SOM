@@ -39,6 +39,6 @@ ImmutableMessageMO = MessageMO (
 	)
 	
 	activate: aMethod withArguments: arguments = (
-		^self target perform: aMethod withArguments: arguments
+		^Array with: self target with: aMethod with: arguments
 	)
 )
