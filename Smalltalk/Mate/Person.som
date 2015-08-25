@@ -1,6 +1,6 @@
 "
 
-$Id: Environment.som 29 2005-04-17 11:28:44Z guido.chari $
+$Id: Array.som 29 2009-07-31 11:28:44Z michael.haupt $
 
 Copyright (c) 2001-2013 see AUTHORS file
 
@@ -23,26 +23,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-ImmutableMessageMO = MessageMO (
-    find: aSymbol since: aClass = (	
-		| class | 
-		class := (self class = aClass) 
-			ifTrue: [ self target class ]
-			ifFalse: [aClass].
-		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
-			
-			class := class superclass.
-		].
-		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
-		^nil.
-		"^self error: 'Method ', aSymbol asString, 'not found since Class: ', aClass asString."  
-	)
-	
-	activate: aMethod withArguments: arguments = (
-		|context|
-		context := Array new: arguments length + 1.
-		context at: 1 put: self target.
-		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
-		^Array with: Handle semanticsForInstances with: context 
-	)
+Person = (
+	| name surname ssn address tel cel profession gender birth job|
+    
+    name = (^name)
+    surname = (^surname)
+    ssn = (^ssn)
+    address = (^address)
+    tel = (^tel)
+    cel = (^cel)
+    profession = (^profession)
+    gender = (^gender)
+    birth = (^birth)
+    job = (^job)
+    
+    name: aName = (name := aName)
+    surname: aSurname = (surname := aSurname)
+    ssn: aSSN = (ssn := aSSN)
+    address: anAddress = (address := anAddress)
+    tel: aTel = (tel := aTel)
+    cel: aCel = (cel := aCel)
+    profession: aProfession = (profession := aProfession)
+    gender: aGender = (gender := aGender)
+    birth: aBirth = (birth := aBirth)
+    job: aJob = (job := aJob)
 )
