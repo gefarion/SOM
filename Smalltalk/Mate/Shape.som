@@ -28,6 +28,6 @@ Shape = (
     ----------------------------
   
     "Instance creation"
-    new 				= self newWithFieldCount: 0
-    newWithFieldCount: 	= primitive
+    new 							= (self newWithFieldsCount: 0)
+    newWithFieldsCount: aNumber 	= primitive
  )

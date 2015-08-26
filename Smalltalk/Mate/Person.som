@@ -24,7 +24,7 @@ THE SOFTWARE.
 "
 
 Person = (
-	| name surname ssn address tel cel profession gender birth job|
+	| name surname ssn address tel cel profession gender birth job |
     
     name = (^name)
     surname = (^surname)

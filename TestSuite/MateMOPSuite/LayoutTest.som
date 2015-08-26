@@ -24,19 +24,19 @@ THE SOFTWARE.
 LayoutTest = TestCase (
     
 	testChangeLayout = (
-		| object mateFormat reflectiveObject semantics |
-		shape := Shape new: 6.
+		| shape person person2 |
+		shape := Shape newWithFieldsCount: 6.
 		person := Person new. 
 		person ssn: 3055.
-		person address: casa.
+		person address: 'casa'.
 		person tel: 1234.
 		self assert: person ssn = 3055.
-		person2 = Person new.
+		person2 := Person new.
+		person2 ssn: 3055.
 		person2 changeShape: shape. 
 		person2 installEnvironment: self environment.
-		person ssn: 3055.
-		person address: casa.
-		person tel: 1234.
+		person2 address: 'casa'.
+		person2 tel: 1234.
 		person2 cel: 4321.
     )
     
