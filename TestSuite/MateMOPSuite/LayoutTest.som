@@ -36,13 +36,13 @@ LayoutTest = TestCase (
 		person2 changeShape: shape. 
 		person2 installEnvironment: self environment.
 		person2 address: 'casa'.
-		person2 tel: 1234.
-		person2 cel: 4321.
+		"person2 tel: 1234.
+		person2 cel: 4321."
     )
     
     environment = (
     	^EnvironmentMO 
-			operationalSemantics: ImmutableSemanticsMO new 
+			operationalSemantics: HashFieldsSemanticsMO new 
 			message: nil 
 			layout: nil.
 	)		

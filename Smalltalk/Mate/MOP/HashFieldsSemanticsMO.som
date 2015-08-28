@@ -23,7 +23,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-ImmutableSemanticsMO = OperationalSemanticsMO (
-    | |
-	write: anIndex value: aValue = ()
+HashFieldsSemanticsMO = LayoutMO (
+    | index |
+	read: aNumber = (
+		index = self fieldIndexForField: aNumber. 
+		^index isNil 
+			ifTrue:	 [nil]
+			ifFalse: [self instVarAt: index]
+	)
+		
+	write: aNumber value: anObject = (
+		| index |
+		index = self fieldIndexForField: aNumber. 
+		index isNil
+			ifTrue:	 [throw NoMoreSpaceException new]
+			ifFalse: [
+				self instVarAt: index put: anObject.
+				self instVarAt: index + 1 put: aNumber.
+			]
+	)
+	
+	fieldsCount =  ( self class instVarsSize )
 )
