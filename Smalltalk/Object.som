@@ -108,4 +108,6 @@ Object = nil (
     
     "Extension for the MOP"
 	readOnly = ( ^Handle target: self )
+	changeShape: aShape = primitive
+	shape = primitive
 )

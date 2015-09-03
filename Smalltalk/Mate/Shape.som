@@ -25,6 +25,8 @@ THE SOFTWARE.
 
 Shape = (
 	
+    fieldsCount = primitive
+    
     ----------------------------
   
     "Instance creation"
