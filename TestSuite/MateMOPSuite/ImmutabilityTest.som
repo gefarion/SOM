@@ -30,7 +30,7 @@ ImmutabilityTest = TestCase (
 							message: nil 
 							layout: nil.
 		object := Pair new.
-		object key:1.
+		object key: 1.
 		self assert: object key equals: 1.
 		object installEnvironment: environment.
 		object key: 2.

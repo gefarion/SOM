@@ -24,7 +24,7 @@ THE SOFTWARE.
 LayoutTest = TestCase (
     
 	testChangeLayout = (
-		| shape person person2 |
+		| shape person person2 usedSlots |
 		shape := Shape newWithFieldsCount: 6.
 		person := Person new. 
 		person ssn: 3055.
@@ -42,7 +42,10 @@ LayoutTest = TestCase (
 		self assert: person2 tel = 1234.
 		self assert: person2 class fields length = 10.
 		self assert: person2 shape fieldsCount = 6.
-		
+		usedSlots := 0.
+		1 to: 6 do: [:index | (person2 instVarAt: index) ifNotNil:[usedSlots := usedSlots + 1]].
+		usedSlots println.
+		self assert: usedSlots = 6.
     )
     
     environment = (
@@ -50,7 +53,5 @@ LayoutTest = TestCase (
 			operationalSemantics: nil  
 			message: nil 
 			layout: HashFieldsSemanticsMO new.
-	)		
-		
-    
+	)
  )
