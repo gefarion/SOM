@@ -30,7 +30,6 @@ ImmutableMessageMO = MessageMO (
 			ifTrue: [ self target class ]
 			ifFalse: [aClass].
 		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
-			
 			class := class superclass.
 		].
 		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
