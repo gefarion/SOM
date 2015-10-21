@@ -25,5 +25,6 @@ THE SOFTWARE.
 
 ImmutableSemanticsMO = OperationalSemanticsMO (
     | |
-	write: anIndex value: aValue = ()
+	write: anIndex value: aValue = (^aValue)
+	
 )

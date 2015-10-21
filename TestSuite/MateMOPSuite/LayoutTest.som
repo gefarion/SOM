@@ -30,19 +30,18 @@ LayoutTest = TestCase (
 		person ssn: 3055.
 		person address: 'casa'.
 		person tel: 1234.
-		self assert: person ssn = 3055.
-		self assert: person class fields length = 10.
-		self assert: person shape fieldsCount = 10.
+		self assert: person ssn equals: 3055.
+		self assert: person class fields length equals: 10.
+		self assert: person shape fieldsCount equals: 10.
 		person2 := Person new.
 		person2 changeShape: shape. 
 		person2 installEnvironment: self environment.
 		person2 address: 'casa'.
 		person2 tel: 1234.
 		person2 cel: 4321.
-		self assert: person2 tel = 1234.
-		self assert: person2 class fields length = 10.
-		self assert: person2 shape fieldsCount = 6.
-		
+		self assert: person2 tel equals: 1234.
+		self assert: person2 class fields length equals: 10.
+		self assert: person2 shape fieldsCount equals: 6.
     )
     
     environment = (
@@ -50,7 +49,5 @@ LayoutTest = TestCase (
 			operationalSemantics: nil  
 			message: nil 
 			layout: HashFieldsSemanticsMO new.
-	)		
-		
-    
+	)
  )
