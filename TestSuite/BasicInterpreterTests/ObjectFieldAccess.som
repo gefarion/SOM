@@ -1,0 +1,13 @@
+ObjectFieldAccess = (
+ | a |
+
+ do = (
+   a println.
+   a := 4.
+   ^ a
+ )
+ ----
+ test = (
+  ^ ObjectFieldAccess new do.
+ )
+)
