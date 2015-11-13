@@ -24,7 +24,7 @@ THE SOFTWARE.
 ImmutabilityTest = TestCase (
     
 	testObjectImmutability = (
-        "| object value environment |
+        | object value environment |
 		environment := EnvironmentMO 
 							operationalSemantics: ImmutableSemanticsMO new 
 							message: nil 
@@ -37,7 +37,7 @@ ImmutabilityTest = TestCase (
 		self assert: object key equals: 1.
 		object installEnvironment: nil.
 		object key: 2.
-		self assert: object key equals: 2." 
+		self assert: object key equals: 2. 
     )
     
 	testReferenceImmutabilty = (
