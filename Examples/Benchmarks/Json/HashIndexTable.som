@@ -34,8 +34,4 @@ HashIndexTable = (
   hashSlotFor: element = (
     ^ (element hashcode & 31) + 1
   )
-  
-  ----
-  
-  new = ( ^ super new initialize )
 )

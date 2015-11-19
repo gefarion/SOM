@@ -87,8 +87,6 @@ JsonArray = JsonValue (
 
   ----
   
-  new = ( ^ super new initialize )
-  
   readFrom: string = (
     ^ (JsonValue readFrom: string) asArray
   )
