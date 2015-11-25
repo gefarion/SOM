@@ -1,0 +1,11 @@
+VMReflectiveFieldWrite = FieldWrite (
+    initialize = (
+    	| environment |
+    	super initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: FieldWriteSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+)

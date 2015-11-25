@@ -23,6 +23,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-OperationalSemanticsMO = (
-    | |
+MethodActivationSemanticsMO = MessageMO (
+    find: aSymbol since: aClass = (	
+		| class | 
+		class := aClass.
+		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
+			class := class superclass.
+		].
+		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
+		^nil.
+		"^self error: 'Method ', aSymbol asString, 'not found since Class: ', aClass asString."  
+	)
+	
+	activate: aMethod withArguments: arguments = (
+		|context|
+		context := Array new: arguments length + 1.
+		context at: 1 put: self.
+		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
+		^Array with: nil with: context 
+	)
 )

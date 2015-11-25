@@ -1,0 +1,15 @@
+MessageSend = Benchmark (
+    | object |
+    
+    initialize = (
+    	object := Mock new.
+    )
+    
+    benchmark = (
+		object key.
+    )
+    
+    verifyResult: result = (
+      ^self assert: true equals: true
+    )
+)    

@@ -1,0 +1,13 @@
+VMReflectiveMessageSend = MessageSend (
+    | object |
+    
+    initialize = (
+    	| environment |
+    	super initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: nil 
+							message: MessageSendSemanticsMO new
+							layout: nil.
+		object installEnvironment: environment.
+    )
+)    

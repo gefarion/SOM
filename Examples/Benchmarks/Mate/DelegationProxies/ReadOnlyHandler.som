@@ -1,0 +1,4 @@
+ReadOnlyHandler = Object (
+	handleWriteField: field value: value myself: aProxy target: aReceiver = (
+	)
+)

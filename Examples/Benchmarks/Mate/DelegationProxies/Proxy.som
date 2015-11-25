@@ -1,0 +1,7 @@
+Proxy = Object (
+	| target handler |
+	
+	handleMessage: aMsg myself: aProxy target: aReceiver = (
+		handler handleMessage: aMsg myself: aProxy target: aReceiver
+	)
+)

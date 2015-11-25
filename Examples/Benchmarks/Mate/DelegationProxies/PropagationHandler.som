@@ -1,0 +1,49 @@
+PropagationHandler = Object (
+	initialize = (
+		isRoot := true
+	)
+	
+	handleMessage: aMsg myself: aProxy target: aReceiver = (
+		^aMsg selector isPrimitive
+			ifTrue: [ self wrap: (aReceiver perform: aMsg myself: aProxy) ]
+			ifFalse: [
+				self isRoot
+					ifTrue: [
+						aMsg arguments: (self wrapAll: aMsg arguments).
+						self unwrap: (aReceiver perform: aMsg myself: aProxy) ]
+					ifFalse: [ t perform: m myself: p ] 
+			] 
+	)
+	
+	handleReadField: aField myself: aProxy target: aReceiver = (
+		^self wrap: (aReceiver instVarNamed: aField myself: aProxy).
+	)
+	
+	handleWriteField: aField value: aValue myself: aProxy target: aReceiver = (
+		aReceiver instVarNamed: aField put: (self unwrap: aValue) myself: aProxy.
+		^aValue
+	)
+	
+	handleLiteral: l myself: p target: t = (
+		^self wrap: l.
+	)
+	
+	wrap: anObject = (
+		| handler |
+		handler := self class new.
+		handler isRoot: false.
+		^Proxy handler: handler target: anObject
+	)
+	
+	wrapAll: aCollection = (
+ 		aCollection collect: [ :each | self wrap: each ]
+ 	)
+ 	
+ 	unwrap: aProxy = (
+ 		Reflect targetOf: aProxy
+ 	)
+ 	
+ 	isRoot: aBoolean = (
+		isRoot := aBoolean
+	)
+)

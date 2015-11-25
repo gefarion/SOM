@@ -23,6 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-OperationalSemanticsMO = (
-    | |
+FieldWriteSemanticsMO = OperationalSemanticsMO (
+	write: anIndex value: aValue = (^self instVarAt: anIndex + 1 put: aValue)
 )

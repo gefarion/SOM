@@ -1,0 +1,17 @@
+Handler = Object (
+	handleMessage: aMsg myself: aProxy target: aReceiver = (
+		^self subclassResponsibility. 
+	)
+	
+	handleReadField: aField myself: aProxy target: aReceiver = (
+		^self subclassResponsibility.
+	)
+	
+	handleWriteField: aField value: value myself: aProxy target: aReceiver = (
+		^self subclassResponsibility.
+	)
+	
+	handleLiteral: l myself: p target: t = (
+		^self subclassResponsibility.
+	)
+)
