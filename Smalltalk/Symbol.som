@@ -29,6 +29,10 @@ Symbol = String (
     asString = primitive
     asSymbol = ( ^self )
     
+    selector = (^self)
+    
+    isPrimitive = (^false)
+    
     "Printing"
     print    = ( '#' print. super print )
     

@@ -26,29 +26,18 @@ THE SOFTWARE.
 PairProxy = Proxy (
 
     key = ( ^self readKeyMyself: self )
-    value = ( ^self readValueMyself: value )
+    value = ( ^self readValueMyself: self )
     
-    readKeyMyself: self = ( ^key )
-    readValueMyself: self = ( ^value )
+    readKeyMyself: aProxy = ( ^handler handleReadField: #key myself: aProxy target: target )
+    readValueMyself: aProxy = ( ^handler handleReadField: #value myself: aProxy target: target )
     
     key: aKey = ( ^self writeKey: aKey myself: self )
-    value: aValue = ( ^self writeValue: aValue myself: self = ( value := aValue ) )
+    value: aValue = ( ^self writeValue: aValue myself: self)
     
-    writeKey: aKey myself: self = ( key := aKey )
-    writeValue: aValue myself: self = ( value := aValue )
+    writeKey: aKey myself: aProxy = ( ^handler handleWriteField: #key value: aKey myself: aProxy target: target )
+    writeValue: aValue myself: aProxy = ( ^handler handleWriteField: #value value: aValue myself: aProxy target: target )
         
     "Printing"
-    print = ( '[' print. key print. '=>' print. value print. ']' print )
+    print = ( '[' print. self key print. '=>' print. self value print. ']' print )
     println = ( self print. '' println )
-    
-    ----
-    
-    withKey: aKey andValue: aValue = (
-        | newPair |
-        newPair := super new.
-        newPair key: aKey.
-        newPair value: aValue.
-        ^newPair
-    )
-    
 )

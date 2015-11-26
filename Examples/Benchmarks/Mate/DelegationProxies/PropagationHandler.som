@@ -1,4 +1,6 @@
 PropagationHandler = Object (
+	| isRoot |
+	
 	initialize = (
 		isRoot := true
 	)
@@ -11,7 +13,7 @@ PropagationHandler = Object (
 					ifTrue: [
 						aMsg arguments: (self wrapAll: aMsg arguments).
 						self unwrap: (aReceiver perform: aMsg myself: aProxy) ]
-					ifFalse: [ t perform: m myself: p ] 
+					ifFalse: [ aReceiver perform: aMsg myself: aProxy ] 
 			] 
 	)
 	
@@ -40,10 +42,15 @@ PropagationHandler = Object (
  	)
  	
  	unwrap: aProxy = (
- 		Reflect targetOf: aProxy
+		"Reflect targetOf: aProxy"
+		^aProxy target.
  	)
  	
  	isRoot: aBoolean = (
 		isRoot := aBoolean
+	)
+	
+	isRoot = (
+		^isRoot
 	)
 )

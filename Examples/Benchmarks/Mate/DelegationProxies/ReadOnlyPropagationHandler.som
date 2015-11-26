@@ -1,4 +1,3 @@
-ReadOnlyHandler = PropagationHandler (
-	handleWriteField: field value: value myself: aProxy target: aReceiver = (
-	)
+ReadOnlyPropagationHandler = PropagationHandler (
+	handleWriteField: field value: value myself: aProxy target: aReceiver = ()
 )

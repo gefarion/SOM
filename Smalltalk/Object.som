@@ -106,6 +106,9 @@ Object = nil (
     instVarAt: idx put: obj = primitive
     instVarNamed: sym       = primitive
     
+    "Delegation Proxies"
+    instVarNamed: sym myself: anObject = (^self instVarNamed: sym)
+    
     "Extension for the MOP"
 	readOnly = ( ^Handle target: self )
 	changeShape: aShape = primitive
