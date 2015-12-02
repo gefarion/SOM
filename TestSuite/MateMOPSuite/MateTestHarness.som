@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-MateTestHarness = TestHarness(
+MateTestHarness = TestHarness (
     tests = ( "Now ordered by alphabetical order to improve maintainability"
         ^ ImmutabilityTest    
     )

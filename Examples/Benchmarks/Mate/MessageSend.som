@@ -6,10 +6,10 @@ MessageSend = Benchmark (
     )
     
     benchmark = (
-		object key.
+		^object key.
     )
     
     verifyResult: result = (
-      ^self assert: true equals: true
+      ^self assert: result equals: 1
     )
 )    

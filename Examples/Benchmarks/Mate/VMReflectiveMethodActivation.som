@@ -10,4 +10,8 @@ VMReflectiveMethodActivation = MessageSend (
 							layout: nil.
 		object installEnvironment: environment.
     )
+    
+    verifyResult: result = (
+      ^self assert: result equals: 2
+    )
 )    
