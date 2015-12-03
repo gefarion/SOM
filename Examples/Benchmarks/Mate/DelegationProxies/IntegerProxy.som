@@ -23,27 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-ProxiedPair = Pair (
+IntegerProxy = Proxy (
 
-    readKeyMyself: self = ( ^key )
-    readValueMyself: self = ( ^value )
-    
-    "Private"
-    writeKey: aKey myself: self = ( key := aKey )
-    writeValue: aValue myself: self = ( value := aValue )
-        
-    "Printing"
-    print = ( '[' print. key print. '=>' print. value print. ']' print )
-    println = ( self print. '' println )
-    
-    ----
-    
-    withKey: aKey andValue: aValue = (
-        | newPair |
-        newPair := super new.
-        newPair key: aKey.
-        newPair value: aValue.
-        ^newPair
+    equal: aValue myself: aProxy = (
+       	^self target = aValue
+       	"^handler handleMessage: #= withArguments: (Array with: aValue) lookupClass: Integer myself: aProxy target: target"
     )
     
+    "Printing"
+    print = ( '[' print. self key print. '=>' print. self value print. ']' print )
+    println = ( self print. '' println )
 )

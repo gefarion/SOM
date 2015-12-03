@@ -27,12 +27,18 @@ Pair = (
 
     | key value |
     
+    "Accessing"
     key = ( ^key )
     value = ( ^value )
     
     "Private"
     key: aKey = ( key := aKey )
     value: aValue = ( value := aValue )
+    
+    "Comparing"
+    =aPair = (
+    	^(self key = aPair key) and: [self value = aPair value]
+    )
         
     "Printing"
     print = ( '[' print. key print. '=>' print. value print. ']' print )
