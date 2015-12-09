@@ -6,7 +6,7 @@ MessageSend = Benchmark (
     )
     
     benchmark = (
-		^object key.
+    	^object key.
     )
     
     verifyResult: result = (

@@ -5,7 +5,7 @@ PropagationHandler = Object (
 		isRoot := true
 	)
 	
-	handleMessage: aSelector withArguments: arguments lookupClass: aClass myself: aProxy target: aReceiver = (
+	handleMessage: aSelector withArguments: arguments myself: aProxy target: aReceiver = (
 		^aSelector isPrimitive
 			ifTrue: [ self wrap: (aReceiver perform: aMsg myself: aProxy) ]
 			ifFalse: [
@@ -14,7 +14,7 @@ PropagationHandler = Object (
 						aMsg arguments: (self wrapAll: aMsg arguments).
 						self unwrap: (aReceiver perform: aMsg myself: aProxy) ]
 					ifFalse: [ "
-				aProxy perform: aSelector withArguments: arguments inSuperclass: aClass ] 
+				aReceiver perform: aSelector withArguments: arguments ] 
 			"]" 
 	)
 	

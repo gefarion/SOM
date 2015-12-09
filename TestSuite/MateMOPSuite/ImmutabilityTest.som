@@ -23,7 +23,7 @@ THE SOFTWARE.
 
 ImmutabilityTest = TestCase (
     
-	"testObjectImmutability = (
+	testObjectImmutability = (
         | object value environment |
 		environment := EnvironmentMO 
 							operationalSemantics: ImmutableSemanticsMO new 
@@ -44,28 +44,24 @@ ImmutabilityTest = TestCase (
         | object readOnlyReference |
 		Handle initialize.
 		object := Pair new.
-		readOnlyReference := object readOnly.
-		object key: 1.
-		self assert: object key equals: 1.
-		readOnlyReference key: 2.
-		self assert: object key equals: 1.
-		object key: 2.
-		self assert: object key equals: 2.
-		self assert: readOnlyReference equals: object.
-		self assert: readOnlyReference key equals: 2.
-	)"
+		self readOnlyReferenceOf: object withReference: object readOnly
+	)
 	
 	testReferenceReadOnlyProxies = (
 		| object readOnlyReference |
 		object := Pair new.
 		readOnlyReference := PairProxy handler: ReadOnlyPropagationHandler new target: object.
-		object key: 1.
-		self assert: object key equals: 1.
-		readOnlyReference key: 2.
-		self assert: object key equals: 1.
-		object key: 2.
-		self assert: object key equals: 2.
-		"self assert: readOnlyReference equals: object."
-		self assert: readOnlyReference key equals: 2.
+		self readOnlyReferenceOf: object withReference: readOnlyReference
+	)
+	
+	readOnlyReferenceOf: aPair withReference: aReference = (
+		aPair key: 1.
+		self assert: aPair key equals: 1.
+		aReference key: 2.
+		self assert: aPair key equals: 1.
+		aPair key: 2.
+		self assert: aPair key equals: 2.
+		self assert: aReference equals: aPair.
+		"self assert: aReference key equals: 2"
 	)
 )

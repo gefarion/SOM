@@ -25,9 +25,8 @@ THE SOFTWARE.
 
 IntegerProxy = Proxy (
 
-    equal: aValue myself: aProxy = (
-       	^self target = aValue
-       	"^handler handleMessage: #= withArguments: (Array with: aValue) lookupClass: Integer myself: aProxy target: target"
+    equal: aValue myself: slf = (
+       	^handler handleMessage: #equal:myself: withArguments: (Array with: aValue with: slf) myself: slf target: target
     )
     
     "Printing"

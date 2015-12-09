@@ -27,7 +27,7 @@ MessageSendSemanticsMO = MessageMO (
     find: aSymbol since: aClass = (	
 		| class realSymbol| 
 		class := aClass.
-		realSymbol := ('reflective' + aSymbol asString) asSymbol. 
+		realSymbol := ('reflective' + aSymbol asString) asSymbol.
 		"realSymbol := aSymbol."
 		[class isNil or: (class hasMethod: realSymbol)] whileFalse: [
 			class := class superclass.

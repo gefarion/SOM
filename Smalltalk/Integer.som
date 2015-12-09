@@ -102,6 +102,10 @@ Integer = (
     proxyClass = (
     	^IntegerProxy
     )
+    
+    equal: anInteger myself: slf = (
+    	^self = anInteger
+    )
 
     ----
     

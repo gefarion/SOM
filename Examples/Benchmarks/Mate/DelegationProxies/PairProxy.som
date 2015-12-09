@@ -25,21 +25,21 @@ THE SOFTWARE.
 
 PairProxy = Proxy (
 
-    key = ( ^self readKeyMyself: self )
-    value = ( ^self readValueMyself: self )
+    key = ( ^self keyMyself: self )
+    value = ( ^self valueMyself: self )
     
-    equal: aValue myself: aProxy = (
-       	^handler handleMessage: #= withArguments: (Array with: aValue) lookupClass: Pair myself: aProxy target: target
+    equal: aValue myself: slf = (
+    	^handler handleMessage: #equal:myself: withArguments: (Array with: aValue with: slf) myself: slf target: target
     )
     
-    readKeyMyself: aProxy = ( ^handler handleReadField: #key myself: aProxy target: target )
-    readValueMyself: aProxy = ( ^handler handleReadField: #value myself: aProxy target: target )
+    keyMyself: slf = ( ^handler handleReadField: #key myself: slf target: target )
+    valueMyself: slf = ( ^handler handleReadField: #value myself: slf target: target )
     
     key: aKey = ( ^self writeKey: aKey myself: self )
     value: aValue = ( ^self writeValue: aValue myself: self)
     
-    writeKey: aKey myself: aProxy = ( ^handler handleWriteField: #key value: aKey myself: aProxy target: target )
-    writeValue: aValue myself: aProxy = ( ^handler handleWriteField: #value value: aValue myself: aProxy target: target )
+    writeKey: aKey myself: slf = ( ^handler handleWriteField: #key value: aKey myself: slf target: target )
+    writeValue: aValue myself: slf = ( ^handler handleWriteField: #value value: aValue myself: slf target: target )
         
     "Printing"
     print = ( '[' print. self key print. '=>' print. self value print. ']' print )

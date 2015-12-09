@@ -36,5 +36,9 @@ Nil = (
     ifNil: aBlock = (^aBlock value)
     ifNotNil: aBlock = (^self)
     ifNil: goBlock ifNotNil: noGoBlock = (^goBlock value)
-
+    
+    "Delegation Proxies"
+    proxyClass = (
+    	^NoProxy
+    )
 )

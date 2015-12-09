@@ -8,4 +8,8 @@ VMReflectiveFieldWrite = FieldWrite (
 							layout: nil.
 		object installEnvironment: environment.
     )
+    
+    verifyResult: result = (
+      ^self assert: object key equals: 1
+    )
 )
