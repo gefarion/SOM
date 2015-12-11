@@ -1,0 +1,16 @@
+FieldRead = Benchmark (
+    | object |
+    
+    initialize = (
+    	object := Pair new.
+    	object key: 1.
+    )
+    
+    benchmark = (
+		^object key.
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: 1
+    )
+)    

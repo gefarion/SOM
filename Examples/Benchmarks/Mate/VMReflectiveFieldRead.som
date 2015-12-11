@@ -1,15 +1,15 @@
-VMReflectiveMessageSend = MessageSend (
+VMReflectiveFieldRead = FieldRead (
     initialize = (
     	| environment |
     	super initialize.
     	environment := EnvironmentMO 
-							operationalSemantics: nil 
-							message: MessageSendSemanticsMO new
+							operationalSemantics: FieldReadSemanticsMO new 
+							message: nil 
 							layout: nil.
 		object installEnvironment: environment.
     )
     
     verifyResult: result = (
-      ^self assert: object key equals: 2
+      ^self assert: result equals: 1
     )
-)    
+)
