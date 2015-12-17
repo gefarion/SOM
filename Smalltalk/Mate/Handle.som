@@ -44,13 +44,13 @@ Handle = (
 		self semanticsForInstances: 
 					(EnvironmentMO 
 							operationalSemantics: ImmutableSemanticsMO new 
-							message: nil 
+							message: ImmutableMessageMO 
 							layout: nil
 					).
 		self semanticsForDelegating: 
 					(EnvironmentMO 
 							operationalSemantics: ImmutableSemanticsMO new 
-							message: ImmutableMessageMO new 
+							message: ImmutableMessageForHandlesMO new 
 							layout: nil
 					).			
 	)

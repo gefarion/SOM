@@ -6,7 +6,7 @@ VMReflectiveMethodActivation = MessageSend (
     	super initialize.
     	environment := EnvironmentMO 
 							operationalSemantics: nil 
-							message: MessageSendSemanticsMO new
+							message: MethodActivationSemanticsMO new
 							layout: nil.
 		object installEnvironment: environment.
     )
