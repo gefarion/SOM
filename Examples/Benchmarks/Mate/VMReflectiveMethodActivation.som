@@ -12,6 +12,6 @@ VMReflectiveMethodActivation = MessageSend (
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 2
+      ^self assert: result equals: 1
     )
 )    
