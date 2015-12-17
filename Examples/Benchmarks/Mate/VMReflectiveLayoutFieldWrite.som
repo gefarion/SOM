@@ -3,7 +3,7 @@ VMReflectiveLayoutFieldWrite = FieldWrite (
     	| environment |
     	super initialize.
     	environment := EnvironmentMO 
-							operationalSemantics:  
+							operationalSemantics: nil 
 							message: nil 
 							layout: LayoutFieldWriteSemanticsMO new.
 		object installEnvironment: environment.

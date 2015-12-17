@@ -3,7 +3,7 @@ VMReflectiveLayoutFieldRead = FieldRead (
     	| environment |
     	super initialize.
     	environment := EnvironmentMO 
-							operationalSemantics:  
+							operationalSemantics: nil  
 							message: nil 
 							layout: LayoutFieldReadSemanticsMO new.
 		object installEnvironment: environment.
