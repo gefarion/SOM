@@ -62,6 +62,6 @@ ImmutabilityTest = TestCase (
 		aPair key: 2.
 		self assert: aPair key equals: 2.
 		self assert: aReference equals: aPair.
-		"self assert: aReference key equals: 2"
+		self assert: aReference key equals: 2
 	)
 )
