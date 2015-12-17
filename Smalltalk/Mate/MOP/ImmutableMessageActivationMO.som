@@ -1,0 +1,9 @@
+ImmutableMessageActivationMO = MessageMO (
+    activate: aMethod withArguments: arguments = (
+		|context|
+		context := Array new: arguments length + 1.
+		context at: 1 put: self target.
+		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
+		^Array with: Handle semanticsForInstances with: context 
+	)
+)
