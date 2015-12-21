@@ -1,4 +1,4 @@
-ImmutableMessageMO = ImmutableMessageActivationMO (
+ImmutableMessageMO = MessageMO (
     find: aSymbol since: aClass = (	
 		| class |
 		class := aClass. 
@@ -7,5 +7,13 @@ ImmutableMessageMO = ImmutableMessageActivationMO (
 		].
 		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
 		^nil.
+	)
+	
+	activate: aMethod withArguments: arguments = (
+		| context |
+		context := Array new: arguments length + 1.
+		context at: 1 put: self.
+		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
+		^Array with: Handle semanticsForInstances with: context 
 	)
 )

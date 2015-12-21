@@ -29,29 +29,10 @@ Pair = (
     "Accessing"
     key = ( ^key )
     value = ( ^value )
-    readFieldKeyMyself: slf = ( ^key )
-    readFieldValueMyself: slf = ( ^value )
     
     "Private"
     key: aKey = ( key := aKey )
     value: aValue = ( value := aValue )
-    writeFieldKeyValue: aKey myself: slf = ( key := aKey )
-    writeFieldValueValue: aValue myself: slf = ( value := aValue )
-    
-    "Delegation Proxies"
-    keyMyself: slf = (
-    	^slf readFieldKeyMyself: slf
-    )
-    valueMyself: slf = (
-    	^slf readFieldValueMyself: slf
-    )
-    
-    key: aKey myself: slf = (
-    	slf writeFieldKeyValue: aKey myself: aProxy
-    )
-    value: aValue myself: aProxy = (
-    	slf writeFieldValueValue: aValue myself: aProxy
-    )
     
     "Comparing"
     =aPair = (
@@ -75,5 +56,4 @@ Pair = (
         newPair value: aValue.
         ^newPair
     )
-    
 )
