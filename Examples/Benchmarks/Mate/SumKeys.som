@@ -1,25 +1,28 @@
 SumKeys = Benchmark (
-    | pairs samePairs |
+    | pairs |
  
     initialize = (
-    	Handle initialize.
     	self initializePairArrays.
    	)
     
     initializePairArrays = (
     	pairs := Array new: 100 withAll: [PairForProxiesAndHandles new].
     	pairs doIndexes: [:index | (pairs at: index) key: index].
-    	samePairs := Array new: 100.
-    	1 to: 100 do: [:index | samePairs at: index put: (pairs at: index)].
+    	"samePairs := Array new: 100.
+    	1 to: 100 do: [:index | samePairs at: index put: (pairs at: index)]."
     )
     
     benchmark = (
-		samePairs doIndexes: [:index | 
-			(samePairs at: index) 
+		pairs doIndexes: [:index |
+			(self encapsulate: (pairs at: index))
 				key: index 
 				innerPropagation: 5 
 				all: pairs
-		].
+		]
+    )
+    
+    encapsulate: aPair = (
+    	^aPair
     )
     
     verifyResult: result = (

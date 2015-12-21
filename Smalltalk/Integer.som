@@ -106,6 +106,10 @@ Integer = (
     equal: anInteger myself: slf = (
     	^self = anInteger
     )
+    
+    plus: anInteger myself: slf = (
+    	^self + anInteger
+    )
 
     ----
     

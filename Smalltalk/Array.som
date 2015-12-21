@@ -153,4 +153,14 @@ Array = (
         arr at: 3 put: c.
         ^ arr
     )
+    
+    with: a with: b with: c with: d    = (
+    	| arr |
+        arr := self new: 4.
+        arr at: 1 put: a.
+        arr at: 2 put: b.
+        arr at: 3 put: c.
+        arr at: 4 put: d.
+        ^ arr
+    )
 )

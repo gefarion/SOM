@@ -25,11 +25,19 @@ THE SOFTWARE.
 
 IntegerProxy = Proxy (
 
+    + anInteger = (
+    	self plus: anInteger myself: self
+    )
+    
     equal: aValue myself: slf = (
        	^handler handleMessage: #equal:myself: withArguments: (Array with: aValue with: slf) myself: slf target: target
     )
     
+    plus: anInteger myself: slf = (
+    	^handler handleMessage: #plus:myself: withArguments: (Array with: anInteger with: slf) myself: slf target: target
+    )
+    
     "Printing"
-    print = ( '[' print. self key print. '=>' print. self value print. ']' print )
+    print = ( '[' print. self target print. ']' print )
     println = ( self print. '' println )
 )

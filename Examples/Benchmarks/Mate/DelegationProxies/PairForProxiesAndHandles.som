@@ -9,6 +9,16 @@ PairForProxiesAndHandles = Pair (
                 all: aSetOfPairs
         ]
     )
+    
+    key: aValue innerPropagation: anIndex all: aSetOfPairs myself: slf = (
+        slf writeKey: (slf keyMyself: slf) + aValue myself: slf.
+        (anIndex > 0 and: [aValue < aSetOfPairs length]) ifTrue: [
+			(slf class handler: slf handler target: (aSetOfPairs at: aValue + 1))
+            	key: aValue + 1 
+                innerPropagation: anIndex - 1 
+                all: aSetOfPairs
+        ]
+    )
 
 	"Delegation Proxies"
     keyMyself: slf = (

@@ -44,4 +44,13 @@ PairProxy = Proxy (
     "Printing"
     print = ( '[' print. self key print. '=>' print. self value print. ']' print )
     println = ( self print. '' println )
+    
+    "Delegation Proxies"
+    key: aValue innerPropagation: anIndex all: aSetOfPairs = (
+    	^self key: aValue innerPropagation: anIndex all: aSetOfPairs myself: self
+    )
+    
+    key: aValue innerPropagation: anIndex all: aSetOfPairs myself: slf = (
+    	^handler handleMessage: #key:innerPropagation:all:myself: withArguments: (Array with: aValue with: anIndex with: aSetOfPairs with: slf) myself: slf target: target
+    )
 )
