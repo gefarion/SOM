@@ -36,10 +36,6 @@ MethodActivationSemanticsMO = MessageMO (
 	)
 	
 	activate: aMethod withArguments: arguments = (
-		|context|
-		context := Array new: arguments length + 1.
-		context at: 1 put: self.
-		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
-		^Array with: nil with: context 
+		^arguments 
 	)
 )
