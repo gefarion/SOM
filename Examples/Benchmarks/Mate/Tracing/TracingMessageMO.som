@@ -1,0 +1,20 @@
+TracingMessageMO = MessageMO (
+    find: aSymbol since: aClass = (	
+		| class |
+		class := aClass. 
+		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
+			class := class superclass.
+		].
+		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
+		^nil.
+	)
+	
+	activate: aMethod withArguments: arguments = (
+		| context |
+		Counter addMethodCall.
+		context := Array new: arguments length + 1.
+		context at: 1 put: self.
+		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
+		^Array with: nil with: context 
+	)
+)

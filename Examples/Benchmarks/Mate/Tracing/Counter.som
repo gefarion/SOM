@@ -1,0 +1,13 @@
+Counter = Object (
+	addMethodCall = (
+		self class methods := self class methods + 1. 
+	)
+	
+	----------------
+	
+	| methods |
+	
+	initialize = (
+		methods := 0.
+	)
+)
