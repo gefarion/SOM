@@ -1,4 +1,4 @@
-BinaryConstraint = AbstractConstraint (
+BinaryConstraintInstrumented = AbstractConstraintInstrumented (
     "I am an abstract superclass for constraints having two possible output
     variables.
 
@@ -16,7 +16,7 @@ BinaryConstraint = AbstractConstraint (
         "Initialize myself with the given variables and strength."
 
         Counter addMethodCall.
-        strength := Strength of: strengthSymbol.
+        strength := StrengthInstrumented of: strengthSymbol.
         v1 := variable1.
         v2 := variable2.
         direction := nil.

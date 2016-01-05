@@ -1,4 +1,4 @@
-SortedCollection = OrderedCollection (
+SortedCollectionInstrumented = OrderedCollectionInstrumented (
 
     | sortBlock |
 

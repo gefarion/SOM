@@ -1,4 +1,4 @@
-Strength = (
+StrengthInstrumented = (
     "Strengths are used to measure the relative importance of constraints. The
      hierarchy of available strengths is determined by the class variable
      StrengthTable (see my class initialization method). Because Strengths are
@@ -77,7 +77,7 @@ Strength = (
 
         Counter addMethodCall.
         symbolicValue := symVal.
-        arithmeticValue := Strength strengthTable at: symbolicValue.
+        arithmeticValue := StrengthInstrumented strengthTable at: symbolicValue.
     )
 
     ----
@@ -93,8 +93,7 @@ Strength = (
         "Initialize the symbolic strength table. Fix the internally caches
          values of all existing instances."
         "Strength initialize"
-
-        StrengthTable := Dictionary new.
+		StrengthTable := Dictionary new.
         StrengthTable at: #absoluteStrongest put: -10000.
         StrengthTable at: #required put: -800.
         StrengthTable at: #strongPreferred put: -600.
@@ -111,9 +110,9 @@ Strength = (
                     at: strengthSymbol
                     put: ((super new) initializeWith: strengthSymbol)].
 
-        AbsoluteStrongest := Strength of: #absoluteStrongest.
-        AbsoluteWeakest := Strength of: #absoluteWeakest.
-        Required := Strength of: #required.
+        AbsoluteStrongest := StrengthInstrumented of: #absoluteStrongest.
+        AbsoluteWeakest := StrengthInstrumented of: #absoluteWeakest.
+        Required := StrengthInstrumented of: #required.
     )
 
     "instance creation"

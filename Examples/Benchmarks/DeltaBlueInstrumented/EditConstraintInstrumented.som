@@ -1,4 +1,4 @@
-EditConstraint = UnaryConstraint (
+EditConstraintInstrumented = UnaryConstraintInstrumented (
     "I am a unary input constraint used to mark a variable that the client
      wishes to change."
      

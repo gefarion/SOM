@@ -1,4 +1,4 @@
-Variable = (
+VariableInstrumented = (
     "I represent a constrained variable. In addition to my value, I maintain the
     structure of the constraint graph, the current dataflow graph, and various
     parameters of interest to the DeltaBlue incremental constraint solver.
@@ -18,9 +18,9 @@ Variable = (
     initialize = (
         Counter addMethodCall.
         value := 0.
-        constraints  := OrderedCollection new: 2.
+        constraints  := OrderedCollectionInstrumented new: 2.
         determinedBy := nil.
-        walkStrength := Strength absoluteWeakest.
+        walkStrength := StrengthInstrumented absoluteWeakest.
         stay := true.
         mark := 0.
     )

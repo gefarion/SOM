@@ -1,13 +1,18 @@
 Counter = Object (
-	addMethodCall = (
-		self class methods := self class methods + 1. 
-	)
 	
 	----------------
 	
-	| methods |
+	| methodCalls |
 	
 	initialize = (
-		methods := 0.
+		methodCalls := 0.
+	)
+	
+	addMethodCall = (
+		methodCalls := methodCalls + 1. 
+	)
+	
+	methodCalls = (
+		^methodCalls. 
 	)
 )

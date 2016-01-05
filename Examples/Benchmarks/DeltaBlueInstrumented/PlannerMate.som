@@ -1,0 +1,15 @@
+PlannerMate = Planner (
+    installTracingMO = (
+    	self installEnvironment: DeltaBlueMate instrumentationMO
+    )
+    
+    ----
+    
+    "instance creation"
+    new = (
+        super new. 
+        currentPlanner installTracingMO.
+        Planner current: currentPlanner.
+        ^currentPlanner
+    )
+)

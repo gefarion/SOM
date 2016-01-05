@@ -1,4 +1,4 @@
-OrderedCollection = Vector (
+OrderedCollectionInstrumented = Vector (
     add: elem = (
         Counter addMethodCall.
         ^ self append: elem

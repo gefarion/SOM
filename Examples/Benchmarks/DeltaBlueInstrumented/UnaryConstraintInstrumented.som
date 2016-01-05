@@ -1,4 +1,4 @@
-UnaryConstraint = AbstractConstraint (
+UnaryConstraintInstrumented = AbstractConstraintInstrumented (
     "I am an abstract superclass for constraints having a single possible output
     variable.
 
@@ -13,7 +13,7 @@ UnaryConstraint = AbstractConstraint (
         "Initialize myself with the given variable and strength."
 
         Counter addMethodCall.
-        strength := Strength of: strengthSymbol.
+        strength := StrengthInstrumented of: strengthSymbol.
         output := aVariable.
         satisfied := false.
         self addConstraint.

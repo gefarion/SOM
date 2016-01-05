@@ -1,4 +1,4 @@
-Planner = (
+PlannerInstrumented = (
     "This benchmark is an implementation of the DeltaBlue Constraint Solver
      described in `The DeltaBlue Algorithm: An Incremental Constraint
      Hierarchy Solver'', by Bjorn N. Freeman-Benson and John Maloney,
@@ -70,7 +70,7 @@ Planner = (
 
         | sources |
         Counter addMethodCall.
-        sources := OrderedCollection new.
+        sources := OrderedCollectionInstrumented new.
         constraints do:
             [: c | ((c isInput) and: [c isSatisfied]) ifTrue: [sources add: c]].
         ^self makePlan: sources
@@ -82,7 +82,7 @@ Planner = (
          that it contains all the input variables."
 
         | sources |
-        sources := OrderedCollection new.
+        sources := OrderedCollectionInstrumented new.
         variables do:
             [: v |
              (v constraints) do:
@@ -111,7 +111,7 @@ Planner = (
         | mark plan todo c |
         Counter addMethodCall.
         mark := self newMark.
-        plan := Plan new.
+        plan := PlanInstrumented new.
         todo := sources.
         [todo isEmpty] whileFalse:
             [c := todo removeFirst.
@@ -128,7 +128,7 @@ Planner = (
 
         | todo c |
         Counter addMethodCall.
-        todo := OrderedCollection new.
+        todo := OrderedCollectionInstrumented new.
         self addConstraintsConsuming: v to: todo.
         [todo isEmpty] whileFalse:
             [c := todo removeFirst.
@@ -163,7 +163,7 @@ Planner = (
 
         | todo d |
         Counter addMethodCall.
-        todo := OrderedCollection with: c.
+        todo := OrderedCollectionInstrumented with: c.
         [todo isEmpty] whileFalse:
             [d := todo removeFirst.
              (d output mark = mark) ifTrue:
@@ -177,7 +177,7 @@ Planner = (
     changeVar: aVariable newValue: newValue = (
         | editConstraint plan |
         Counter addMethodCall.
-        editConstraint := EditConstraint var: aVariable strength: #preferred.
+        editConstraint := EditConstraintInstrumented var: aVariable strength: #preferred.
         plan := self extractPlanFromConstraints: (Array with: editConstraint).
         10 timesRepeat: [
             aVariable value: newValue.
@@ -215,12 +215,12 @@ Planner = (
 
         | unsatisfied todo v nextC  u2 |
         Counter addMethodCall.
-        unsatisfied := OrderedCollection new.
+        unsatisfied := OrderedCollectionInstrumented new.
             
         out determinedBy: nil.
-        out walkStrength: Strength absoluteWeakest.
+        out walkStrength: StrengthInstrumented absoluteWeakest.
         out stay: true.
-        todo := OrderedCollection with: out.
+        todo := OrderedCollectionInstrumented with: out.
         [todo isEmpty] whileFalse: [
             v := todo removeFirst.
              v constraints do: [:c |
@@ -236,7 +236,7 @@ Planner = (
     
     run = (
         Counter addMethodCall.
-        Planner standardBenchmark
+        PlannerInstrumented standardBenchmark
     )
     
     ----
@@ -254,18 +254,18 @@ Planner = (
         | vars editConstraint plan planner |
         
         Counter addMethodCall.
-        planner := Planner new.
-        vars := Array new: n+1 withAll: [ Variable new ].
+        planner := PlannerInstrumented new.
+        vars := Array new: n+1 withAll: [ VariableInstrumented new ].
 
         "thread a chain of equality constraints through the variables"
         1 to: n do:
             [ :i | | v1 v2 |
              v1 := vars at: i.
              v2 := vars at: i + 1.
-             EqualityConstraint var: v1 var: v2 strength: #required].
+             EqualityConstraintInstrumented var: v1 var: v2 strength: #required].
 
-        StayConstraint var: vars last strength: #strongDefault.
-        editConstraint := EditConstraint var: (vars first) strength: #preferred.
+        StayConstraintInstrumented var: vars last strength: #strongDefault.
+        editConstraint := EditConstraintInstrumented var: (vars first) strength: #preferred.
         plan := planner extractPlanFromConstraints: (Array with: editConstraint).
         1 to: 100 do: [ :v | 
             vars first value: v.
@@ -280,17 +280,17 @@ Planner = (
 
         | scale offset src dst planner dests |
         Counter addMethodCall.
-        planner := Planner new.
-        dests := OrderedCollection new.
-        scale := Variable value: 10.
-        offset := Variable value: 1000.
+        planner := PlannerInstrumented new.
+        dests := OrderedCollectionInstrumented new.
+        scale := VariableInstrumented value: 10.
+        offset := VariableInstrumented value: 1000.
         1 to: n do:
             [ :i |
-            src := Variable value: i.
-            dst := Variable value: i.
+            src := VariableInstrumented value: i.
+            dst := VariableInstrumented value: i.
             dests add: dst.
-            StayConstraint var: src strength: #default.
-            ScaleConstraint var: src var: scale var: offset var: dst strength: #required].
+            StayConstraintInstrumented var: src strength: #default.
+            ScaleConstraintInstrumented var: src var: scale var: offset var: dst strength: #required].
 
         planner changeVar: src newValue: 17.
         dst value ~= 1170 ifTrue: [self error: 'Projection test 1 failed!!'].
@@ -325,7 +325,7 @@ Planner = (
         "This the combined benchmark."
         "Planner standardBenchmark"
         Counter addMethodCall.
-        Strength initialize.
+        StrengthInstrumented initialize.
 
         self report: 'Chain and projection tests' times: 100 run: [
             self chainTest: 100. 

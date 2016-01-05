@@ -1,4 +1,4 @@
-AbstractConstraint = (
+AbstractConstraintInstrumented = (
     "I am an abstract class representing a system-maintainable relationship (or
     'constraint') between a set of variables. I supply a strength instance
     variable; concrete subclasses provide a means of storing the constrained
@@ -19,7 +19,7 @@ AbstractConstraint = (
     strength: strengthSymbol = (
         "Set my strength."
         Counter addMethodCall.
-        strength := Strength of: strengthSymbol.
+        strength := StrengthInstrumented of: strengthSymbol.
     )
 
     "queries"
@@ -43,7 +43,7 @@ AbstractConstraint = (
 
         Counter addMethodCall.
         self addToGraph.
-        Planner current incrementalAdd: self.
+        PlannerInstrumented current incrementalAdd: self.
     )
 
     addToGraph = (
@@ -57,7 +57,7 @@ AbstractConstraint = (
          possibly causing other constraints to be satisfied, and destroy it."
 
         Counter addMethodCall.
-        (self isSatisfied) ifTrue: [Planner current incrementalRemove: self].
+        (self isSatisfied) ifTrue: [PlannerInstrumented current incrementalRemove: self].
         self removeFromGraph.
         "self release."
     )
@@ -143,7 +143,7 @@ AbstractConstraint = (
                  overridden := out determinedBy.
                  (overridden == nil) ifFalse: [overridden markUnsatisfied].
                  out determinedBy: self.
-                 (Planner current addPropagate: self mark: mark) ifFalse:
+                 (PlannerInstrumented current addPropagate: self mark: mark) ifFalse:
                     [self notify:
                         ('Cycle encountered adding:\   ',
                          self printString,
@@ -152,7 +152,7 @@ AbstractConstraint = (
                  out mark: mark]
             ifFalse:            "constraint cannot be satisfied"
                 [overridden := nil.
-                 (strength sameAs: (Strength required)) ifTrue:
+                 (strength sameAs: (StrengthInstrumented required)) ifTrue:
                     [self notify: 'Failed to satisfy a required constraint']].
         ^overridden
     )

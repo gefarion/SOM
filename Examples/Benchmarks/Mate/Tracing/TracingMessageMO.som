@@ -1,7 +1,7 @@
 TracingMessageMO = MessageMO (
     find: aSymbol since: aClass = (	
 		| class |
-		class := aClass. 
+		class := aClass.
 		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
 			class := class superclass.
 		].
@@ -10,11 +10,10 @@ TracingMessageMO = MessageMO (
 	)
 	
 	activate: aMethod withArguments: arguments = (
-		| context |
+		| realArguments | 
 		Counter addMethodCall.
-		context := Array new: arguments length + 1.
-		context at: 1 put: self.
-		2 to: arguments length + 1 do: [:i | context at: i put: (arguments at: i - 1)].
-		^Array with: nil with: context 
+		realArguments := arguments copy.
+		realArguments at: 1 put: DeltaBlueMate instrumentationMO.
+		^realArguments.
 	)
 )
