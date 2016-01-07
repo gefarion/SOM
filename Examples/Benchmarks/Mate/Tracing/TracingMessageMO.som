@@ -2,7 +2,6 @@ TracingMessageMO = MessageMO (
     find: aSymbol since: aClass = (	
 		| class |
 		class := aClass.
-				class println.
 		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
 			class := class superclass.
 		].
