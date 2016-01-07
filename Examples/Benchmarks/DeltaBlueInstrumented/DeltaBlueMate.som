@@ -11,24 +11,29 @@ DeltaBlueMate = DeltaBlue (
 
     innerBenchmarkLoop: innerIterations = (
         self installEnvironment: self class instrumentationMO.
-        Planner chainTest: innerIterations.
-        Planner projectionTest: innerIterations.
+        self runIterations: innerIterations.
         self installEnvironment: nil.
-        Counter methodCalls println.
-        self verifyResult ifFalse: [ ^ false ].
+        "Counter methodCalls println.
+        Counter methods do: [:name | name println.]. 
+        self verifyResult ifFalse: [ ^ false ]."
         ^ true
     )
     
+    runIterations: innerIterations = (
+    	Planner chainTest: innerIterations.
+        Planner projectionTest: innerIterations.
+    )
+    
     verifyResult = (
-    	^(Counter methodCalls % self iterationOperations) = 0.
+    	^(Counter methodCalls - 2 % self iterationOperations) = 0.
     )
     
     iterationOperations = (
-    	^806
+    	^1351
     )
     
     oneIteration = (
-    	^1439 + 1836 + 2237 + 2634 + 3033
+    	^3866 + 5217 + 6998 + 8233 + 3033
     )
     
     ----------------------------

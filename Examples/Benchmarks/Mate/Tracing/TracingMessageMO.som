@@ -2,6 +2,7 @@ TracingMessageMO = MessageMO (
     find: aSymbol since: aClass = (	
 		| class |
 		class := aClass.
+				class println.
 		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
 			class := class superclass.
 		].
@@ -11,6 +12,7 @@ TracingMessageMO = MessageMO (
 	
 	activate: aMethod withArguments: arguments = (
 		| realArguments | 
+		"Counter addMethodCall: (arguments at: 3) class , '>>', aMethod signature."
 		Counter addMethodCall.
 		realArguments := arguments copy.
 		realArguments at: 1 put: DeltaBlueMate instrumentationMO.
