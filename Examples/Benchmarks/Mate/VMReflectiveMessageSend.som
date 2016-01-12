@@ -1,0 +1,15 @@
+VMReflectiveMessageSend = MessageSend (
+    initialize = (
+    	| environment |
+    	super initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: nil 
+							message: MessageSendSemanticsMO new
+							layout: nil.
+		object installEnvironment: environment.
+    )
+    
+    verifyResult: result = (
+      ^self assert: object key equals: 2
+    )
+)    

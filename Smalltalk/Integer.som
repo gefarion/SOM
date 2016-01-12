@@ -97,6 +97,19 @@ Integer = (
     max: otherInt = (
         (self < otherInt) ifTrue: [^otherInt] ifFalse: [^self].
     )
+    
+    "Delegation Proxies"
+    proxyClass = (
+    	^IntegerProxy
+    )
+    
+    equal: anInteger myself: slf = (
+    	^self = anInteger
+    )
+    
+    plus: anInteger myself: slf = (
+    	^self + anInteger
+    )
 
     ----
     

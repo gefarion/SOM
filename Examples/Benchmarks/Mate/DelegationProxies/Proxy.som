@@ -1,0 +1,35 @@
+Proxy = Object (
+	| target handler |
+	
+	= aValue = (
+    	^self equal: aValue myself: self.
+    )
+    
+    instVarNamed: sym myself: anObject = (^self instVarNamed: sym)
+	
+	handler = (
+		^handler 
+	) 
+	
+	target = (
+		^target 
+	)
+	
+	handler: aHandler = (
+		handler := aHandler 
+	) 
+	
+	target: anObject = (
+		target := anObject 
+	) 
+	
+	--------
+	
+	handler: aHandle target: anObject = (
+		| proxy |
+		proxy := self new. 
+		proxy handler: aHandle.
+		proxy target: anObject.
+		^proxy 
+	)
+)

@@ -1,0 +1,3 @@
+ReadOnlyPropagationHandler = PropagationHandler (
+	handleWriteField: field value: value myself: aProxy target: aReceiver = ()
+)

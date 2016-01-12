@@ -1,0 +1,4 @@
+Mock = Object (
+    key = (^1)
+    reflectivekey = (^2)
+)    

@@ -1,0 +1,67 @@
+"
+Copyright (c) 2001-2013 see AUTHORS file
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the 'Software'), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"
+
+
+ImmutabilityTest = TestCase (
+    
+	testObjectImmutability = (
+        | object value environment |
+		environment := EnvironmentMO 
+							operationalSemantics: ImmutableSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object := Pair new.
+		object key: 1.
+		self assert: object key equals: 1.
+		object installEnvironment: environment.
+		object key: 2.
+		self assert: object key equals: 1.
+		object installEnvironment: nil.
+		object key: 2.
+		self assert: object key equals: 2. 
+    )
+    
+	testReferenceImmutabilty = (
+        | object readOnlyReference |
+		Handle initialize.
+		object := Pair new.
+		self readOnlyReferenceOf: object withReference: object readOnly
+	)
+	
+	testReferenceReadOnlyProxies = (
+		| object readOnlyReference |
+		object := Pair new.
+		readOnlyReference := PairProxy handler: ReadOnlyPropagationHandler new target: object.
+		self readOnlyReferenceOf: object withReference: readOnlyReference
+	)
+	
+	readOnlyReferenceOf: aPair withReference: aReference = (
+		aPair key: 1.
+		self assert: aPair key equals: 1.
+		aReference key: 2.
+		self assert: aPair key equals: 1.
+		aPair key: 2.
+		self assert: aPair key equals: 2.
+		self assert: aReference equals: aPair.
+		self assert: aReference key equals: 2
+	)
+)

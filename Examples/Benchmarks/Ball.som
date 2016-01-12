@@ -51,9 +51,4 @@ Ball = (
         xVel := (Random next % 300) - 150.
         yVel := (Random next % 300) - 150.
     )
-    
-    -----------------
-    
-    new = ( ^super new initialize )
-    
 )

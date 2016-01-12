@@ -1,0 +1,17 @@
+VMReflectiveMethodActivation = MessageSend (
+    | object |
+    
+    initialize = (
+    	| environment |
+    	super initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: nil 
+							message: MethodActivationSemanticsMO new
+							layout: nil.
+		object installEnvironment: environment.
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: 1
+    )
+)    

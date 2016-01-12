@@ -171,9 +171,6 @@ JsonObject = JsonValue (
   )
 
   ----
-  
-  new = ( ^ super new initialize )
-  
   readFrom: string = (
     ^ (JsonValue readFrom: string) asObject
   )

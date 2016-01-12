@@ -1,0 +1,28 @@
+DeltaBlueInstrumented = Benchmark (
+
+    oneTimeSetup = ( 
+    	Counter initialize.
+    	StrengthInstrumented initialize. 
+    )
+
+    innerBenchmarkLoop: innerIterations = (
+        Counter initialize.
+        PlannerInstrumented chainTest: innerIterations.
+        PlannerInstrumented projectionTest: innerIterations.
+        self verifyResult ifFalse: [ ^ false ].
+        ^ true
+    )
+    
+    verifyResult = (
+    	^((Counter methodCalls - self initializationOperations) 
+    		% self iterationOperations) = 0.	
+    )
+    
+    initializationOperations = (
+    	^1330
+    )
+    
+    iterationOperations = (
+    	^806
+    )
+)

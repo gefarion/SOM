@@ -1,0 +1,20 @@
+ReadonlySumKeys = SumKeys (
+    initialize = (
+    	super initialize.
+    	Handle initialize.
+   	)
+    	
+    initializePairArrays = (
+    	pairs := Array new: 100 withAll: [PairForProxiesAndHandles new].
+    	pairs doIndexes: [:index | (pairs at: index) key: index].
+    )
+    
+    encapsulate: aPair = (
+    	^aPair readOnly
+    )
+    
+    verifyResult: result = (
+      pairs doIndexes: [:index | (pairs at: index) key = index ifFalse: [^false]].
+      ^true
+    )
+)

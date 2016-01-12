@@ -1,0 +1,9 @@
+ImmutableMessageActivationMO = MessageMO (
+    activate: aMethod withArguments: arguments = (
+		| realArguments | 
+		realArguments := arguments copy.
+		realArguments at: 1 put: Handle semanticsForInstances.
+		realArguments at: 3 put: self target.
+		^realArguments.
+	)
+)

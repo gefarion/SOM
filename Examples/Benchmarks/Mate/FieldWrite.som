@@ -1,0 +1,15 @@
+FieldWrite = Benchmark (
+    | object |
+    
+    initialize = (
+    	object := Pair new.
+    )
+    
+    benchmark = (
+		object key: 1.
+    )
+    
+    verifyResult: result = (
+      ^self assert: object key equals: 1
+    )
+)    

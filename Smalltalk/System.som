@@ -34,6 +34,8 @@ System = (
     initialize: arguments = (
         | application |
         
+        'Total Number of Tests:      ' print.
+
         "Make sure we have got at least one argument"
         (arguments length < 1) ifTrue: [ 'No class specified' println. ^nil ].
         

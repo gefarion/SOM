@@ -234,7 +234,7 @@ Planner = (
 
     "instance creation"
     new = (
-        ^currentPlanner := super new initialize
+        ^currentPlanner := super new
     )
 
     "benchmarks"

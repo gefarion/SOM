@@ -1,0 +1,28 @@
+Counter = Object (
+	
+	----------------
+	
+	| methodCalls methods |
+	
+	initialize = (
+		methods := Array new: 10000.
+		methodCalls := 0.
+	)
+	
+	addMethodCall = (
+		methodCalls := methodCalls + 1.
+	)
+	
+	addMethodCall: aSelector = (
+		methodCalls := methodCalls + 1.
+		methods at: methodCalls put: aSelector 
+	)
+	
+	methodCalls = (
+		^methodCalls. 
+	)
+	
+	methods = (
+		^methods. 
+	)
+)

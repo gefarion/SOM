@@ -1,0 +1,33 @@
+SumKeys = Benchmark (
+    | pairs |
+ 
+    initialize = (
+    	self initializePairArrays.
+   	)
+    
+    initializePairArrays = (
+    	pairs := Array new: 100 withAll: [PairForProxiesAndHandles new].
+    	pairs doIndexes: [:index | (pairs at: index) key: index].
+    )
+    
+    benchmark = (
+		pairs doIndexes: [:index |
+			(self encapsulate: (pairs at: index))
+				key: index 
+				innerPropagation: 5 
+				all: pairs
+		]
+    )
+    
+    encapsulate: aPair = (
+    	^aPair
+    )
+    
+    verifyResult: result = (
+      pairs doIndexes: [:index | | value |
+      	value := (pairs at: index) key. 	
+       	((value % index) = 0 and: [value > index]) ifFalse: [^false]
+      ].
+      ^true
+    )
+)

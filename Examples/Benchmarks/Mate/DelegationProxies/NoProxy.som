@@ -1,0 +1,6 @@
+NoProxy = Object (
+	-----------------------
+	handler: aHandle target: anObject = (
+		^anObject 
+	)
+)

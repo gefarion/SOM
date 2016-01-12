@@ -1,0 +1,15 @@
+VMReflectiveFieldRead = FieldRead (
+    initialize = (
+    	| environment |
+    	super initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: FieldReadSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: 1
+    )
+)

@@ -1,0 +1,47 @@
+DeltaBlueMate = DeltaBlue (
+	
+    oneTimeSetup = ( 
+    	super oneTimeSetup.
+    	Counter initialize.
+    	self class instrumentationMO: (EnvironmentMO 
+			operationalSemantics: nil 
+			message: TracingMessageMO new
+			layout: nil) 
+    )
+
+    innerBenchmarkLoop: innerIterations = (
+        self installEnvironment: self class instrumentationMO.
+        self runIterations: innerIterations.
+        self installEnvironment: nil.
+        "Counter methodCalls println.
+        Counter methods do: [:name | name println.]. 
+        self verifyResult ifFalse: [ ^ false ]."
+        ^ true
+    )
+    
+    runIterations: innerIterations = (
+    	Planner chainTest: innerIterations.
+        Planner projectionTest: innerIterations.
+    )
+    
+    verifyResult = (
+    	^(Counter methodCalls - 2 % self iterationOperations) = 0.
+    )
+    
+    iterationOperations = (
+    	^1351
+    )
+    
+    oneIteration = (
+    	^3866 + 5217 + 6998 + 8233 + 3033
+    )
+    
+    ----------------------------
+    
+    | instrumentationMO |
+    
+    instrumentationMO = (^instrumentationMO)
+    instrumentationMO: aMetaobject = (
+    	instrumentationMO := aMetaobject
+    )
+)
