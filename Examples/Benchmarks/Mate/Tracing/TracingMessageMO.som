@@ -14,7 +14,16 @@ TracingMessageMO = MessageMO (
 		"Counter addMethodCall: (arguments at: 3) class , '>>', aMethod signature."
 		Counter addMethodCall.
 		realArguments := arguments copy.
-		realArguments at: 1 put: DeltaBlueMate instrumentationMO.
+		realArguments at: 1 put: TracingMessageMO instrumentationMO.
 		^realArguments.
 	)
+	
+	----------------------------
+	
+	| instrumentationMO |
+	
+	instrumentationMO = (^instrumentationMO)
+    instrumentationMO: aMetaobject = (
+    	instrumentationMO := aMetaobject
+    )
 )
