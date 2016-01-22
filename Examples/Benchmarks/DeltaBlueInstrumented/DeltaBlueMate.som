@@ -1,12 +1,15 @@
 DeltaBlueMate = DeltaBlue (
 	
     oneTimeSetup = ( 
+    	| metaobject |
     	super oneTimeSetup.
     	Counter initialize.
-    	self class instrumentationMO: (EnvironmentMO 
+    	metaobject := (EnvironmentMO 
 			operationalSemantics: nil 
 			message: TracingMessageMO new
-			layout: nil) 
+			layout: nil).
+		TracingMessageMO instrumentationMO: metaobject. 
+    	self class instrumentationMO: metaobject
     )
 
     innerBenchmarkLoop: innerIterations = (
