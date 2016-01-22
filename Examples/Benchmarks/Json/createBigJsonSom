@@ -1,8 +1,8 @@
 #!/usr/bin/env python2.7
-homeDir = '/Users/guidochari/'
+homeDir = '/Users/guidochari'
 projectDir = homeDir + '/Documents/Projects/TruffleMATE'
 benchmarkDir = 'Examples/Benchmarks/Json'
-bigJsonFilename = 'AllSets-x.json'
+bigJsonFilename = 'AllCards.json'
 bigJson = open (projectDir + '/' + benchmarkDir + '/JsonBig.som', 'w')
 copyOfbigJson = open (projectDir + '/' + benchmarkDir + '/JsonBigTemplate.som', 'r')
 dataFile = open (projectDir + '/' + benchmarkDir + '/' + bigJsonFilename, 'r')
