@@ -1,0 +1,7 @@
+NBodyMate = NBody (
+    innerBenchmarkLoop: innerIterations = (
+    	self installEnvironment: DeltaBlueMate instrumentationMO.
+    	super innerBenchmarkLoop: innerIterations.
+    	self installEnvironment: null.
+    )
+)    
