@@ -9,11 +9,10 @@ DeltaBlueMate = DeltaBlue (
 			message: TracingMessageMO new
 			layout: nil).
 		TracingMessageMO instrumentationMO: metaobject. 
-    	self class instrumentationMO: metaobject
     )
 
     innerBenchmarkLoop: innerIterations = (
-        self installEnvironment: self class instrumentationMO.
+        self installEnvironment: TracingMessageMO instrumentationMO.
         self runIterations: innerIterations.
         self installEnvironment: nil.
         "Counter methodCalls println.
@@ -37,14 +36,5 @@ DeltaBlueMate = DeltaBlue (
     
     oneIteration = (
     	^3866 + 5217 + 6998 + 8233 + 3033
-    )
-    
-    ----------------------------
-    
-    | instrumentationMO |
-    
-    instrumentationMO = (^instrumentationMO)
-    instrumentationMO: aMetaobject = (
-    	instrumentationMO := aMetaobject
     )
 )
