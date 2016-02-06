@@ -7,14 +7,15 @@ NBodyMate = NBody (
 			operationalSemantics: nil 
 			message: TracingMessageMO new
 			layout: nil).
-		TracingMessageMO instrumentationMO: metaobject. 
+		TracingMessageMO instrumentationMO: metaobject.
+		self installEnvironment: TracingMessageMO instrumentationMO.
     )
     
-    innerBenchmarkLoop: innerIterations = (
+    "innerBenchmarkLoop: innerIterations = (
     	| result |
     	self installEnvironment: TracingMessageMO instrumentationMO.
     	result := super innerBenchmarkLoop: innerIterations.
     	self installEnvironment: nil.
     	^result
-    )
+    )"
 )    
