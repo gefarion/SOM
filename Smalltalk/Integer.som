@@ -41,6 +41,13 @@ Integer = (
     sqrt        = primitive
     negated     = ( ^0 - self )
     
+    exp: aNumber = (
+    	| value |
+    	value := self.
+    	1 to: aNumber - 1 do: [:i | value := value * self].
+    	^value
+    )
+    
     "Random numbers"
     atRandom = primitive
     
@@ -96,6 +103,10 @@ Integer = (
 
     max: otherInt = (
         (self < otherInt) ifTrue: [^otherInt] ifFalse: [^self].
+    )
+    
+    min: otherInt = (
+        (self > otherInt) ifTrue: [^otherInt] ifFalse: [^self].
     )
     
     "Delegation Proxies"
