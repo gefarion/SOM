@@ -1,33 +1,61 @@
 SumKeys = Benchmark (
     | pairs |
- 
+    
+    listSize = (^10)
+    
     initialize = (
     	self initializePairArrays.
    	)
     
     initializePairArrays = (
-    	pairs := Array new: 100 withAll: [PairForProxiesAndHandles new].
-    	pairs doIndexes: [:index | (pairs at: index) key: index].
+    	pairs := self makeList: self listSize withAll: [:i | PairForProxiesAndHandles new key: i].
     )
     
     benchmark = (
-		pairs doIndexes: [:index |
-			(self encapsulate: (pairs at: index))
-				key: index 
-				innerPropagation: 5 
-				all: pairs
+		| current |
+		current := pairs.
+		[current isNil] whileFalse: [
+			self duplicateValueOf: current andFollowing: 5.
+			current := current next.
 		]
     )
     
-    encapsulate: aPair = (
-    	^aPair
+    duplicateValueOf: element andFollowing: aNumber = (
+    	| current |
+    	element val key: element val key * 2.
+    	element length > 1 ifTrue: [
+	    	current := element next.
+	  		1 to: (aNumber - 1 min: current length) do: [:i |
+	  			current val key: current val key * 2.
+	  			current := current next.
+	  		]
+	  	]
+    )
+    
+    encapsulate: aListElement = (
+    	^aListElement
     )
     
     verifyResult: result = (
-      pairs doIndexes: [:index | | value |
-      	value := (pairs at: index) key. 	
-       	((value % index) = 0 and: [value > index]) ifFalse: [^false]
+      | current |
+      current := pairs.
+      1 to: self listSize do: [:i | 
+      	current val key = (i * (2 exp: (i min: 5))) ifFalse: [^false].
+      	current := current next.
       ].
       ^true
+    )
+    
+    makeList: length withAll: aBlock = (
+        | element last |
+        (length = 0) ifTrue: [ ^nil ].
+        element := (self encapsulate: (ListElement new: (aBlock value: 1))).
+        last := element.
+        2 to: length do: [:i | | value |
+        	value := (self encapsulate: (ListElement new: (aBlock value: i))).
+        	last next: value.
+        	last := value.
+        ].
+        ^element
     )
 )
