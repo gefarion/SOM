@@ -1,9 +1,14 @@
 SumKeys = Benchmark (
-    | pairs |
+    | pairs listSize self propagation|
     
-    listSize = (^10)
+    listSize = (^listSize)
+    listSize: aNumber = (listSize := aNumber)
+    propagation = (^propagation)
+    propagation: aNumber = (propagation := aNumber)
     
     initialize = (
+		self listSize: 1000.
+		self propagation: 5.
     	self initializePairArrays.
    	)
     
@@ -15,19 +20,23 @@ SumKeys = Benchmark (
 		| current |
 		current := pairs.
 		[current isNil] whileFalse: [
-			self duplicateValueOf: current andFollowing: 5.
+			self duplicateValueOf: current andFollowing: self propagation.
 			current := current next.
 		]
     )
     
     duplicateValueOf: element andFollowing: aNumber = (
-    	| current |
-    	element val key: element val key * 2.
-    	element length > 1 ifTrue: [
+    	| current length pos |
+    	length := element length.
+		pos := (self listSize - length) + 1.
+		element val key: element val key + pos.
+    	length > 1 ifTrue: [
 	    	current := element next.
-	  		1 to: (aNumber - 1 min: current length) do: [:i |
-	  			current val key: current val key * 2.
+	    	pos := pos + 1.
+	    	1 to: (aNumber - 1 min: current length) do: [:i |
+	  			current val key: current val key + pos.
 	  			current := current next.
+	  			pos := pos + 1.
 	  		]
 	  	]
     )
@@ -37,10 +46,11 @@ SumKeys = Benchmark (
     )
     
     verifyResult: result = (
-      | current |
+      | current value |
       current := pairs.
       1 to: self listSize do: [:i | 
-      	current val key = (i * (2 exp: (i min: 5))) ifFalse: [^false].
+      	"value := (i * (2 exp: (i min: self propagation)))."
+      	(current val key rem: i) = 0 ifFalse: [i println. current val key println.^false].
       	current := current next.
       ].
       ^true
@@ -49,10 +59,10 @@ SumKeys = Benchmark (
     makeList: length withAll: aBlock = (
         | element last |
         (length = 0) ifTrue: [ ^nil ].
-        element := (self encapsulate: (ListElement new: (aBlock value: 1))).
+        element := (self encapsulate: (ListElementForProxies new: (aBlock value: 1))).
         last := element.
         2 to: length do: [:i | | value |
-        	value := (self encapsulate: (ListElement new: (aBlock value: i))).
+        	value := (self encapsulate: (ListElementForProxies new: (aBlock value: i))).
         	last next: value.
         	last := value.
         ].

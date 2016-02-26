@@ -120,9 +120,7 @@ OrderedCollection = Vector (
         ]
     )
     
-    
-    
-    ----
+    ----------
     
     with: anElement = (
         | col |

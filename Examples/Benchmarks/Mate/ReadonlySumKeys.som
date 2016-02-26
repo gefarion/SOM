@@ -1,21 +1,10 @@
-ReadonlySumKeys = SumKeys (
+ReadonlySumKeys = DelegationProxiesSumKeys (
     initialize = (
     	Handle initialize.
     	super initialize.
    	)
     	
-    verifyResult: result = (
-      | current |
-      current := pairs.
-      1 to: self listSize do: [:i | 
-      	current val key = i ifFalse: [i print. ':' print. current val key println. ^false].
-      	current := current next.
-      ].
-      ^true
-    )
-    
-    initializePairArrays = (
-    	super initializePairArrays.
+    makeHeadOfListReadOnly = (
     	pairs := pairs readOnly.
     )
 )

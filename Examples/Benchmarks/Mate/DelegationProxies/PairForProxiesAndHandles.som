@@ -40,4 +40,6 @@ PairForProxiesAndHandles = Pair (
     readFieldValueMyself: slf = ( ^value )
     writeFieldKeyValue: aKey myself: slf = ( key := aKey )
     writeFieldValueValue: aValue myself: slf = ( value := aValue )
+    
+    proxyClass = (^PairProxy)
 )    

@@ -1,17 +1,20 @@
 DelegationProxiesSumKeys = SumKeys (
-    initializePairArrays = (
-    	pairs := Array new: 100 withAll: [PairForProxiesAndHandles new].
-    	pairs doIndexes: [:index | (pairs at: index) key: index].
-    	"samePairs := Array new: 100.
-    	1 to: 100 do: [:index | samePairs at: index put: (PairProxy handler: ReadOnlyPropagationHandler new target: (pairs at: index))]."
-    )
-    
-    encapsulate: aPair = (
-    	^PairProxy handler: ReadOnlyPropagationHandler new target: aPair
-    )
-    
-    verifyResult: result = (
-      pairs doIndexes: [:index | (pairs at: index) key = index ifFalse: [^false]].
+     verifyResult: result = (
+      | current |
+      current := pairs.
+      1 to: self listSize do: [:i | 
+      	current val key = i ifFalse: [i println. current val key println. ^false].
+      	current := current next.
+      ].
       ^true
+    )
+    
+    makeHeadOfListReadOnly = (
+    	pairs := ListElementProxy handler: ReadOnlyPropagationHandler new target: pairs.
+    )
+    
+    initializePairArrays = (
+    	super initializePairArrays.
+    	self makeHeadOfListReadOnly
     )
 )
