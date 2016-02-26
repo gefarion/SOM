@@ -121,7 +121,9 @@ Integer = (
     plus: anInteger myself: slf = (
     	^self + anInteger
     )
-
+	
+	"Readonly"
+	readOnly = (^self)
     ----
     
     fromString: aString = primitive

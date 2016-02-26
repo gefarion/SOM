@@ -31,31 +31,22 @@ Handle = (
     
     ----------------------------
     
-    | semanticsForDelegating semanticsForInstances |
+    | semantics |
     
     "Accessing"
-    semanticsForDelegating 				= ( ^semanticsForDelegating )
-    semanticsForDelegating: anObject	= ( semanticsForDelegating := anObject ) 
+    semantics = ( ^semantics )
+    semantics: anObject	= ( semantics := anObject ) 
     
-    semanticsForInstances				= ( ^semanticsForInstances )
-    semanticsForInstances: anObject 	= ( semanticsForInstances := anObject )
-    
-    initialize 							= (
-		self semanticsForInstances: 
+    initialize = (
+		self semantics: 
 					(EnvironmentMO 
 							operationalSemantics: ImmutableSemanticsMO new 
-							message: ImmutableMessageMO new
+							message: ImmutableMessageHandlesMO new
 							layout: nil
 					).
-		self semanticsForDelegating: 
-					(EnvironmentMO 
-							operationalSemantics: ImmutableSemanticsMO new 
-							message: ImmutableMessageForHandlesMO new 
-							layout: nil
-					).			
 	)
     
     target: anObject = (
-    	^(self new target: anObject) installEnvironment: self semanticsForDelegating
+    	^(self new target: anObject) installEnvironment: self semantics
     )
  )

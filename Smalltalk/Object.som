@@ -39,6 +39,11 @@ Object = nil (
     isNil       = ( ^false )
     notNil      = ( ^true )
     
+    "Accessing"
+    species = (
+    	^self class
+    )
+    
     "Converting"
     asString  = ( ^'instance of ' + (self class) )
     , element = ( ^(Vector new append: self) append: element )
@@ -46,14 +51,16 @@ Object = nil (
     
     "Evaluating"
     value     = ( ^self )
+    yourself  = ("Answer self." ^self)
     
     "Convenience"
     ifNil: aBlock = (^self)
-    ifNotNil: aBlock = (^aBlock value)
-    ifNil: noGoBlock ifNotNil: goBlock = (^goBlock value)
+    ifNotNil: aBlock = (^aBlock value: self)
+    ifNil: noGoBlock ifNotNil: goBlock = (^goBlock value: self)
     
     "Printing"
     print     = ( self asString print )
+    printString = (^self asString)
     println   = ( self print. system printNewline )
 
     "Debugging"
@@ -113,4 +120,5 @@ Object = nil (
 	readOnly = ( ^Handle target: self )
 	changeShape: aShape = primitive
 	shape = primitive
+	target = (^self)
 )
