@@ -1,0 +1,19 @@
+ImmutableMessageHandlesMO = MessageMO (
+    find: aSymbol since: aClass = (	
+		| class |
+		class := self target class.
+		[class isNil or: [(class hasMethod: aSymbol)]] whileFalse: [
+			class := class superclass.
+		].
+		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
+		^self doesNotUnderstand: aSymbol arguments: nil. 
+	)
+	
+    activate: aMethod withArguments: arguments = (
+		| realArguments | 
+		realArguments := arguments copy.
+		realArguments at: 1 put: Handle semantics.
+		realArguments at: 3 put: self target.
+		^realArguments.
+	)
+)

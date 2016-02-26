@@ -22,7 +22,6 @@ THE SOFTWARE.
 
 
 ImmutabilityTest = TestCase (
-    
 	testObjectImmutability = (
         | object value environment |
 		environment := EnvironmentMO 
