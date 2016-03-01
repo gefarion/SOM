@@ -1,6 +1,6 @@
 "
 
-$Id: Array.som 29 2009-07-31 11:28:44Z michael.haupt $
+$Id: Environment.som 29 2005-04-17 11:28:44Z guido.chari $
 
 Copyright (c) 2001-2013 see AUTHORS file
 
@@ -23,33 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-Handle = (
-	| target |
-    "Accessing"
-    target 				= ( ^target )
-    target: anObject 	= ( target := anObject )
-    
-    ----------------------------
-    
-    | semantics |
-    
-    "Accessing"
-    semantics = ( ^semantics )
-    semantics: anObject	= ( semantics := anObject ) 
-    
-    initialize = (
-		| shape |
-		shape := self getShapeForInstances.
-		self semantics: 
-					(EnvironmentMO 
-							operationalSemantics: ImmutableSemanticsForHandlesMO new 
-							message: ImmutableMessageForHandlesMO new
-							layout: nil
-					).
-		self updateShapeForInstancesWith: (shape installEnvironment: self semantics).
-	)
-    
-    target: anObject = (
-    	^(self new target: anObject) "installEnvironment: self semantics"
-    )
- )
+ImmutableSemanticsForHandlesMO = OperationalSemanticsMO (
+    read: anIndex = (^(self instVarAt: anIndex + 1) readOnly)
+    write: anIndex value: aValue = 
+    	(
+    	self class = Handle 
+    		ifTrue:[self instVarAt: anIndex + 1 put: aValue] 
+    		ifFalse:[^aValue])
+)
