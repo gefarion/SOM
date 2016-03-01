@@ -115,6 +115,7 @@ Object = nil (
     
     "Delegation Proxies"
     instVarNamed: sym myself: anObject = (^self instVarNamed: sym)
+    instVarAt: anIndex myself: anObject = (^self instVarAt: anIndex)
     
     "Extension for the MOP"
 	readOnly = ( ^Handle target: self )

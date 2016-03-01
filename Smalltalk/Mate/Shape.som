@@ -30,6 +30,7 @@ Shape = (
     ----------------------------
   
     "Instance creation"
-    new 							= (self newWithFieldsCount: 0)
-    newWithFieldsCount: aNumber 	= primitive
+    new 							  = (self newWithFieldsCount: 0)
+    newWithFieldsCount: aNumber 	  = primitive
+    installEnvironment: anEnvironment = primitive
  )
