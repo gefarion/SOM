@@ -47,4 +47,7 @@ Class = (
         ^false
     )
     
+    "Mate"
+    updateShapeForInstancesWith = primitive
+    getShapeForInstances = primitive
 )
