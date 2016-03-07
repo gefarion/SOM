@@ -1,3 +1,9 @@
 ReadOnlyPropagationHandler = PropagationHandler (
 	handleWriteField: field value: value myself: aProxy target: aReceiver = ()
+	
+	--------------
+	initialize = (
+		notRoot := self new.
+		notRoot isRoot: false.
+	)
 )

@@ -2,7 +2,7 @@ PropagationHandler = Object (
 	| isRoot |
 	
 	initialize = (
-		isRoot := true
+		isRoot := true.
 	)
 	
 	handleMessage: aSelector withArguments: arguments myself: aProxy target: aReceiver = (
@@ -32,10 +32,7 @@ PropagationHandler = Object (
 	)
 	
 	wrap: anObject = (
-		| handler |
-		handler := self class new.
-		handler isRoot: false.
-		^anObject proxyClass handler: handler target: anObject
+		^anObject proxyClass handler: self class notRoot target: anObject
 	)
 	
 	wrapAll: aCollection = (
@@ -54,4 +51,14 @@ PropagationHandler = Object (
 	isRoot = (
 		^isRoot
 	)
+	
+	---------------
+	| notRoot |
+	
+	initialize = (
+		notRoot := self new.
+		notRoot isRoot: false.
+	)
+	
+	notRoot = (^notRoot)
 )
