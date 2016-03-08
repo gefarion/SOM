@@ -1,12 +1,12 @@
 SumKeys = Benchmark (
-    | pairs listSize self propagation|
+    | pairs listSize self propagation |
     
     listSize = (^listSize)
     listSize: aNumber = (listSize := aNumber)
     propagation = (^propagation)
     propagation: aNumber = (propagation := aNumber)
     
-    initialize = (
+    oneTimeSetup = (
 		self listSize: 1000.
 		self propagation: 5.
     	self initializePairArrays.

@@ -1,8 +1,12 @@
 ReadonlySumKeys = DelegationProxiesSumKeys (
-    initialize = (
+    oneTimeSetup = (
     	Handle initialize.
-    	super initialize.
+    	super oneTimeSetup.
    	)
+   	
+   	verifyResult: result = (
+      ^true
+    )
     	
     makeHeadOfListReadOnly = (
     	pairs := pairs readOnly.

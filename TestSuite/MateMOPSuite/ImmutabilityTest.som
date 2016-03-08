@@ -22,6 +22,11 @@ THE SOFTWARE.
 
 
 ImmutabilityTest = TestCase (
+	initialize = (
+		PropagationHandler initialize. 
+		ReadOnlyPropagationHandler initialize
+	)
+	
 	testObjectImmutability = (
         | object value environment |
 		environment := EnvironmentMO 
@@ -36,7 +41,7 @@ ImmutabilityTest = TestCase (
 		self assert: object key equals: 1.
 		object installEnvironment: nil.
 		object key: 2.
-		self assert: object key equals: 2. 
+		self assert: object key equals: 2.
     )
     
 	testReferenceImmutabilty = (

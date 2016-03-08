@@ -1,6 +1,6 @@
 "
 
-$Id: Nil.som 27 2009-07-31 11:17:53Z michael.haupt $
+$Id: Environment.som 29 2005-04-17 11:28:44Z guido.chari $
 
 Copyright (c) 2001-2013 see AUTHORS file
 
@@ -23,24 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-Nil = (
-
-    "Converting"
-    asString = ( ^'nil' )
-    
-    "Comparing"
-    isNil    = ( ^true )
-    notNil   = ( ^false )
-
-    "Convenience"
-    ifNil: aBlock = (^aBlock value)
-    ifNotNil: aBlock = (^self)
-    ifNil: goBlock ifNotNil: noGoBlock = (^goBlock value)
-    
-    "Delegation Proxies"
-    proxyClass = (
-    	^NoProxy
-    )
-    
-    readOnly = (^nil)
+FieldWriteAndReadSemanticsMO = FieldWriteSemanticsMO (
+	read: anIndex = (^self instVarAt: anIndex + 1)
 )

@@ -1,0 +1,15 @@
+AllOperations = Benchmark (
+    initialize = (
+    	| environment |
+    	super initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: FieldReadSemanticsMO new 
+							message: MethodActivationSemanticsMO new 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: 1
+    )
+)    
