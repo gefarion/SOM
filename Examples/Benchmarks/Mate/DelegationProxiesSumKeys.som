@@ -17,4 +17,10 @@ DelegationProxiesSumKeys = SumKeys (
     	super initializePairArrays.
     	self makeHeadOfListReadOnly
     )
+    
+    oneTimeSetup = (
+    	super oneTimeSetup.
+    	PropagationHandler initialize.
+    	ReadOnlyPropagationHandler initialize.
+    )
 )
