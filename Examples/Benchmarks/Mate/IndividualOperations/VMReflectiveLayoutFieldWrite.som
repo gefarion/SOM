@@ -1,15 +1,11 @@
 VMReflectiveLayoutFieldWrite = FieldWrite (
-    initialize = (
+    oneTimeSetup = (
     	| environment |
-    	super initialize.
+    	super oneTimeSetup.
     	environment := EnvironmentMO 
 							operationalSemantics: nil 
 							message: nil 
 							layout: LayoutFieldWriteSemanticsMO new.
 		object installEnvironment: environment.
-    )
-    
-    verifyResult: result = (
-      ^self assert: object key equals: 1
     )
 )

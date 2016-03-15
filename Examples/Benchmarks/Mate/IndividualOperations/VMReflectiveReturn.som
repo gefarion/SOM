@@ -1,0 +1,11 @@
+VMReflectiveReturn = FieldRead (
+    oneTimeSetup = (
+    	| environment |
+    	super oneTimeSetup.
+    	environment := EnvironmentMO 
+							operationalSemantics: ReturnSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+)

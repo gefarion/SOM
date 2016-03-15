@@ -1,0 +1,3 @@
+ReturnSemanticsMO = OperationalSemanticsMO (
+	return: aValue = (^aValue)
+)

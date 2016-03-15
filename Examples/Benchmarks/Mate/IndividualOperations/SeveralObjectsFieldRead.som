@@ -1,0 +1,17 @@
+SeveralObjectsFieldRead = Benchmark (
+    | pairs |
+    
+    oneTimeSetup = (
+    	pairs := Array new: 15.
+    	1 to: 15 do: [:i | pairs at: i put: ((Pair new) key: i)].
+    )
+    
+    benchmark = (
+    	1 to: 14 do: [:i | (pairs at: i) key].
+    	^(pairs at: 15) key
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: 15
+    )
+)    

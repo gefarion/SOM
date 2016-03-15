@@ -1,12 +1,13 @@
-FieldRead = Benchmark (
+AllOperations = Benchmark (
     | object |
     
-    initialize = (
+    oneTimeSetup = (
     	object := Pair new.
     	object key: 1.
     )
     
     benchmark = (
+		object key: 1.
 		^object key.
     )
     

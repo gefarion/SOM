@@ -1,15 +1,15 @@
-VMReflectiveMessageSend = MessageSend (
-    initialize = (
+VMReflectiveMethodActivation = MessageSend (
+    oneTimeSetup = (
     	| environment |
-    	super initialize.
+    	super oneTimeSetup.
     	environment := EnvironmentMO 
 							operationalSemantics: nil 
-							message: MessageSendSemanticsMO new
+							message: MethodActivationSemanticsMO new
 							layout: nil.
 		object installEnvironment: environment.
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 2
+      ^self assert: result equals: 1
     )
 )    

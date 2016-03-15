@@ -1,15 +1,11 @@
 VMReflectiveFieldWrite = FieldWrite (
-    initialize = (
+    oneTimeSetup = (
     	| environment |
-    	super initialize.
+    	super oneTimeSetup.
     	environment := EnvironmentMO 
 							operationalSemantics: FieldWriteSemanticsMO new 
 							message: nil 
 							layout: nil.
 		object installEnvironment: environment.
-    )
-    
-    verifyResult: result = (
-      ^self assert: object key equals: 1
     )
 )

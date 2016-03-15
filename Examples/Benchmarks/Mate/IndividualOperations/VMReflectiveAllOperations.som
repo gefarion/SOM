@@ -1,10 +1,10 @@
-VMReflectiveFieldRead = FieldRead (
-    initialize = (
+AllOperations = Benchmark (
+    oneTimeSetup = (
     	| environment |
-    	super initialize.
+    	super oneTimeSetup.
     	environment := EnvironmentMO 
-							operationalSemantics: FieldReadSemanticsMO new 
-							message: nil 
+							operationalSemantics: FieldWriteAndReadSemanticsMO new 
+							message: MethodActivationSemanticsMO new 
 							layout: nil.
 		object installEnvironment: environment.
     )
@@ -12,4 +12,4 @@ VMReflectiveFieldRead = FieldRead (
     verifyResult: result = (
       ^self assert: result equals: 1
     )
-)
+)    

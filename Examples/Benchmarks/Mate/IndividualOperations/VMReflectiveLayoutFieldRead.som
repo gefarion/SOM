@@ -1,15 +1,11 @@
 VMReflectiveLayoutFieldRead = FieldRead (
-    initialize = (
+    oneTimeSetup = (
     	| environment |
-    	super initialize.
+    	super oneTimeSetup.
     	environment := EnvironmentMO 
 							operationalSemantics: nil  
 							message: nil 
 							layout: LayoutFieldReadSemanticsMO new.
 		object installEnvironment: environment.
-    )
-    
-    verifyResult: result = (
-      ^self assert: result equals: 1
     )
 )

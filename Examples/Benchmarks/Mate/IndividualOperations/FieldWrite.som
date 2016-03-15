@@ -1,17 +1,15 @@
-AllOperations = Benchmark (
+FieldWrite = Benchmark (
     | object |
     
-    initialize = (
+    oneTimeSetup = (
     	object := Pair new.
-    	object key: 1.
     )
     
     benchmark = (
 		object key: 1.
-		^object key.
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 1
+      ^self assert: object key equals: 1
     )
 )    
