@@ -1,12 +1,11 @@
 VMReflectiveSeveralObjectsFieldRead = SeveralObjectsFieldRead (
     oneTimeSetup = (
     	super oneTimeSetup.
-    	1 to: 15 do: [:i | | environment |  
+    	1 to: 15 do: [:i | | environment | 
     		environment := EnvironmentMO 
 							operationalSemantics: FieldReadSemanticsMO new 
 							message: nil 
 							layout: nil.
-			(pairs at: i) installEnvironment: environment.							
-		].
+			(pairs at: i) installEnvironment: environment.]
     )
 )

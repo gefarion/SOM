@@ -5,6 +5,12 @@ ReadonlySumKeys = DelegationProxiesSumKeys (
    	)
    	
    	verifyResult: result = (
+      | current |
+      current := pairs.
+      1 to: self listSize do: [:i | 
+      	current val key = i ifFalse: [i println. current val key println. ^false].
+      	current := current next.
+      ].
       ^true
     )
     	

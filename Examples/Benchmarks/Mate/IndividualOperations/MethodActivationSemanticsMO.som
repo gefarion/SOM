@@ -22,7 +22,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
-
 MethodActivationSemanticsMO = MessageMO (
     find: aSymbol since: aClass = (	
 		| class | 
@@ -35,6 +34,6 @@ MethodActivationSemanticsMO = MessageMO (
 	)
 	
 	activate: aMethod withArguments: arguments = (
-		^arguments 
+		^arguments
 	)
 )

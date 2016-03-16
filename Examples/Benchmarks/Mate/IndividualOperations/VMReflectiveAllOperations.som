@@ -1,4 +1,4 @@
-AllOperations = Benchmark (
+VMReflectiveAllOperations = AllOperations (
     oneTimeSetup = (
     	| environment |
     	super oneTimeSetup.
@@ -7,9 +7,5 @@ AllOperations = Benchmark (
 							message: MethodActivationSemanticsMO new 
 							layout: nil.
 		object installEnvironment: environment.
-    )
-    
-    verifyResult: result = (
-      ^self assert: result equals: 1
     )
 )    

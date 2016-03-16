@@ -25,4 +25,5 @@ THE SOFTWARE.
 
 FieldWriteAndReadSemanticsMO = FieldWriteSemanticsMO (
 	read: anIndex = (^self instVarAt: anIndex + 1)
+	return: aValue = (^aValue)
 )
