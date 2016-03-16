@@ -17,5 +17,5 @@ QuickSortTrace = QuickSort (
     	result := super innerBenchmarkLoop: innerIterations.
     	self installEnvironment: nil.
     	^result
-    )
+    )"
 )
