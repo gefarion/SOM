@@ -1,0 +1,13 @@
+VMReflectiveSeveralObjectsFieldReadOneMO2 = SeveralObjectsFieldRead2 (
+    oneTimeSetup = (
+    	| environment |
+    	super oneTimeSetup.
+    	environment := EnvironmentMO 
+							operationalSemantics: FieldReadSemanticsMO new 
+							message: nil 
+							layout: nil.
+    	1 to: 15 do: [:i |   
+    		(pairs at: i) installEnvironment: environment.							
+		].
+    )
+)

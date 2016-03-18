@@ -1,0 +1,19 @@
+SeveralObjectsFieldRead2 = Benchmark (
+    | pairs |
+    
+    oneTimeSetup = (
+    	Random initialize.
+    	pairs := Array new: 15.
+    	1 to: 15 do: [:i | pairs at: i put: ((Pair new) key: i)].
+    )
+    
+    benchmark = (
+		| value |
+		value := Random next rem: 15
+		^(pairs at: (value + 1)) key.
+    )
+    
+    verifyResult: result = (
+      ^result <= 15
+    )
+)    
