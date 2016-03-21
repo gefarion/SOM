@@ -2,15 +2,17 @@ FieldRead = Benchmark (
     | object |
     
     oneTimeSetup = (
+    	Random initialize.
     	object := Pair new.
     	object key: 1.
     )
     
     benchmark = (
+    	object key: (Random next rem: 100)  + 1.
 		^object key.
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 1
+      ^result <= 100
     )
 )    
