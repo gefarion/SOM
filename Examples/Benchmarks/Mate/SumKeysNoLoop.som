@@ -1,0 +1,46 @@
+SumKeysNoLoop = SumKeys (
+    benchmark = (
+		| current |
+		current := pairs.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+		self duplicateValueOf: current andFollowing: self propagation.
+		current := current next.
+	)
+)

@@ -1,10 +1,10 @@
-ReadonlySumKeys = DelegationProxiesSumKeys (
+ReadonlySumKeys = DelegationProxiesSumKeysNoLoop (
     oneTimeSetup = (
     	Handle initialize.
     	super oneTimeSetup.
    	)
-   	
-   	makeHeadOfListReadOnly = (
+   		
+    makeHeadOfListReadOnly = (
     	pairs := pairs readOnly.
     )
 )

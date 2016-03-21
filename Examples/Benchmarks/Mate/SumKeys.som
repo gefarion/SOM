@@ -7,7 +7,7 @@ SumKeys = Benchmark (
     propagation: aNumber = (propagation := aNumber)
     
     oneTimeSetup = (
-		self listSize: 1000.
+		self listSize: 20.
 		self propagation: 5.
     	self initializePairArrays.
    	)
@@ -50,6 +50,7 @@ SumKeys = Benchmark (
       current := pairs.
       1 to: self listSize do: [:i | 
       	"value := (i * (2 exp: (i min: self propagation)))."
+      	current val key > i ifFalse: [i println. current val key println.^false].
       	(current val key rem: i) = 0 ifFalse: [i println. current val key println.^false].
       	current := current next.
       ].

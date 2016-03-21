@@ -6,7 +6,7 @@ VMReflectiveSeveralObjectsFieldReadOneMO = SeveralObjectsFieldRead (
 							operationalSemantics: FieldReadSemanticsMO new 
 							message: nil 
 							layout: nil.
-    	1 to: 15 do: [:i |   
+    	1 to: size do: [:i |   
     		(pairs at: i) installEnvironment: environment.							
 		].
     )

@@ -1,4 +1,4 @@
-VMReflectiveSeveralObjectsFieldRead = SeveralObjectsFieldRead (
+VMReflectiveSeveralObjectsFieldRead2 = SeveralObjectsFieldRead2 (
     oneTimeSetup = (
     	super oneTimeSetup.
     	1 to: size do: [:i | | environment | 
