@@ -1,20 +1,24 @@
 SeveralObjectsFieldRead = Benchmark (
-    | pairs |
+    | pairs size |
     
     oneTimeSetup = (
-    	pairs := Array new: 15.
-    	1 to: 15 do: [:i | pairs at: i put: ((Pair new) key: i)].
+    	size := 20.
+    	pairs := Array new: size.
+    	1 to: size do: [:i | pairs at: i put: ((Pair new) key: i)].
     )
     
     benchmark = (
-    	| value i |
-    	i := 1.
-    	[i < 15] whileTrue: [value := (pairs at: i) key. i := i + 1].
-    	"1 to: 14 do: [:i | value := (pairs at: i) key]."
-    	^(pairs at: 15) key
+    	| i accum |
+    	accum := 0.
+    	"[i < (size + 1)] whileTrue: [accum := accum + ((pairs at: ) key). i := i + 1]."
+    	1 to: size do: [:i | accum := accum + ((pairs at: i) key)].
+    	^accum
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 15
+      | accum |
+      accum := 0.	
+      1 to: size do: [:i | accum := accum + i].
+      ^result = accum
     )
 )    
