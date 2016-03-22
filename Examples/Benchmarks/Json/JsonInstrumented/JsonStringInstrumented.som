@@ -1,0 +1,35 @@
+JsonStringInstrumented = JsonValueInstrumented (
+  | string |
+  
+  initializeWith: str = ( Counter addMethodCall. string := str )
+
+  isString = (
+    Counter addMethodCall.
+    ^ true
+  )
+
+  asString = (
+    Counter addMethodCall.
+    ^ string
+  )
+
+  hashcode = (
+    Counter addMethodCall.
+    ^ string hashcode
+  )
+
+  = other = (
+    Counter addMethodCall.
+    self == other ifTrue: [ ^ true ].
+    other == nil ifTrue: [ ^ false ].
+
+    self class == other class ifFalse: [ ^ false ].
+
+    ^ string =  other asString
+  )
+
+  ----
+  
+  new: str = ( Counter addMethodCall. ^ self new initializeWith: str )
+
+)

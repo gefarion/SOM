@@ -1,0 +1,117 @@
+JsonValueInstrumented = (
+
+  isObject  = ( Counter addMethodCall. ^ false )
+  isArray   = ( Counter addMethodCall. ^ false )
+  isNumber  = ( Counter addMethodCall. ^ false )
+  isString  = ( Counter addMethodCall. ^ false )
+  isBoolean = ( Counter addMethodCall. ^ false )
+  
+  isTrue  = ( Counter addMethodCall. ^ false )
+  isFalse = ( Counter addMethodCall. ^ false )
+  isNull  = ( Counter addMethodCall. ^ false )
+
+  asObject = (
+    Counter addMethodCall.
+    self error: 'Unsupported operation, not an object: ' + self asString
+  )
+
+  asArray = (
+    Counter addMethodCall.
+    self error: 'Unsupported operation, not an array: ' + self asString
+  )
+
+  asInteger = (
+    Counter addMethodCall.
+    self error: 'Unsupported operation, not a number: ' + self asString
+  )
+
+  asDouble = (
+    Counter addMethodCall.
+    self error: 'Unsupported operation, not a number: ' + self asString
+  )
+
+  asString = (
+    Counter addMethodCall.
+    self error: 'Unsupported operation, not a string: ' + self asString
+  )
+
+  asBoolean = (
+    Counter addMethodCall.
+    self error: 'Unsupported operation, not a boolean: ' + self asString
+  )
+
+  writeTo: writer = (
+    Counter addMethodCall.
+    self writeTo: writer with: nil
+  )
+
+" TODO:
+    public void writeTo( final Writer writer, final WriterConfig config ) throws IOException {
+    WritingBuffer buffer = new WritingBuffer( writer, 128 );
+    write( config == null ? new JsonWriter( buffer ) : config.createWriter( buffer ) );
+    buffer.flush();
+  }"
+
+  "TODO:
+  @Override
+  public String toString() {
+    Counter addMethodCall.
+    return toString( null );
+  }
+
+  public String toString( final WriterConfig config ) {
+    Counter addMethodCall.
+    StringWriter writer = new StringWriter();
+    try {
+      writeTo( writer, config );
+    } catch( IOException exception ) {
+      // StringWriter does not throw IOExceptions
+      throw new RuntimeException( exception );
+    }
+    return writer.toString();
+  }"
+
+
+  writeOn: writer = (
+    Counter addMethodCall.
+    ^ self subclassResponsibility
+  )
+
+  ----
+  
+  readFrom: str = (
+    Counter addMethodCall.
+    ^ (JsonParserInstrumented with: str) parse
+  )
+
+  integer: anInteger = (
+    Counter addMethodCall.
+    ^ JsonNumberInstrumented new: anInteger asString
+  )
+
+  double: aDouble = (
+    Counter addMethodCall.
+    aDouble ifNil: [self error: 'aDouble nil'].
+    ^ JsonNumberInstrumented new: (self cutOffPointZero: aDouble asString)
+  )
+
+  string: aString = (
+    Counter addMethodCall.
+    ^ aString == nil
+        ifTrue:  [ JsonLiteralInstrumented NULL ]
+        ifFalse: [ JsonStringInstrumented new: aString ]
+  )
+
+  boolean: aBoolean = (
+    Counter addMethodCall.
+    ^ aBoolean
+        ifTrue:  [ JsonLiteralInstrumented TRUE  ]
+        ifFalse: [ JsonLiteralInstrumented FALSE ]
+  )
+  
+  cutOffPointZero: str = (
+    Counter addMethodCall.
+    (str endsWith: '.0') ifTrue: [ ^ str substringFrom: 1 to: str length - 2].
+    ^ str
+  )
+)

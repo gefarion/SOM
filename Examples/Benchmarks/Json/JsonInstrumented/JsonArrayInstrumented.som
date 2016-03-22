@@ -1,0 +1,113 @@
+JsonArrayInstrumented = JsonValueInstrumented (
+  | values |
+
+  initialize = ( Counter addMethodCall. values := Vector new )
+
+  addInteger: value = (
+    Counter addMethodCall.
+    values append: (JsonValue integer: value)
+  )
+
+  addDouble: value = (
+    Counter addMethodCall.
+    values append: (JsonValue double: value)
+  )
+
+  addBoolean: value = (
+    Counter addMethodCall.
+    values append: (JsonValue boolean: value)
+  )
+
+  addString: value = (
+    Counter addMethodCall.
+    values append: (JsonValue string: value)
+  )
+
+  add: value = (
+    Counter addMethodCall.
+    value ifNil: [ self error: 'value is null' ].
+    values append: value
+  )
+
+  at: index putInteger: value = (
+    Counter addMethodCall.
+    values at: index put: (JsonValue integer: value)
+  )
+
+  at: index putDouble: value = (
+    Counter addMethodCall.
+    values at: index put: (JsonValue double: value)
+  )
+
+  at: index putBoolean: value = (
+    Counter addMethodCall.
+    values at: index put: (JsonValue boolean: value)
+  )
+
+  at: index putString: value = (
+    Counter addMethodCall.
+    values at: index put: (JsonValue string: value)
+  )
+
+  at: index put: value = (
+    Counter addMethodCall.
+    value ifNil: [ self error: 'value is null' ].
+    values at: index put: value
+  )
+
+  removeAt: index = (
+    Counter addMethodCall.
+    values removeAt: index
+  )
+
+  size = (
+    Counter addMethodCall.
+    ^ values size
+  )
+
+  isEmpty = (
+    Counter addMethodCall.
+    ^ values isEmpty
+  )
+
+  at: index = (
+    Counter addMethodCall.
+    ^ values at: index
+  )
+
+  values = (
+    Counter addMethodCall.
+    ^ values
+  )
+ 
+  isArray = (
+    Counter addMethodCall.
+    ^ true
+  )
+
+  asArray = (
+    Counter addMethodCall.
+    ^ self
+  )
+
+  hashcode = (
+    Counter addMethodCall.
+    ^ values hashcode
+  )
+
+  = other = (
+    Counter addMethodCall.
+    self == other ifTrue: [ ^ true ].
+    other == nil ifTrue: [ ^ false ].
+    self class == other class ifFalse: [ ^ false ].
+
+    ^ values = other values
+  )
+
+  ----
+  
+  readFrom: string = (
+    Counter addMethodCall.
+    ^ (JsonValue readFrom: string) asArray
+  )
+)

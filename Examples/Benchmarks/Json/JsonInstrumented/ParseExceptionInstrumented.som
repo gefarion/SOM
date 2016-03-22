@@ -1,0 +1,29 @@
+ParseExceptionInstrumented = (
+  | offset line column msg |
+  
+  initializeWith: message at: anOffset line: aLine column: aColumn = (
+    Counter addMethodCall.
+    msg    := message.
+    offset := anOffset.
+    line   := aLine.
+    column := aColumn.
+  )
+  
+  message = ( Counter addMethodCall. ^ msg )
+  
+  offset = ( Counter addMethodCall. ^ offset )
+  line   = ( Counter addMethodCall. ^ line   )
+  column = ( Counter addMethodCall. ^ column )
+  
+  asString = ( Counter addMethodCall. ^ msg + ':' + line + ':' + column )
+  
+  ----
+
+  with: aMessageString at: offset line: line column: column = (
+    Counter addMethodCall.
+    ^ self new initializeWith: aMessageString
+                           at: offset
+                         line: line
+                       column: column
+  )
+)

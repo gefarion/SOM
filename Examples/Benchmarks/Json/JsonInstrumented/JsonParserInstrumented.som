@@ -1,0 +1,386 @@
+" This is a rough port of minijson from Java.
+  TODO: add details (com.eclipsesource.json) "
+
+JsonParserInstrumented = (
+  | input index line column current captureBuffer captureStart exceptionBlock |
+  
+  initializeWith: string = (
+    Counter addMethodCall.
+    input := string.
+    self reset.	
+  )
+  
+  reset = (
+  	Counter addMethodCall.
+  	index := 0.
+    line  := 1.
+    column := 0.
+    current := nil.
+    captureBuffer := ''.
+  )
+
+  parse = (
+    | result |
+    Counter addMethodCall.
+    exceptionBlock := [:ex | ^ ex ].
+    self read.
+    self skipWhiteSpace.
+    result := self readValue.
+    self skipWhiteSpace.
+    self isEndOfText ifFalse: [ self error: 'Unexpected character'].
+    ^ result
+  )
+
+  readValue = (
+    Counter addMethodCall.
+    current = 'n' ifTrue: [ ^ self readNull   ].
+    current = 't' ifTrue: [ ^ self readTrue   ].
+    current = 'f' ifTrue: [ ^ self readFalse  ].
+    current = '"' ifTrue: [ ^ self readString ].
+    current = '[' ifTrue: [ ^ self readArray  ].
+    current = '{' ifTrue: [ ^ self readObject ].
+    
+    "Is this really the best way to write this?, or better #or:?,
+     but with all the nesting, it's just ugly."
+    current = '-' ifTrue: [ ^ self readNumber ].
+    current = '0' ifTrue: [ ^ self readNumber ].
+    current = '1' ifTrue: [ ^ self readNumber ].
+    current = '2' ifTrue: [ ^ self readNumber ].
+    current = '3' ifTrue: [ ^ self readNumber ].
+    current = '4' ifTrue: [ ^ self readNumber ].
+    current = '5' ifTrue: [ ^ self readNumber ].
+    current = '6' ifTrue: [ ^ self readNumber ].
+    current = '7' ifTrue: [ ^ self readNumber ].
+    current = '8' ifTrue: [ ^ self readNumber ].
+    current = '9' ifTrue: [ ^ self readNumber ].
+    
+    "else"
+    self expected: 'value'
+  )
+
+  readArrayElement: array = (
+    Counter addMethodCall.
+    self skipWhiteSpace.
+    array add: self readValue.
+    self skipWhiteSpace.
+  )
+  
+  readArray = (
+    | array |
+    Counter addMethodCall.
+    self read.
+    array := JsonArrayInstrumented new.
+    
+    "Array might be empty"
+    self skipWhiteSpace.
+    (self readChar: ']') ifTrue: [
+      ^ array
+    ].
+    
+    self readArrayElement: array.
+    [self readChar: ','] whileTrue: [
+      self readArrayElement: array.
+    ].
+
+    (self readChar: ']') ifFalse: [
+      self expected: '"," or "]"'
+    ].
+    ^ array
+  )
+
+  readObjectKeyValuePair: object = (
+    | name |
+    Counter addMethodCall.
+    self skipWhiteSpace.
+    name := self readName.
+    self skipWhiteSpace.
+  
+    (self readChar: ':') ifFalse: [ self expected: ':' ].
+  
+    self skipWhiteSpace.
+  
+    object add: name with: self readValue.
+  
+    self skipWhiteSpace.
+  )
+
+  readObject = (
+    | object |
+    Counter addMethodCall.
+    self read.
+    object := JsonObject new.
+    self skipWhiteSpace.
+
+    (self readChar: '}') ifTrue: [
+      ^ object
+    ].
+    
+    self readObjectKeyValuePair: object.
+    [self readChar: ','] whileTrue: [
+      self readObjectKeyValuePair: object.
+    ].
+    
+    (self readChar: '}') ifFalse: [
+      self expected: '"," or "}"'
+    ].
+    
+    ^ object
+  )
+
+  readName = (
+    Counter addMethodCall.
+    current = '"' ifFalse: [ self expected: 'name' ].
+    ^ self readStringInternal
+  )
+
+  readNull = (
+    Counter addMethodCall.
+    self read.
+    self readRequiredChar: 'u'.
+    self readRequiredChar: 'l'.
+    self readRequiredChar: 'l'.
+    ^ JsonLiteralInstrumented NULL
+  )
+
+  readTrue = (
+    Counter addMethodCall.
+    self read.
+    self readRequiredChar: 'r'.
+    self readRequiredChar: 'u'.
+    self readRequiredChar: 'e'.
+    ^ JsonLiteralInstrumented TRUE
+  )
+
+  readFalse = (
+    Counter addMethodCall.
+    self read.
+    self readRequiredChar: 'a'.
+    self readRequiredChar: 'l'.
+    self readRequiredChar: 's'.
+    self readRequiredChar: 'e'.
+    ^ JsonLiteralInstrumented FALSE
+  )
+
+  readRequiredChar: ch = (
+    Counter addMethodCall.
+    (self readChar: ch) ifFalse: [
+      self expected: 'character: ' + ch
+    ]
+  )
+
+  readString = (
+    Counter addMethodCall.
+    ^ JsonStringInstrumented new: self readStringInternal
+  )
+
+  readStringInternal = (
+    | string |
+    Counter addMethodCall.
+    self read.
+    self startCapture.
+    
+    [current = '"'] whileFalse: [
+      current = '\\' ifTrue: [
+        self pauseCapture.
+        self readEscape.
+        self startCapture.
+      ] ifFalse: [
+        "if (current < 0x20) { throw expected('valid string character'); }"
+        "we currently don't have a way to get the ordinal value for a character"
+        "} else {"
+        self read.
+      ]
+    ].
+    string := self endCapture.
+    self read.
+    ^ string
+  )
+
+  readEscapeChar = (
+    Counter addMethodCall.
+    current = '"'  ifTrue: [ ^ '"'  ].
+    current = '/'  ifTrue: [ ^ '/'  ].
+    current = '\\' ifTrue: [ ^ '\\' ].
+
+    current = 'b'  ifTrue: [ ^ '\b'  ].
+    current = 'f'  ifTrue: [ ^ '\f'  ].
+    current = 'n'  ifTrue: [ ^ '\n'  ].
+    current = 'r'  ifTrue: [ ^ '\r'  ].
+    current = 't'  ifTrue: [ ^ '\t'  ].
+    
+    "TODO: SOM doesn't have a way to create unicode characters."
+    self expected: 'valid escape sequence. note, some are not supported'
+  )
+
+  readEscape = (
+    Counter addMethodCall.
+    self read.
+    captureBuffer := captureBuffer concatenate: self readEscapeChar.
+    self read
+  )
+
+  readNumber = (
+    | firstDigit |
+    Counter addMethodCall.
+    self startCapture.
+    self readChar: '-'.
+    firstDigit := current.
+    
+    self readDigit ifFalse: [ self expected: 'digit' ].
+    firstDigit <> '0' ifTrue: [ [self readDigit] whileTrue: []].
+        
+    self readFraction.
+    self readExponent.
+    ^ JsonNumberInstrumented new: self endCapture
+  )
+
+  readFraction = (
+    Counter addMethodCall.
+    (self readChar: '.') ifFalse: [ ^ false ].
+    
+    self readDigit ifFalse: [ self expected: 'digit' ].
+    
+    [self readDigit] whileTrue: [].
+
+    ^ true
+  )
+
+  readExponent = (
+    Counter addMethodCall.
+    ((self readChar: 'e') not and: [
+      (self readChar: 'E') not]) ifTrue: [ ^ false ].
+    
+    
+    (self readChar: '+') ifFalse: [ self readChar: '-' ].
+    
+    self readDigit ifFalse: [ self expected: 'digit' ].
+
+    [self readDigit] whileTrue: [].
+
+    ^ true
+  )
+
+  readChar: ch = (
+    Counter addMethodCall.
+    current = ch ifFalse: [ ^ false ].
+    self read.
+    ^ true
+  )
+
+  readDigit = (
+    Counter addMethodCall.
+    self isDigit ifFalse: [ ^ false ].
+    self read.
+    ^ true
+  )
+
+  skipWhiteSpace = (
+    Counter addMethodCall.
+    [ self isWhiteSpace ]
+      whileTrue:
+        [ self read ].
+  )
+
+  read = ("TODO: this is probably broken"
+    Counter addMethodCall.
+    current = '\n' ifTrue: [
+      line := line + 1.
+      column := 0.
+    ].
+    
+    index := index + 1.
+    column := column + 1.
+
+    input ifNil: [ self error:'input nil'].
+    index <= input length
+      ifTrue:  [ current := input charAt: index ]
+      ifFalse: [ current := nil ]
+  )
+
+  startCapture = (
+    Counter addMethodCall.
+    captureStart := index
+  )
+
+  pauseCapture = (
+    Counter addMethodCall.
+    captureBuffer := captureBuffer concatenate: (
+      input substringFrom: captureStart to: index - 1).
+    captureStart := -1
+  )
+
+  endCapture = (
+    | captured |
+    Counter addMethodCall.
+    '' = captureBuffer
+      ifTrue:  [ 
+      	(captureStart > (index - 1)) ifTrue: [
+      		captured := '' 
+      	] ifFalse:[
+      		captured := input substringFrom: captureStart to: index - 1 
+		]
+      ]
+      ifFalse: [
+        self pauseCapture.
+        captured := captureBuffer.
+        captureBuffer := '' ].
+    captureStart := -1.
+    
+    ^ captured
+  )
+
+  expected: expected = (
+    Counter addMethodCall.
+    self isEndOfText ifTrue: [
+      self error: 'Unexpected end of input, expected ' + expected asString
+    ].
+    self error: 'Expected ' + expected
+  )
+
+  error: message = (
+    Counter addMethodCall.
+    'error:' print.
+    message print.
+    ':' print.
+    line print.
+    column println.
+    exceptionBlock value: (ParseException with: message at: index
+                                          line: line    column: column )
+  )
+
+  isWhiteSpace = (
+    Counter addMethodCall.
+    current = ' '  ifTrue: [^ true].
+    current = '\t' ifTrue: [^ true].
+    current = '\n' ifTrue: [^ true].
+    current = '\r' ifTrue: [^ true].
+    ^ false
+  )
+
+  isDigit = (
+    Counter addMethodCall.
+    current = '0' ifTrue: [^ true].
+    current = '1' ifTrue: [^ true].
+    current = '2' ifTrue: [^ true].
+    current = '3' ifTrue: [^ true].
+    current = '4' ifTrue: [^ true].
+    current = '5' ifTrue: [^ true].
+    current = '6' ifTrue: [^ true].
+    current = '7' ifTrue: [^ true].
+    current = '8' ifTrue: [^ true].
+    current = '9' ifTrue: [^ true].
+    ^ false
+  )
+
+  isEndOfText = (
+    Counter addMethodCall.
+    ^ current isNil
+  )
+  
+  ----
+  
+  with: aJsonString = (
+    Counter addMethodCall.
+    ^ self new initializeWith: aJsonString
+  )
+)
