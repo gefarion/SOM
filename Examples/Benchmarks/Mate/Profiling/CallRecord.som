@@ -1,0 +1,35 @@
+CallRecord = Object (
+	| id parent metrics children |
+	
+	id: anObject = (
+		id := anObject
+	)
+	
+	metrics: anObject = (
+		metrics := anObject
+	)
+	
+	parent: aCallRecord = (
+		parent := aCallRecord
+	)
+	
+	children = (
+		^ children
+	)
+	
+	id = (
+		^ id
+	)
+	
+	children: anArrayOfCallRecords = (
+		children := anArrayOfCallRecords
+	)
+	
+	metrics = (
+		^ metrics
+	)
+	
+	parent = (
+		^ parent
+	)
+)

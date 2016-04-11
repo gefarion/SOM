@@ -1,0 +1,6 @@
+CCTActivationSemantics = TracingMessageMO (
+    activate: aMethod withArguments: arguments = (
+		CCT forThisThread activateMethod: aMethod withArguments: arguments. 
+		^super activate: aMethod withArguments: arguments
+	)
+)

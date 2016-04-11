@@ -1,0 +1,26 @@
+CCT = Object (
+	| root current |
+	
+	root = (
+		^root
+	)
+	
+	current: aCallRecord = (
+		current := aCallRecord
+	)
+	
+	root: aCallRecord = (
+		root := aCallRecord
+	)
+	
+	current = (
+		^current
+	)
+	
+	----------------------------------| instance |
+	
+	forThisThread = (
+		^instance
+	)
+)
+)

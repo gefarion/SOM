@@ -1,0 +1,39 @@
+DeltaBlueProfiled = DeltaBlue (
+	
+    oneTimeSetup = ( 
+    	| metaobject |
+    	super oneTimeSetup.
+    	metaobject := (EnvironmentMO 
+			operationalSemantics: nil 
+			message: CCTActivationSemantics new
+			layout: nil).
+		CCTActivationSemantics instrumentationMO: metaobject. 
+    )
+
+    innerBenchmarkLoop: innerIterations = (
+        Counter initialize.
+        self installEnvironment: TracingMessageMO instrumentationMO.
+        self runIterations: innerIterations.
+        self installEnvironment: nil.
+        "Counter methods do: [:name | name println.]." 
+        self verifyResult ifFalse: [ ^ false ].
+        ^ true
+    )
+    
+    runIterations: innerIterations = (
+    	Planner chainTest: innerIterations.
+        Planner projectionTest: innerIterations.
+    )
+    
+    verifyResult = (
+    	^true
+    )
+    
+    iterationOperations = (
+    	^1351
+    )
+    
+    oneIteration = (
+    	^3866 + 5217 + 6998 + 8233 + 3033
+    )
+)
