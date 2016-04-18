@@ -7,17 +7,16 @@ DeltaBlueProfiled = DeltaBlue (
 			operationalSemantics: nil 
 			message: CCTActivationSemantics new
 			layout: nil).
-		CCTActivationSemantics instrumentationMO: metaobject. 
+		CCT initialize.
+		CCTActivationSemantics instrumentationMO: metaobject.
+		PropagationMessageMO instrumentationMO: metaobject.
     )
 
     innerBenchmarkLoop: innerIterations = (
-        Counter initialize.
-        self installEnvironment: TracingMessageMO instrumentationMO.
+        self installEnvironment: CCTActivationSemantics instrumentationMO.
         self runIterations: innerIterations.
         self installEnvironment: nil.
-        "Counter methods do: [:name | name println.]." 
-        self verifyResult ifFalse: [ ^ false ].
-        ^ true
+        ^self verifyResult
     )
     
     runIterations: innerIterations = (

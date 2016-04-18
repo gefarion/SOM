@@ -32,4 +32,11 @@ CallRecord = Object (
 	parent = (
 		^ parent
 	)
+	
+	----------------------------------
+	
+	
+	forMethod: aMethod = (
+		^self new id: aMethod
+	)
 )

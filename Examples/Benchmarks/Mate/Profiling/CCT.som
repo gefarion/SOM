@@ -13,14 +13,24 @@ CCT = Object (
 		root := aCallRecord
 	)
 	
+	activate: aMethod withArguments: arguments  = (
+		"self assert: current id = aMethod."
+		^thisContext method println.
+	)
+	
 	current = (
 		^current
 	)
 	
-	----------------------------------| instance |
+	----------------------------------
+	| instance |
 	
 	forThisThread = (
 		^instance
 	)
-)
+	
+	initialize = (
+		 "Initialization for a unithread environment"
+		 instance := self new
+	)
 )
