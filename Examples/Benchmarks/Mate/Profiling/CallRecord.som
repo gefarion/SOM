@@ -33,10 +33,23 @@ CallRecord = Object (
 		^ parent
 	)
 	
+	addCallTo: aCallRecord = (
+		self children append: aCallRecord 
+	)
+	
 	----------------------------------
 	
-	
 	forMethod: aMethod = (
-		^self new id: aMethod
+		| record |
+		record := self new id: aMethod.
+		record children: (Vector new: 3).
+		^record
+	)
+	
+	forMethod: aMethod parent: aCallRecord = (
+		| record |
+		record := self forMethod: aMethod.
+		record parent: aCallRecord.
+		^record 
 	)
 )

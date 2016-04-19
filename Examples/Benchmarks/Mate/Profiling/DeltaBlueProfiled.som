@@ -1,18 +1,18 @@
 DeltaBlueProfiled = DeltaBlue (
-	
+	| metaobject |
+
     oneTimeSetup = ( 
-    	| metaobject |
     	super oneTimeSetup.
     	metaobject := (EnvironmentMO 
 			operationalSemantics: nil 
 			message: CCTActivationSemantics new
 			layout: nil).
-		CCT initialize.
-		CCTActivationSemantics instrumentationMO: metaobject.
-		PropagationMessageMO instrumentationMO: metaobject.
     )
 
     innerBenchmarkLoop: innerIterations = (
+        CCT initializeFrom: thisContext method.
+		CCTActivationSemantics instrumentationMO: metaobject.
+		PropagationMessageMO instrumentationMO: metaobject.
         self installEnvironment: CCTActivationSemantics instrumentationMO.
         self runIterations: innerIterations.
         self installEnvironment: nil.

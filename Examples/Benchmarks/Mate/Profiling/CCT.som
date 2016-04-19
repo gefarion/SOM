@@ -13,13 +13,45 @@ CCT = Object (
 		root := aCallRecord
 	)
 	
-	activate: aMethod withArguments: arguments  = (
-		"self assert: current id = aMethod."
-		^thisContext method println.
-	)
-	
 	current = (
 		^current
+	)
+	
+	activate: aMethod withArguments: arguments  = (
+		| record |
+		"self assert: current id = thisContext method."
+		record := self recordFor: aMethod calledFrom: current.
+		self fillForMethodActivation: record.
+		current := record.
+	)
+	
+	recordFor: aMethod calledFrom: aCallRecord = (
+		"Look for an existing call record hanging from the actual record"
+		(aCallRecord children detect: [:record | record id = aMethod]) ifNotNil: [:record | ^record].
+		"Look for an existing call record in the parents sequence to look for a recursive call"
+		(self callRecordForRecursiveCallFor: aMethod calledFrom: aCallRecord) ifNotNil: [:record | ^record].
+		"Create a new call record hanging from the actual record"
+		^self addRecordFor: aMethod from: current 
+	)
+	
+	callRecordForRecursiveCallFor: aMethod calledFrom: aCallRecord = (
+		| record |
+		record := aCallRecord.
+		[record isNil or: [record id = aMethod]] whileFalse: [
+			record := record parent.
+		].
+		^record
+	)
+	
+	addRecordFor: aMethod from: current = (
+		| record |
+		record := CallRecord forMethod: aMethod parent: current.
+		current addCallTo: record.
+		^record
+	)
+	
+	fillForMethodActivation: record = (
+		"Here it should be the definition for storing in the call record the necessary information to profile about method activations"
 	)
 	
 	----------------------------------
@@ -29,8 +61,12 @@ CCT = Object (
 		^instance
 	)
 	
-	initialize = (
+	initializeFrom: aMethod = (
+		 | record |
 		 "Initialization for a unithread environment"
-		 instance := self new
+		 record := CallRecord forMethod: aMethod.
+		 instance := self new.
+		 instance root: record.
+		 instance current: record.
 	)
 )

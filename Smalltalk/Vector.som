@@ -144,6 +144,26 @@ Vector = (
         ^ Set new addAll: self
     )
     
+    "detect protocol ported from Pharo 5.0"
+    detect: aBlock = (
+		^ self detect: aBlock ifNone: [self errorNotFound: aBlock]
+    )
+    
+    detect: aBlock ifNone: exceptionBlock = (
+		^ self detect: aBlock ifFound: [ :element | element ] ifNone: exceptionBlock
+	)
+	
+	detect: aBlock ifFound: foundBlock ifNone: exceptionBlock = (
+		self
+			do: [ :each | 
+				(aBlock value: each)
+					ifTrue: [ ^ foundBlock value: each ] ].
+		^ exceptionBlock value
+	)
+	
+	errorNotFound: anObject = (
+		^nil
+	)
     ----------------------------
     
     "Allocation"

@@ -1,29 +1,6 @@
-TracingMessageMO = MessageMO (
-    find: aSymbol since: aClass = (	
-		| class |
-		class := aClass.
-		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
-			class := class superclass.
-		].
-		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
-		^nil.
-	)
-	
+TracingMessageMO = PropagationMessageMO (
 	activate: aMethod withArguments: arguments = (
-		| realArguments | 
-		"Counter addMethodCall: (arguments at: 3) class , '>>', aMethod signature."
 		Counter addMethodCall.
-		realArguments := arguments copy.
-		realArguments at: 1 put: TracingMessageMO instrumentationMO.
-		^realArguments.
+		^super activate: aMethod withArguments: arguments
 	)
-	
-	----------------------------
-	
-	| instrumentationMO |
-	
-	instrumentationMO = (^instrumentationMO)
-    instrumentationMO: aMetaobject = (
-    	instrumentationMO := aMetaobject
-    )
 )
