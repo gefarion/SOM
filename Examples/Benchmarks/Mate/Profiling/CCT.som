@@ -1,4 +1,4 @@
-CCT = Object (
+CCT = (
 	| root current |
 	
 	root = (
@@ -20,18 +20,18 @@ CCT = Object (
 	activate: aMethod withArguments: arguments  = (
 		| record |
 		"self assert: current id = thisContext method."
-		record := self recordFor: aMethod calledFrom: current.
-		self fillForMethodActivation: record.
+		record := self recordFor: aMethod calledFrom: current argumentsCount: arguments length.
+		self fillForMethodActivation: record withArguments: arguments.
 		current := record.
 	)
 	
-	recordFor: aMethod calledFrom: aCallRecord = (
+	recordFor: aMethod calledFrom: aCallRecord argumentsCount: aNumber = (
 		"Look for an existing call record hanging from the actual record"
 		(aCallRecord children detect: [:record | record id = aMethod]) ifNotNil: [:record | ^record].
 		"Look for an existing call record in the parents sequence to look for a recursive call"
 		(self callRecordForRecursiveCallFor: aMethod calledFrom: aCallRecord) ifNotNil: [:record | ^record].
 		"Create a new call record hanging from the actual record"
-		^self addRecordFor: aMethod from: current 
+		^self addRecordFor: aMethod from: current argumentsCount: aNumber 
 	)
 	
 	callRecordForRecursiveCallFor: aMethod calledFrom: aCallRecord = (
@@ -43,15 +43,33 @@ CCT = Object (
 		^record
 	)
 	
-	addRecordFor: aMethod from: current = (
+	addRecordFor: aMethod from: current argumentsCount: aNumber = (
 		| record |
-		record := CallRecord forMethod: aMethod parent: current.
+		record := CallRecord forMethod: aMethod parent: current argumentsCount: aNumber.
 		current addCallTo: record.
 		^record
 	)
 	
-	fillForMethodActivation: record = (
+	fillForMethodActivation: record withArguments: arguments = (
 		"Here it should be the definition for storing in the call record the necessary information to profile about method activations"
+		record addInvokation.
+		record storeArguments: arguments.
+	)
+	
+	asString = (
+		| levelRecords childrenRecords output |
+		output := ''.
+		levelRecords := Vector with: self root.
+		[levelRecords isEmpty] whileFalse: [
+			childrenRecords := Vector new.
+			levelRecords do: [:callRecord | 
+				output := output + callRecord printString + '\n'.
+				callRecord children isNil ifFalse: [childrenRecords appendAll: callRecord children].
+			]. 
+			output := output + '-------------------------------------------------\n'.
+			levelRecords := childrenRecords.
+		].
+		^output
 	)
 	
 	----------------------------------

@@ -16,6 +16,7 @@ DeltaBlueProfiled = DeltaBlue (
         self installEnvironment: CCTActivationSemantics instrumentationMO.
         self runIterations: innerIterations.
         self installEnvironment: nil.
+        CCT forThisThread println.
         ^self verifyResult
     )
     

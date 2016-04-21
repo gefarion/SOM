@@ -164,6 +164,12 @@ Vector = (
 	errorNotFound: anObject = (
 		^nil
 	)
+	
+	appendAll: aCollection = ( 
+		aCollection do: [:each | self append: each].
+		^ aCollection
+	)
+	
     ----------------------------
     
     "Allocation"

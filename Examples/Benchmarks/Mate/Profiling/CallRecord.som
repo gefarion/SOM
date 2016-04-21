@@ -1,6 +1,15 @@
 CallRecord = Object (
 	| id parent metrics children |
 	
+	initialize = (
+		self children: (Vector new: 3).
+		self metrics: (Array new: 5).
+		self metrics at: 2 put: (Vector new). "Return Types"
+		self metrics at: (self numberOfInvokationsIndex) put: 0. "Number Of Invokations"
+		self metrics at: 4 put: 0. "Number Of Created Objects"
+		self metrics at: 5 put: 0.  "Allocated Memory"	
+	)
+	
 	id: anObject = (
 		id := anObject
 	)
@@ -37,19 +46,40 @@ CallRecord = Object (
 		self children append: aCallRecord 
 	)
 	
+	addInvokation = (
+		self metrics at: (self numberOfInvokationsIndex) put: ((self metrics at: (self numberOfInvokationsIndex)) + 1)  
+	)
+	
+	storeArguments: arguments = (
+		| args |
+		args := self metrics at: (self argumentsIndex). 
+		1 to: arguments length do: [:i | (args at: i) append: (arguments at: i)]
+	)
+	
+	numberOfInvokationsIndex = (
+		^3
+	)
+	
+	argumentsIndex = (
+		"Receiver and Arguments"
+		^1
+	)
+	
 	----------------------------------
 	
 	forMethod: aMethod = (
 		| record |
 		record := self new id: aMethod.
-		record children: (Vector new: 3).
 		^record
 	)
 	
-	forMethod: aMethod parent: aCallRecord = (
-		| record |
+	forMethod: aMethod parent: aCallRecord argumentsCount: aNumber = (
+		| record arguments |
 		record := self forMethod: aMethod.
 		record parent: aCallRecord.
+		arguments := (Array new: aNumber).
+		1 to: aNumber do: [:i | arguments at: i put: Vector new].
+		record metrics at: (record argumentsIndex) put: arguments.
 		^record 
 	)
 )
