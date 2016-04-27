@@ -1,0 +1,348 @@
+FileSystemStore = Object (
+	"I am an abstract superclass for store implementations. My subclasses provide access to the actual data storage of a particular kind of filesystem. The file system can be accessed via	FileSystem disk 	FileSystem memory	My associated filesystem can be accessed as follows:      DiskStore currentFileSystem"
+	
+	
+	nodeAt: aPath = (
+		^ self 
+			nodeAt: aPath 
+			ifPresent: [ :node| node ]
+			ifAbsent: [ NotFound signalFor: aPath in: self ]
+	)
+	
+	entryFromNode: aNode fileSystem: aFilesystem path: aPath = (
+		^ FileSystemDirectoryEntry
+			fileSystem: aFilesystem
+			path: aPath
+			creation: (self basicCreationTime: aNode)
+			modification:(self basicModificationTime: aNode)
+			isDir: (self basicIsDirectory: aNode)
+			size: (self basicSize: aNode)
+			posixPermissions: (self basicPosixPermissions: aNode)
+			isSymlink: (self basicIsSymlink: aNode)
+	)
+	
+	basicEntry: directoryEntry path: aPath nodesDo: aBlock = (
+		self subclassResponsibility 
+	)
+	
+	basicOpen: aPath writable: aBoolean = (
+		"open the file at the given path and return an identifier"
+		self subclassResponsibility
+	)
+	
+	createDirectory: aPath = (
+		self subclassResponsibility 
+	)
+	
+	directoryAt: aPath ifAbsent: absentBlock nodesDo: aBlock = (
+		^ self
+			nodeAt: aPath
+			ifPresent: [ :entry | 
+				(self basicIsDirectory: entry)
+					ifTrue: [ self basicEntry: entry path: aPath nodesDo: aBlock ]
+					ifFalse: [ DirectoryDoesNotExist signalWith: aPath ] ]
+			ifAbsent: absentBlock
+	)
+	
+	ensureCreateDirectory: aPath = (
+		(self isDirectory: aPath) ifTrue: [ ^ self ].
+		self ensureCreateDirectory: aPath parent.
+		self createDirectory: aPath
+	)
+	
+	basicIsSymlink: aNode = (
+		^self subclassResponsibility 
+		
+	)
+	
+	openFileStream: path writable: writable = (
+		self subclassResponsibility
+	)
+	
+	directoryAt: aPath ifAbsent: absentBlock fileNodesDo: aBlock = (
+		^ self 
+			directoryAt: aPath 
+			ifAbsent: absentBlock 
+			nodesDo: [ :entry|
+				(self basicIsDirectory: entry) 
+					ifFalse: [ aBlock value: entry ]].
+	)
+	
+	printPath: aPath on: out = (
+		"Use the unix convention by default, since it's the most common."
+		
+		aPath isAbsolute ifTrue: [ out nextPut: self delimiter ].
+		^ aPath printOn: out delimiter: self delimiter
+	)
+	
+	basicIsFile: aNode = (
+		"Used to decide whether the low-level representation (node / entry) from the store is a file.
+		This private message should only be called form within the store."
+		self subclassResponsibility 
+	)
+	
+	copy: sourcePath ifAbsent: absentBlock to: destinationPath ifPresent: presentBlock fileSystem: aFilesystem = (
+	
+		| buffer out in |
+		
+		in := nil.
+		out := nil.
+		buffer := nil.
+		[
+			in := aFilesystem readStreamOn: sourcePath.
+			in ifNil: [ ^ absentBlock value ].
+			
+			(self exists: destinationPath)
+				ifTrue: [ "cannot overwrite destination"
+					^ presentBlock value ].
+				
+			out := aFilesystem writeStreamOn: destinationPath.
+			buffer := ByteArray new: 1024.
+			
+			[ in atEnd ]
+				whileFalse: [ 
+					buffer := in nextInto: buffer.
+					out nextPutAll: buffer ]]
+		ensure: [ 
+			in ifNotNil: [ in close ].
+			out ifNotNil: [ out close ]]
+	)
+	
+	separator = (
+		^ self class separator
+	)
+	
+	entryFromNode: node path: path for: aFileystem = (
+		| entryPath |
+		entryPath := path / (self basenameFromEntry: node).
+		^ self entryFromNode: node fileSystem: aFileystem path: entryPath
+	)
+	
+	modificationTime: aPath = (
+		^ self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | self basicModificationTime: entry ] 
+			ifAbsent: [ self signalFileDoesNotExist: aPath ].
+		
+	)
+	
+	creationTime: aPath = (
+		^ self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | self basicCreationTime: entry ] 
+			ifAbsent: [ self signalFileDoesNotExist: aPath ].
+		
+	)
+	
+	basicSize: aNode = (
+		"Used to get the size of the low-level representation (node / entry) "
+		self subclassResponsibility 
+	)
+	
+	pathFromString: aString = (
+		"Use the unix convention by default, since many filesystems are based on it."
+		
+		^ Path from: aString delimiter: self delimiter
+	)
+	
+	filename: aByteString matches: aByteString2 = (
+		^ aByteString = aByteString2
+	)
+	
+	checkName: aString fixErrors: fixErrors = (
+		^ self subclassResponsibility
+	)
+	
+	open = (
+		"Some kinds of filesystems need to open connections to external resources"
+	)
+	
+	isDirectory: aPath = (
+		aPath isRoot ifTrue: [ ^ true ].
+		self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | ^ self basicIsDirectory: entry ] 
+			ifAbsent: [ ^ false ].
+		
+	)
+	
+	isSymlink: aPath = (
+		aPath isRoot ifTrue: [ ^ true ].
+		self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | ^ self basicIsSymlink: entry ] 
+			ifAbsent: [ ^ false ].
+		
+	)
+	
+	signalFileExists: aPath = (
+		^ FileExists signalWith: aPath
+	)
+	
+	delimiter = (
+		^ self class delimiter
+	)
+	
+	close = (
+		"Some kinds of filesystems need to open connections to external resources"
+	)
+	
+	signalFileDoesNotExist: aPath = (
+		^ FileDoesNotExist signalWith: aPath
+	)
+	
+	signalDirectoryExists: aPath = (
+		^ DirectoryExists signalWith: aPath
+	)
+	
+	isCaseSensitive = (
+		^ self class isCaseSensitive
+	)
+	
+	stringFromPath: aPath = (
+		^ String streamContents: [ :out | 
+			self printPath: aPath on: out ]
+	)
+	
+	isWritable: aPath = (
+		self nodeAt: aPath 
+			ifPresent: [ :entry | ^ self basicIsWritable: entry ] 
+			ifAbsent: [ ^ false ].
+		
+	)
+	
+	rename: sourcePath to: destinationPath = (
+		self subclassResponsibility 
+	)
+	
+	defaultWorkingDirectory = (
+		^ Path root
+	)
+	
+	basicPosixPermissions: aNode = (
+		"Used to get the posix permissions from a low-level filesystem entry / node"
+		self subclassResponsibility 
+	)
+	
+	isDiskFileSystem = (
+		^ false
+	)
+	
+	basicIsDirectory: aNode = (
+		"Used to decide whether the low-level representation (node / entry) from the store is a directory.
+		This private message should only be called form within the store."
+		self subclassResponsibility 
+	)
+	
+	delete: aPath = (
+		self subclassResponsibility 
+	)
+	
+	nodeAt: aPath ifPresent: presentBlock ifAbsent: absentBlock = (
+		self subclassResponsibility 
+	)
+	
+	exists: aPath = (
+		self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | ^ true ] 
+			ifAbsent: [ ^ false ].
+		
+	)
+	
+	mimeTypesAt: aPath = (
+		| mimeType |
+		mimeType := ZnMimeType 
+							forFilenameExtension: aPath extension 
+							ifAbsent: [  ^ nil ].
+		^ Array with: mimeType
+	)
+	
+	rename: sourcePath ifAbsent: absentBlock to: destinationPath ifPresent: presentBlock fileSystem: anFSFilesystem = (
+	
+		| result |
+		(self exists: destinationPath) ifTrue: [ ^ presentBlock value ].
+		(self exists: sourcePath) ifFalse: [ ^ absentBlock value ].
+		result := self rename: sourcePath to: destinationPath.
+		result ifNil: [ self primitiveFailed ].
+		^ self.
+	)
+	
+	signalDirectoryDoesNotExist: aPath = (
+		^ DirectoryDoesNotExist signalWith: aPath
+	)
+	
+	isMemoryFileSystem = (
+		^ false
+	)
+	
+	basenameFromEntry: aNode = (
+		"Used to extract the basename from the low-level representation (node / entry) from the store."
+		self subclassResponsibility
+	)
+	
+	size: aPath = (
+		^ self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | self basicSize: entry ] 
+			ifAbsent: [ self signalFileDoesNotExist: aPath ]
+		
+	)
+	
+	basicCreationTime: aNode = (
+		"Used to decide whether the low-level representation (node / entry) from the store is a readable
+		file or a directory whose contents can be listed."
+		self subclassResponsibility 
+	)
+	
+	permissions: aPath = (
+		self nodeAt: aPath 
+			ifPresent: [ :entry | ^ FileSystemPermission posixPermissions: (self basicPosixPermissions: entry) ] 
+			ifAbsent: [ ^ FileSystemPermission default ].
+		
+	)
+	
+	directoryAt: aPath ifAbsent: absentBlock directoryNodesDo: aBlock = (
+		^ self 
+			directoryAt: aPath 
+			ifAbsent: absentBlock 
+			nodesDo: [ :entry|
+				(self basicIsDirectory: entry) 
+					ifTrue: [ aBlock value: entry ]].
+	)
+	
+	isFile: aPath = (
+		"slow solution for big directories! "
+		^ self 
+			nodeAt: aPath 
+			ifPresent: [ :entry | ^ self basicIsFile: entry ] 
+			ifAbsent: [ ^ false ]
+		
+	)
+	
+	basicModificationTime: aNode = (
+		"Used to decide whether the low-level representation (node / entry) from the store is a readable
+		file or a directory whose contents can be listed."
+		self subclassResponsibility 
+	)
+	
+	basicIsWritable: aNode = (
+		"Used to decide whether the low-level representation (node / entry) from the store is 
+		a writable file or can be changed."
+		self subclassResponsibility 
+	)
+	
+	----------------------------------
+	
+	isCaseSensitive = (
+		^ self shouldBeImplemented
+	)
+	
+	separator = (
+		self shouldBeImplemented
+	)
+	
+	delimiter = (
+		self shouldBeImplemented 
+	)
+)

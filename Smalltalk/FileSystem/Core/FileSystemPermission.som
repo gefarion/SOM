@@ -1,0 +1,142 @@
+FileSystemPermission = Object (
+	"I'm a set of permissions for a Directory Entry"
+	| posixPermission |
+	
+	otherRead = (
+		^ self permissionBitAt: 3
+	)
+	
+	otherExecute = (
+		^ self permissionBitAt: 1
+	)
+	
+	groupWrite = (
+		^ self permissionBitAt: 5
+	)
+	
+	isReadable = (
+		^ self ownerRead
+	)
+	
+	> other = (
+		^ other posixPermission < posixPermission
+	)
+	
+	isWritable = (
+		^ self ownerWrite
+	)
+	
+	ownerExecute = (
+		^ self permissionBitAt: 7
+	)
+	
+	permissionBitAt: bitIndex = (
+		^ (posixPermission bitAt: bitIndex) == 1
+	)
+	
+	>= other = (
+		^ other posixPermission <= posixPermission
+	)
+	
+	< other = (
+		^ posixPermission < other posixPermission
+	)
+	
+	initialize: aNumber = (
+		posixPermission := aNumber.
+		self initialize.	
+	)
+	
+	posixPermission = (
+		^ posixPermission
+	)
+	
+	printOn: aStream = (
+		aStream
+			nextPut:
+				(self ownerRead
+					ifTrue: [ 'r' ]
+					ifFalse: [ '-' ]).	"Owner"
+		aStream
+			nextPut:
+				(self ownerWrite
+					ifTrue: [ 'w' ]
+					ifFalse: [ '-' ]).	"Owner"
+		aStream
+			nextPut:
+				(self ownerExecute
+					ifTrue: [ 'x' ]
+					ifFalse: [ '-' ]).	"Owner"
+		aStream
+			nextPut:
+				(self groupRead
+					ifTrue: [ 'r' ]
+					ifFalse: [ '-' ]).	"Owner"	"Group"
+		aStream
+			nextPut:
+				(self groupWrite
+					ifTrue: [ 'w' ]
+					ifFalse: [ '-' ]).	"Owner"
+		aStream
+			nextPut:
+				(self groupExecute
+					ifTrue: [ 'x' ]
+					ifFalse: [ '-' ]).	"Owner"
+		aStream
+			nextPut:
+				(self otherRead
+					ifTrue: [ 'r' ]
+					ifFalse: [ '-' ]).	"Owner"	"Other"
+		aStream
+			nextPut:
+				(self otherWrite
+					ifTrue: [ 'w' ]
+					ifFalse: [ '-' ]).	"Owner"
+		aStream
+			nextPut:
+				(self otherExecute
+					ifTrue: [ 'x' ]
+					ifFalse: [ '-' ])	"Owner"
+	)
+	
+	groupRead = (
+		^ self permissionBitAt: 6
+	)
+	
+	ownerRead = (
+		^ self permissionBitAt: 9
+	)
+	
+	groupExecute = (
+		^ self permissionBitAt: 4
+	)
+	
+	otherWrite = (
+		^ self permissionBitAt: 2
+	)
+	
+	ownerWrite = (
+		^ self permissionBitAt: 8
+	)
+	
+	<= other = (
+		^ (posixPermission > other posixPermission) not
+	)
+	
+	----------------------------------
+	
+	posixPermissions: aNumber = (
+		| receiver |
+		receiver := self basicNew.
+		receiver initialize: aNumber.
+		^ receiver yourself
+	)
+	
+	new = ( 
+		self error: 'Should not be called. Use #posixPermission: instead'
+	)
+	
+	default = (
+		^ self posixPermissions: 8r777
+	)
+)

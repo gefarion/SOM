@@ -1,0 +1,103 @@
+FileSystemHandle = Object (
+	"I am an abstract superclass for file handle implementations. I provide a uniform interface that streams can use for read and write operations on a file regardless of the filesystem. I encapsulate the actual IO primitives."
+	| reference writable |
+	
+	close = (
+		self subclassResponsibility
+	)
+	
+	isOpen = (
+		self subclassResponsibility
+	)
+	
+	isWritable = (
+		^ writable
+	)
+	
+	at: offset write: buffer startingAt: start count: count = (
+		self subclassResponsibility
+	)
+	
+	fullName = (
+		^ reference fullName
+	)
+	
+	basicOpen = (
+		"get the raw stream description from the filesystem's store"
+		^ self fileSystem 
+			openStreamDescription: reference path
+			writable: writable
+	)
+	
+	readStream = (
+		self subclassResponsibility
+	)
+	
+	fileSystem = (
+		^ reference fileSystem 
+	)
+	
+	ensureClosed = (
+		reference exists ifTrue: [self close]
+	)
+	
+	reopen = (
+		self close.
+		self open
+	)
+	
+	at: offset read: buffer startingAt: start count: count = (
+		self subclassResponsibility
+	)
+	
+	at: index put: anObject = (
+		| buffer |
+		buffer := ByteArray with: (anObject isCharacter
+			ifTrue: [ anObject codePoint ]
+			ifFalse: [ anObject ]).
+		self at: index write: buffer startingAt: 1 count: 1.
+		
+	)
+	
+	at: index = (
+		| buffer |
+		buffer := ByteArray new: 1.
+		self at: index read: buffer startingAt: 1 count: 1.
+		^ buffer at: 1
+	)
+	
+	reference = (
+		^ reference
+	)
+	
+	writeStream = (
+		self subclassResponsibility
+	)
+	
+	flush = (
+		self subclassResponsibility
+	)
+	
+	open = (
+		self subclassResponsibility
+	)
+	
+	setReference: aReference writable: aBoolean = (
+		reference := aReference resolve.
+		writable := aBoolean
+	)
+	
+	truncateTo: anInteger = (
+		self subclassResponsibility
+	)
+	
+	----------------------------------
+	
+	on: aReference writable: aBoolean = (
+		^ self new setReference: aReference writable: aBoolean
+	)
+	
+	open: aReference writable: aBoolean = (
+		^ (self on: aReference writable: aBoolean) open
+	)
+)

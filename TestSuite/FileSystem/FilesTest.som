@@ -1,0 +1,9 @@
+FilesTest = TestCase (
+  setUp = ()
+  
+  testOpen = (
+    | file |
+    file := FileSystem / '/home/guido/Documents/Projects/TruffleMATE/core-lib/Smalltalk/Array.som'.
+    self assert: true
+  )
+)

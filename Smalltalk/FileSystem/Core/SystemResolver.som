@@ -1,0 +1,40 @@
+SystemResolver = FileSystemResolver (
+	"I resolve origins that are related to the currently running Smalltalk system, using primitives provided by the VM. "
+	
+	
+	vmBinary = (
+		^ self resolveString: (Smalltalk vm fullPath)
+	)
+	
+	changes = (
+		^ self image withExtension: Smalltalk changesSuffix
+	)
+	
+	vmDirectory = (
+		^ self resolveString: self primVmDirectoryPath
+	)
+	
+	image = (
+		^ self resolveString: self primImagePath
+	)
+	
+	imageDirectory = (
+		^ self image parent
+	)
+	
+	primVmDirectoryPath = (
+		"Answer the full path name for the current virtual machine."
+	
+		self primitiveFailed
+	)
+	
+	primImagePath = (
+		"Answer the full path name for the current image."
+	
+		self primitiveFailed
+	)
+	
+	supportedOrigins = (
+		^ #(image imageDirectory changes vmBinary vmDirectory workingDirectory)
+	)
+)

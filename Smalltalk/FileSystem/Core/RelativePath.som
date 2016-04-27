@@ -1,0 +1,32 @@
+RelativePath = Path (
+	"I represent a relative path (a position starting from Path workingDirectory)"
+	
+	
+	isRoot = (
+		^ false
+	)
+	
+	printOn: aStream delimiter: aCharacter = (
+		self isWorkingDirectory ifTrue: [aStream nextPut: '.'. ^ self].
+		super printOn: aStream delimiter: aCharacter
+	)
+	
+	printOn: aStream = (
+		aStream nextPutAll: 'Path '.
+		self isWorkingDirectory
+			ifTrue: [ aStream nextPutAll: 'workingDirectory' ]
+			ifFalse: [ 
+				aStream
+					nextPutAll: '* ''';
+					nextPutAll: (self at: 1) asString;
+					nextPut: '\''.
+				2 to: self size do: [ :i | 
+					aStream nextPutAll: ' / '''.
+					aStream nextPutAll: (self at: i).
+					aStream nextPut: '\'' ] ]
+	)
+	
+	isAbsolute = (
+		^ false
+	)
+)

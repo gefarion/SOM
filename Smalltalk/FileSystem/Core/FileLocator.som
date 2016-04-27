@@ -1,0 +1,365 @@
+FileLocator = AbstractFileReference (
+	"I am a late-bound reference. I refer to a file or directory in relation to a well-known location on the filesystem, called an origin. When asked to perform concrete operation, I look up the current location of my origin, and resolve my path against it. Usage----------FileLocator vmDirectory parent pathString	> '/Applications'FileLocator desktop.FileLocator desktop basename.FileLocator home basename.FileLocator image.FileLocator vmBinary asAbsolute pathString 	>  '/Applications/CogVM.app/Contents/MacOS/CogVM'FileLocator vmBinary pathString 	> '/Applications/CogVM.app/Contents/MacOS/CogVM'		Implementation------------------------origin 	A symbolic name for base reference I use to resolve myself.path	A relative path that is resolved against my origin"		"
+	| origin path |
+	
+	hash = (
+		^ origin hash bitXor: path hash
+	)
+	
+	binaryReadStream = (
+		^ self resolve binaryReadStream
+	)
+	
+	origin = (
+		^ origin
+	)
+	
+	readStream = (
+		^ self resolve readStream 
+	)
+	
+	copyWithPath: newPath = (
+		^ self class origin: origin path: newPath
+	)
+	
+	asAbsolute = (
+		^ self 
+	)
+	
+	path = (
+		^ path
+	)
+	
+	isRelative = (
+		^ false
+	)
+	
+	resolveString: aString = (
+		| filesystem thePath |
+		filesystem := (Resolver resolve: origin) fileSystem.
+		thePath := filesystem pathFromString: aString.
+		^ self withPath: (path resolvePath: thePath)
+	)
+	
+	fullPath = (
+		^ self resolve path
+	)
+	
+	doesNotUnderstand: aMessage = (
+		"Redirect message to the resolved version of this FileLocator.
+		If FileReference won't understand the message send a normal DNU."
+	
+		| resolved |
+		
+		resolved := self resolve.
+		(resolved respondsTo: aMessage selector)
+			ifTrue: [ ^ resolved perform: aMessage selector withArguments: aMessage arguments ].
+		
+		^ super doesNotUnderstand: aMessage.
+	)
+	
+	writeStream = (
+		^ self resolve writeStream 
+	)
+	
+	printOn: aStream = (
+		| fs |
+		aStream nextPut: '{'.
+		aStream nextPutAll: origin.
+		aStream nextPut: '}'.
+		path isWorkingDirectory
+			ifTrue: [ ^ self ].
+		fs := self fileSystem.
+		aStream nextPut: fs delimiter.
+		fs printPath: path on: aStream
+	)
+	
+	isAbsolute = (
+		^ true
+	)
+	
+	asFileReference = (
+		^ self resolve
+	)
+	
+	= other = (
+		^ self species = other species
+			and: [origin = other origin
+				and: [path = other path]]
+	)
+	
+	renameTo: newBasename = (
+		
+		| result |
+		result := self resolve renameTo: newBasename.
+		path size > 0
+			ifTrue: [ path basename: newBasename ]
+			ifFalse: [ path := result path ]
+	)
+	
+	resolve = (
+		^ (Resolver resolve: origin) resolve: path
+	)
+	
+	absolutePath = (
+		"Return the absolute path"
+		^ self resolve path
+	)
+	
+	initializeWithOrigin: aSymbol path: aPath = (
+		self initialize.
+		origin := aSymbol.
+		path := aPath.
+	)
+	
+	----------------------------------
+	
+	root = (
+		^ FileSystem disk root
+	)
+	
+	systemLibrary = (
+		^ self origin: #systemLibrary
+	)
+	
+	P = (
+		^ self driveNamed: #P
+	
+	)
+	
+	N = (
+		^ self driveNamed: #N
+	
+	)
+	
+	initialize = (
+		Smalltalk addToStartUpList: self.
+		self startUp: true
+	)
+	
+	vmDirectory = (
+		^ self origin: #vmDirectory
+	)
+	
+	systemApplicationSupport = (
+		^ self origin: #systemApplicationSupport
+	)
+	
+	home = (
+		^ self origin: #home
+	)
+	
+	userApplicationSupport = (
+		^ self origin: #userApplicationSupport
+	)
+	
+	H = (
+		^ self driveNamed: #H
+	
+	)
+	
+	startUp: resuming = (
+		resuming
+			ifFalse: [ ^ self ].
+		Resolver := InteractiveResolver new.
+		Resolver addResolver: SystemResolver new.
+		Resolver addResolver: PlatformResolver forCurrentPlatform
+	)
+	
+	F = (
+		^ self driveNamed: #F
+	
+	)
+	
+	Y = (
+		^ self driveNamed: #Y
+	
+	)
+	
+	temp = (
+		^ self origin: #temp
+	)
+	
+	D = (
+		^ self driveNamed: #D
+	
+	)
+	
+	U = (
+		^ self driveNamed: #U
+	
+	)
+	
+	Q = (
+		^ self driveNamed: #Q
+	
+	)
+	
+	preferences = (
+		^ self origin: #preferences
+	)
+	
+	workingDirectory = (
+		^ FileSystem disk referenceTo: RelativePath new
+	)
+	
+	imageDirectory = (
+		^ self origin: #imageDirectory 
+	)
+	
+	Z = (
+		^ self driveNamed: #Z
+	
+	)
+	
+	C = (
+		^ self driveNamed: #C
+	
+	)
+	
+	M = (
+		^ self driveNamed: #M
+	
+	)
+	
+	I = (
+		^ self driveNamed: #I
+	
+	)
+	
+	vmBinary = (
+		^ self origin: #vmBinary
+	)
+	
+	changes = (
+		^ self origin: #changes 
+	)
+	
+	T = (
+		^ self driveNamed: #T
+	
+	)
+	
+	W = (
+		^ self driveNamed: #W
+	)
+	
+	R = (
+		^ self driveNamed: #R
+	
+	)
+	
+	cache = (
+		^ self origin: #cache
+	)
+	
+	userLibrary = (
+		^ self origin: #userLibrary
+	)
+	
+	documents = (
+		^ self origin: #documents
+	)
+	
+	S = (
+		^ self driveNamed: #S
+	
+	)
+	
+	driveNamed: driveName = (
+		^ FileReference fileSystem: (FileSystem disk) path: Path / (driveName, ':')
+	)
+	
+	origin: aSymbol = ( 
+		^ self origin: aSymbol path: Path workingDirectory
+	)
+	
+	L = (
+		^ self driveNamed: #L
+	
+	)
+	
+	O = (
+		^ self driveNamed: #O
+	
+	)
+	
+	J = (
+		^ self driveNamed: #J
+	
+	)
+	
+	userData = (
+		^ self origin: #userData
+	)
+	
+	E = (
+		^ self driveNamed: #E
+	
+	)
+	
+	K = (
+		^ self driveNamed: #K
+	
+	)
+	
+	image = (
+		^ self origin: #image 
+	)
+	
+	G = (
+		^ self driveNamed: #G
+	
+	)
+	
+	cwd = (
+		^ self workingDirectory
+	)
+	
+	desktop = (
+		^ self origin: #desktop
+	)
+	
+	supportedOrigins = (
+		| origins current |
+		origins := IdentitySet new.
+		current := Resolver.
+		[current notNil] whileTrue:
+			[origins addAll: current supportedOrigins.
+			current := current next].
+		^ origins
+	)
+	
+	A = (
+		^ self driveNamed: #A 
+	
+	)
+	
+	flushCaches = (
+		Resolver flushCaches
+	)
+	
+	addResolver: aResolver = (
+		Resolver addResolver: aResolver
+	)
+	
+	B = (
+		^ self driveNamed: #B
+	
+	)
+	
+	X = (
+		^ self driveNamed: #X
+	
+	)
+	
+	origin: aSymbol path: aPath = (
+		^ self basicNew 
+				initializeWithOrigin: aSymbol path: aPath
+	)
+	
+	V = (
+		^ self driveNamed: #V
+	
+	)
+)

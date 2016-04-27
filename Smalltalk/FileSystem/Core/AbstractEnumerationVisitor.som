@@ -1,0 +1,31 @@
+AbstractEnumerationVisitor = FileSystemVisitor (
+	"I'm an abstract superclass for enumeration operations on directory entries. "
+	| out block |
+	
+	breadthFirst: aReference = (
+		^ self visit: aReference with: (BreadthFirstGuide for: self)
+	)
+	
+	visitReference: anEntry = (
+		self subclassResponsibility
+	)
+	
+	visit: aReference with: aGuide = (
+		out := (Array new: 10) writeStream.
+		aGuide show: aReference.
+		^ out contents
+	)
+	
+	preorder: aReference = (
+		^ self visit: aReference with: (PreorderGuide for: self)
+	)
+	
+	postorder: aReference = (
+		^ self visit: aReference with: (PostorderGuide for: self)
+	)
+	
+	initializeWithBlock: aBlock = (
+		self initialize.
+		block := aBlock
+	)
+)

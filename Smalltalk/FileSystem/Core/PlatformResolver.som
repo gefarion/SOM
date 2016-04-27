@@ -1,0 +1,69 @@
+PlatformResolver = FileSystemResolver (
+	"I am an abstract superclass for platform-specific resolvers."
+	
+	
+	preferences = (
+		^ self subclassResponsibility
+	)
+	
+	directoryFromEnvVariableNamed: aString or: aBlock = (
+		| envValue |
+		envValue := [ Smalltalk os environment at: aString ifAbsent: [ nil ] ]
+			on: Error
+			do: [ ^ aBlock value ].
+		^ envValue isEmptyOrNil
+			ifTrue: [ aBlock value ]
+			ifFalse: [ self resolveString: envValue ]
+	)
+	
+	home = (
+		^ self subclassResponsibility
+	)
+	
+	cache = (
+		"Operating Systems often define standard locations for a personal cache directory. The cache directory is a user-specific non-essential (cached) place where data should be written."
+		self subclassResponsibility
+	)
+	
+	desktop = (
+		^ self subclassResponsibility
+	)
+	
+	temp = (
+		"Where to put files that are not supposed to last long"
+		^ self subclassResponsibility 
+	)
+	
+	documents = (
+		^ self subclassResponsibility
+	)
+	
+	supportedOrigins = (
+		^ #(home desktop documents preferences cache temp)
+	)
+	
+	cantFindOriginError = (
+		^ Error signal: 'Can''t find the requested origin' 
+	)
+	
+	directoryFromEnvVariableNamed: aString = (
+		^ self directoryFromEnvVariableNamed: aString or: [ self cantFindOriginError ]
+	)
+	
+	----------------------------------
+	
+	primitiveGetUntrustedUserDirectory = (
+		self primitiveFailed.
+		self flag: 'use a more decent way to get a path in the users home directory'
+	)
+	
+	platformName = (
+		^ nil
+	)
+	
+	forCurrentPlatform = (
+		| platformName |
+		platformName :=  Smalltalk os platformName.
+		^ (self allSubclasses detect: [:ea | ea platformName = platformName]) new
+	)
+)

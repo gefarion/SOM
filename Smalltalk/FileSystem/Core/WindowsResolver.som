@@ -1,0 +1,37 @@
+WindowsResolver = PlatformResolver (
+	"I am an expert on Windows filesystem conventions. I resolve origins according to these conventions."
+	
+	
+	preferences = (
+		^ self directoryFromEnvVariableNamed: 'APPDATA' or: [ self home ]
+	)
+	
+	documents = (
+		^ self home / 'Documents'
+	)
+	
+	home = (
+		"Value of the 'U'SERPROFILE environment variable."
+	
+		^ self directoryFromEnvVariableNamed: 'USERPROFILE'
+	)
+	
+	cache = (
+		"Because Windows does not define any location for putting cache files, we chose to use the preference directory. http://libertyboy.free.fr/computing/reference/envariables/"
+		^ self preferences
+	)
+	
+	desktop = (
+		^ self home / 'Desktop'
+	)
+	
+	temp = (
+		^ self directoryFromEnvVariableNamed: 'TEMP' or: [ FileLocator C / 'windows' / 'temp' ]
+	)
+	
+	----------------------------------
+	
+	platformName = (
+		^ 'Win32'
+	)
+)

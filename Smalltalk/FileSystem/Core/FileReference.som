@@ -1,0 +1,721 @@
+FileReference = AbstractFileReference (
+	"I combine a filesystem and path, which is sufficient to refer to a concrete file or directory. I provide methods for navigating my filesystem, performing filesystem operations and opening and closing files.  I am the primary mechanism for working with files and directories. | working |working := FileSystem disk workingDirectory.working files | disk |disk := FileSystem disk.disk root.                               	"a reference to the root directory"disk working.                         	"a reference to the working directory""
+	| filesystem path |
+	
+	isRoot = (
+		^ path isRoot
+	)
+	
+	hasFiles = (
+		"Return whether the receiver has children that are files."
+		"FileSystem workingDirectory hasFiles"
+		
+		^ filesystem hasFiles: path
+	)
+	
+	isReadable = (
+		^ filesystem isReadable: path
+	)
+	
+	binaryReadStream = (
+		^ filesystem binaryReadStreamOn: self path
+	)
+	
+	gtInspectorFuelIn: composite = (
+		"(FileSystem disk workingDirectory / 'GTtest.fuel') writeStreamDo: [ :stream |
+		FLSerializer newDefault
+			at: #author putAdditionalObject: 'Author: Max Leske';
+			at: #date putAdditionalObject: DateAndTime now;
+			addPreMaterializationAction: [ Smalltalk inform: 'starting materialization' ];
+			addPostMaterializationAction: [ :materialization | materialization inspect ];
+			serialize: 'foo' on: stream binary ].
+		
+	FLMaterializer materializeFromFileNamed: 'GTtest.fuel'"
+	
+		| receiver |
+		receiver := composite table.
+		receiver title: 'Fuel Header'.
+		receiver display: [ (FLMaterializer materializeHeaderFromFileNamed: self fullName) gtGetMetaData ].
+		receiver column: 'Property' evaluated: [ :assoc | assoc key ].
+		receiver column: 'Value' evaluated: [ :assoc | assoc value ].
+		receiver when: [ self extension = 'fuel' ]
+	)
+	
+	spotterForZipFilesFor: aStep = (
+		| zipFileSystem receiver |
+		self isZipFile
+			ifFalse: [ ^ self ].
+		receiver := aStep listProcessor.
+		receiver
+			allCandidates: [ 
+				zipFileSystem := (FileSystem zip: self) open.
+				zipFileSystem workingDirectory files ].
+		receiver title: 'Files'.
+		receiver candidatesLimit: Float infinity.
+		receiver itemName: #basename.
+		receiver itemIcon: [ GLMUIThemeExtraIcons glamorousBrowse ].
+		receiver filter: GTFilterSubstring
+	)
+	
+	spotterForZipDirectoriesFor: aStep = (
+		| zipFileSystem receiver |
+		self isZipFile
+			ifFalse: [ ^ self ].
+		receiver := aStep listProcessor.
+		receiver
+			allCandidates: [ 
+				zipFileSystem := (FileSystem zip: self) open.
+				zipFileSystem workingDirectory directories ].
+		receiver title: 'Directories'.
+		receiver candidatesLimit: Float infinity.
+		receiver itemName: #basename.
+		receiver itemIcon: [ GLMUIThemeExtraIcons glamorousFolder ].
+		receiver filter: GTFilterSubstring
+	)
+	
+	deleteIfAbsent: aBlock = (
+		self exists 
+			ifTrue: [ self delete ]
+			ifFalse: aBlock
+	)
+	
+	spotterPreviewContentsIn: aComposite = (
+		| receiver |
+		self isFile
+			ifFalse: [ ^ self ].
+		receiver := aComposite text.
+		receiver title: [ self gtDisplayString ].
+		receiver display: #yourself.
+		receiver
+			entity:
+				(self
+					readStreamDo: [ :stream | 
+						| result |
+						result := [ (stream next: 10000) asString ]
+							on: Error
+							do: [ (stream binary next: 10000) asString ].
+						stream size > 10000
+							ifTrue: [ result , '  ... truncated ...' ]
+							ifFalse: [ result ] ])
+	)
+	
+	path = (
+		"Return the path internal representation that denotes the receiver in the context of its filesystem. "
+		^ path
+	)
+	
+	containsReference: aReference = (
+		^  aReference fileSystem = filesystem and: [path contains: aReference path]
+	)
+	
+	asAbsolute = (
+		"Return the receiver as an absolute file reference."
+		
+		^ self isAbsolute
+			ifTrue: [ self ]
+			ifFalse: [ filesystem referenceTo: (filesystem resolve: path) ]
+	)
+	
+	entry = (
+		"Return the entry (meta data) describing the receiver."
+		^ filesystem entryAt: path
+	)
+	
+	resolveString: aString = ( 
+		| thePath |
+		thePath := filesystem pathFromString: aString.
+		^ filesystem referenceTo: (path resolve: thePath)
+	)
+	
+	absolutePath = (
+		"Return the absolute of the receiver"
+		^ self path isRelative
+			ifFalse: [ self path ]
+			ifTrue: [ filesystem resolve: self path ]
+	)
+	
+	spotterForFilesFor: aStep = (
+		^ self isDirectory
+			ifTrue: [ 
+				| receiver |
+				receiver := aStep listProcessor.
+				receiver allCandidates: [ self files ].
+				receiver title: 'Files'.
+				receiver candidatesLimit: Float infinity.
+				receiver itemName: #basename.
+				receiver itemIcon: [ GLMUIThemeExtraIcons glamorousBrowse ].
+				receiver filter: GTFilterSubstring ]
+	)
+	
+	mimeTypes = (
+		"Return the possible mime types for the given path."
+		^ filesystem mimeTypesAt: path
+	)
+	
+	hasDirectories = (
+		"Return whether the receiver has children that are directories."
+		"FileSystem workingDirectory hasDirectories"
+		
+		^ filesystem hasDirectories: path
+	)
+	
+	gtInspectorPngIn: composite = (
+		| receiver |
+		receiver := composite morph.
+		receiver title: 'Picture'.
+		receiver display: [ self binaryReadStreamDo: [ :stream | PNGReadWriter formFromStream: stream ] ].
+		receiver when: [ self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imagePng ] ]
+	)
+	
+	exists = (
+		^ filesystem exists: path
+	)
+	
+	openWritable: aBoolean = ( 
+		^ filesystem open: path writable: aBoolean
+	)
+	
+	copyTo: aReference = (
+		self isDirectory
+			ifTrue: [ aReference ensureCreateDirectory ]
+			ifFalse: [ 
+				filesystem = aReference fileSystem
+					ifTrue: [ filesystem copy: path to: aReference resolve path ]
+					ifFalse: [ filesystem copy: path toReference: aReference ] ]
+	)
+	
+	modificationTime = ( 
+		^ filesystem modificationTime: self path
+	)
+	
+	macTypeAndCreator = (
+		| results typeString creatorString |
+		"get the Macintosh file type and creator info for the file with the given name. Fails if the file does not exist or if the type and creator type arguments are not strings of length 4. Does nothing on other platforms (where the underlying primitive is a noop)."
+		"FileDirectory default getMacFileNamed: 'foo'"
+	
+		self flag: 'TODO'.
+		"
+		typeString := ByteArray new: 4 withAll: ('?' asInteger). #[63 63 63 63]
+		creatorString := ByteArray new: 4 withAll: ('?' asInteger).
+		[self primGetMacFileNamed: (self fullNameFor: fileName) asVmPathName
+			type: typeString
+			creator: creatorString.] ensure: 
+			[typeString := typeString asString. 
+			creatorString := creatorString asString].
+		results := Array with: typeString convertFromSystemString with: creatorString convertFromSystemString.
+		^results"
+	
+	)
+	
+	fullName = (
+		"Return the full path name of the receiver."
+		^ filesystem stringFromPath: (filesystem resolve: path)
+	)
+	
+	ensureCreateDirectory = (
+		"Create if necessary a directory for the receiver."
+		filesystem ensureCreateDirectory: path
+		
+	)
+	
+	spotterPreviewItemsIn: aComposite = (
+		self isDirectory
+			ifFalse: [ ^ self ].
+		aComposite list
+			title: [ self gtDisplayString ];
+			display: #yourself;
+			format: [ :folder | 
+						| receiver |
+						receiver := GTSpotterItemBrick new.
+						receiver text: folder basename.
+						receiver
+							icon:
+								(folder isDirectory
+									ifTrue: [ Smalltalk ui theme icons glamorousFolder ]
+									ifFalse: [ Smalltalk ui theme icons glamorousBrowse ]).
+						receiver disable.
+						receiver yourself ];
+			styled: [ :brick | brick ];
+			entity: self directories , self files.
+		self flag: 'move "entity: self" somewhere else, maybe'
+	)
+	
+	, extension = (
+		^ self withPath: self path, extension
+	)
+	
+	moveTo: aReference = (
+		
+		| result |
+		result := self fileSystem 
+			rename: self path
+			to: aReference resolve path.
+		result ifNotNil: [
+			self setFileSystem: filesystem path: aReference path ].		
+	)
+	
+	fileSystem = (
+		"Return the filesystem to which the receiver belong."
+		^ filesystem
+	)
+	
+	isRelative = (
+		^ path isRelative
+	)
+	
+	fullPath = (
+		^ self path
+	)
+	
+	gtInspectorZipItemsIn: composite = (
+		^ composite table
+			title: 'Items';
+			display: [ 
+						| children root |
+						root := (FileSystem zip: self) open workingDirectory.
+						children := root directories , root files.
+						self isRoot
+							ifTrue: [ children ]
+							ifFalse: [ 
+								| receiver |
+								receiver := children asOrderedCollection.
+								receiver addFirst: self parent.
+								receiver yourself ] ];
+			column: 'Name'
+				evaluated: [ :each | 
+						self parent = each
+							ifTrue: [ '..' ]
+							ifFalse: [ each basename ] ]
+				width: 400;
+			column: 'Size' evaluated: [ :each | each humanReadableSize ] width: 100;
+			column: 'Creation'
+				evaluated: [ :each | 
+						String
+							streamContents: [ :s | 
+								each creationTime printYMDOn: s.
+								s nextPut: Character space.
+								each creationTime printHMSOn: s ] ];
+			icon: [ :each | 
+						each isDirectory
+							ifTrue: [ GLMUIThemeExtraIcons glamorousFolder ]
+							ifFalse: [ GLMUIThemeExtraIcons glamorousBrowse ] ];
+			when: [ self isFile and: [ #('zip' 'jar' 'ear' 'war') includes: self extension ] ];
+			act: [ :table | table update ] icon: GLMUIThemeExtraIcons glamorousRefresh entitled: 'Refresh'
+	)
+	
+	delete = (
+		filesystem delete: path
+	)
+	
+	resolvePath: anObject = (
+		^ self withPath: (path resolve: anObject)
+	)
+	
+	writeStream = (
+		^ filesystem writeStreamOn: self path
+	)
+	
+	hasChildren = (
+		"Return whether the receiver has any children."
+		"FileSystem workingDirectory hasChildren"
+		
+		^ filesystem hasChildren: path
+	)
+	
+	isFile = (
+		^ filesystem isFile: path
+	)
+	
+	gtInspectorActionMaterializeFuel = (
+		| receiver |
+		receiver := GLMGenericAction new.
+		receiver
+			action: [ :composite | 
+				| result |
+				result := FLMaterializer materializeFromFileNamed: self fullName.
+				composite selection: result ].
+		receiver icon: GLMUIThemeExtraIcons glamorousAdd.
+		receiver condition: [ self extension = 'fuel' ].
+		^ receiver title: 'Materialize'
+	)
+	
+	gtInspectorItemsIn: composite = (
+		^ composite table
+			title: 'Items';
+			display: [ 
+						| children |
+						children := self directories , self files.
+						self isRoot
+							ifTrue: [ children ]
+							ifFalse: [ 
+								| receiver |
+								receiver := children asOrderedCollection.
+								receiver addFirst: self parent.
+								receiver yourself ] ];
+			column: 'Name'
+				evaluated: [ :each | 
+						(self isChildOf: each)
+							ifTrue: [ '..' ]
+							ifFalse: [ each basename ] ]
+				width: 400;
+			column: 'Size' evaluated: [ :each | each humanReadableSize ] width: 100;
+			column: 'Creation'
+				evaluated: [ :each | 
+						String
+							streamContents: [ :s | 
+								each creationTime printYMDOn: s.
+								s nextPut: Character space.
+								each creationTime printHMSOn: s ] ];
+			icon: [ :each | 
+						each isDirectory
+							ifTrue: [ GLMUIThemeExtraIcons glamorousFolder ]
+							ifFalse: [ GLMUIThemeExtraIcons glamorousBrowse ] ];
+			when: [ self isDirectory and: [ self hasChildren ] ];
+			selectionAct: [ :table | 
+						table selection delete.
+						table update ]
+				entitled: 'Delete';
+			act: [ :table | table update ] icon: GLMUIThemeExtraIcons glamorousRefresh entitled: 'Refresh'
+	)
+	
+	setFileSystem: aFilesystem path: aPath = (
+		filesystem := aFilesystem.
+		path := aPath
+	)
+	
+	spotterPreviewPngIn: aComposite = (
+		(self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imagePng ])
+			ifFalse: [ ^ self ].
+		aComposite
+			custom:
+				((self binaryReadStreamDo: [ :stream | PNGReadWriter formFromStream: stream ]) asAlphaImageMorph asBrick margin: 20)
+	)
+	
+	gtInspectorJpegIn: composite = (
+		| receiver |
+		receiver := composite morph.
+		receiver title: 'Picture'.
+		receiver display: [ self binaryReadStreamDo: [ :stream | ImageReadWriter formFromStream: stream ] ].
+		receiver when: [ self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imageJpeg ] ]
+	)
+	
+	fileTreeUtilityClass = (
+	    ^ MCFileTreeFileSystemUtils
+	)
+	
+	spotterForDirectoriesFor: aStep = (
+		^ self isDirectory
+			ifTrue: [ 
+				| receiver |
+				receiver := aStep listProcessor.
+				receiver allCandidates: [ self directories ].
+				receiver title: 'Directories'.
+				receiver candidatesLimit: Float infinity.
+				receiver itemName: #basename.
+				receiver itemIcon: [ GLMUIThemeExtraIcons glamorousFolder ].
+				receiver filter: GTFilterSubstring ]
+	)
+	
+	spotterPreviewZipItemsIn: aComposite = (
+		| zip |
+		self isZipFile
+			ifFalse: [ ^ self ].
+		zip := (FileSystem zip: self) open workingDirectory.
+		aComposite list
+			title: [ self gtDisplayString ];
+			display: #yourself;
+			format: [ :folder | 
+						| receiver |
+						receiver := GTSpotterItemBrick new.
+						receiver text: folder basename.
+						receiver
+							icon:
+								(folder isDirectory
+									ifTrue: [ Smalltalk ui theme icons glamorousFolder ]
+									ifFalse: [ Smalltalk ui theme icons glamorousBrowse ]).
+						receiver disable.
+						receiver yourself ];
+			styled: [ :brick | brick ];
+			entity: zip directories , zip files
+	)
+	
+	createDirectory = (
+		"Create a directory if it does not already exist, if this is the case raise the DirectoryExists exception."
+		filesystem createDirectory: path
+	)
+	
+	creationTime = ( 
+		^ filesystem creationTime: self path
+	)
+	
+	isWritable = (
+		^ filesystem isWritable: path
+	)
+	
+	isSymlink = ( 
+		^ filesystem isSymlink: path
+	)
+	
+	gtInspectorGroupedFilesIn: composite = (
+		| receiver |
+		receiver := composite roassal2.
+		receiver title: 'Grouped files'.
+		receiver initializeView: [ RTDoubleBarBuilder new ].
+		receiver
+			painting: [ :builder :presentation | 
+				| metric all grouped |
+				metric := #size.
+				all := self allFiles.
+				grouped := (all groupedBy: [ :each | each extension ]) associations
+					sorted: [ :a :b | (a value sumNumbers: metric) > (b value sumNumbers: metric) ].
+				grouped := (grouped first: (20 min: grouped size)) select: [ :each | (each value sumNumbers: metric) > 0 ].
+				builder pointName: [ :each | each key ].
+				builder points: grouped.
+				builder bottomValue: [ :each | each value size ] titled: 'Number of files'.
+				builder topValue: [ :each | (each value sumNumbers: metric) / 1000000 ] titled: 'Total size in MB' ].
+		receiver send: #value.
+		^ receiver when: [ self isDirectory and: [ self hasChildren ] ]
+	)
+	
+	isDirectory = (
+		^ filesystem isDirectory: path
+	)
+	
+	printOn: aStream = (
+		filesystem forReferencePrintOn: aStream.
+		filesystem printPath: path on: aStream
+	)
+	
+	gtInspectorGifIn: composite = (
+		| receiver |
+		receiver := composite morph.
+		receiver title: 'Picture'.
+		receiver display: [ self binaryReadStreamDo: [ :stream | GIFReadWriter formFromStream: stream ] ].
+		receiver when: [ self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imageGif ] ]
+	)
+	
+	nextVersion = (
+		"Assumes a file name includes a version number encoded as '.' followed by digits 
+		preceding the file extension.  Increment the version number and answer the new file name.
+		If a version number is not found, return just the file"
+	
+		| parent version versionNumbers nameWithoutExtension |
+		
+		self exists
+			ifFalse: [ ^ self ].
+		
+		parent := self parent.
+		nameWithoutExtension := self basename copyUpTo: '.'.
+		
+		versionNumbers := parent files 
+					select: [ :f| 
+						(f basename beginsWith: nameWithoutExtension) ]
+					thenCollect: [ :f| 
+						Number squeezeNumberOutOfString: f basename ifFail: [ 0 ]].
+		
+		versionNumbers ifEmpty: [ ^self ].
+		
+		version := versionNumbers max + 1.
+		^ parent / (nameWithoutExtension , '.', version asString) , self extension
+	)
+	
+	resolveReference: aReference = (
+		
+		^ (filesystem = aReference fileSystem or: [aReference isRelative])
+			ifTrue: [filesystem referenceTo: (path resolvePath: aReference path)]
+			ifFalse: [aReference]
+	)
+	
+	gtDisplayOn: stream = (
+		filesystem printPath: path on: stream
+	)
+	
+	entries = (
+		"Return the entries (meta data - file description) of the direct children of the receiver"
+		^ self fileSystem entriesAt: self path 
+	)
+	
+	size = (
+		^ filesystem size: path
+	)
+	
+	hash = (
+		^ path hash bitXor: filesystem hash
+	)
+	
+	readStream = (
+		^ filesystem readStreamOn: self path
+	)
+	
+	copyWithPath: newPath = (
+		^ filesystem referenceTo: newPath
+	)
+	
+	isAbsolute = (
+		^ path isAbsolute
+	)
+	
+	pathString = (
+		"Return the full path name of the receiver."
+		
+		^ filesystem stringFromPath: (filesystem resolve: path)
+	)
+	
+	asFileReference = (
+		^ self
+	)
+	
+	permissions = (
+		^ filesystem permissions: self path
+	)
+	
+	gtInspectorContentsIn: composite = (
+		| receiver |
+		receiver := composite rubricText.
+		receiver title: 'Contents'.
+		receiver
+			display: [ 
+				self
+					readStreamDo: [ :stream | 
+						| result |
+						result := [ (stream next: 10000) asString ]
+							on: Error
+							do: [ (stream binary next: 10000) asString ].
+						stream size > 10000
+							ifTrue: [ result , '  ... truncated ...' ]
+							ifFalse: [ result ] ] ].
+		receiver withLineNumbers: true.
+		receiver when: [ self isFile ]
+	)
+	
+	= other = (
+		^ self species = other species
+			and: [self path = other path
+				and: [self fileSystem = other fileSystem]]
+	)
+	
+	isZipFile = (
+		^ self isFile and: [ #('zip' 'jar' 'ear' 'war') includes: self extension ]
+	)
+	
+	gtInspectorStScriptIn: composite = (
+		composite smalltalkCode
+			title: 'Script';
+			display: [ self readStreamDo: [ :s | s contents ] ];
+			selectionPopulate: #selection
+				on: 'o'
+				entitled: 'Do it and open (o)'
+				with: [ :text :object | Smalltalk compiler evaluate: text selectedText for: object logged: false ];
+			act: [ :text | 
+					self ensureDelete.
+					self writeStreamDo: [ :s | s nextPutAll: text text asString ] ]
+				icon: GLMUIThemeExtraIcons glamorousSave
+				on: 's'
+				entitled: 'Save';
+			when: [ self extension = 'st' or: [ self extension = 'ph' ] ]
+	)
+	
+	renameTo: newBasename = (
+		
+		| destinationPath |
+		destinationPath := self fileSystem 
+			rename: self 
+			to: self parent / newBasename.
+		
+		destinationPath ifNotNil: [
+			self 
+				setFileSystem: filesystem 
+				path: destinationPath ].
+		^ self
+			
+	)
+	
+	resolve = (
+		^ self
+	)
+	
+	asRepositorySpecFor: aMetacelloMCProject = (
+		| receiver |
+		receiver := aMetacelloMCProject repositorySpec.
+		receiver description: self fullName.
+		receiver type: 'directory'.
+		^ receiver yourself
+	)
+	
+	spotterPreviewStScriptIn: aComposite = (
+		| receiver |
+		(self extension = 'st' or: [ self extension = 'ph' ])
+			ifFalse: [ ^ self ].
+		receiver := aComposite pharoMethod.
+		receiver title: [ self gtDisplayString ].
+		receiver display: #yourself.
+		receiver smalltalkClass: [ nil ].
+		receiver entity: (self readStreamDo: #contents)
+	)
+	
+	setMacType: aTypeString creator: aCreatorString = (
+		self flag: 'TODO'.
+		
+	" 	self primSetMacFileNamed: (self fullNameFor: fileName) asVmPathName
+			type: typeString convertToSystemString
+			creator: creatorString convertToSystemString.
+	"
+	)
+	
+	----------------------------------
+	
+	gtExampleGif = (
+		| receiver |
+		receiver := FileSystem memory workingDirectory / 'pharoicon.gif'.
+		receiver writeStreamDo: [ :stream | GIFReadWriter putForm: ThemeIcons current pharoIcon onStream: stream ].
+		^ receiver yourself
+	)
+	
+	gtExamplePng = (
+		| receiver |
+		receiver := FileSystem memory workingDirectory / 'pharoicon.png'.
+		receiver writeStreamDo: [ :stream | PNGReadWriter putForm: ThemeIcons current pharoIcon onStream: stream ].
+		^ receiver yourself
+	)
+	
+	fileSystem: aFilesystem path: aPath = (
+		^ self new setFileSystem: aFilesystem path: aPath
+	)
+	
+	newTempFilePrefix: prefix suffix: suffix = (
+		| tmpDir random fileName |
+		
+		tmpDir := FileLocator temp asFileReference.
+		[ random := UUIDGenerator default generateRandomBitsOfLength: 100.
+		fileName := prefix , random asString, suffix ] doWhileTrue: [ (tmpDir / fileName) exists ].
+		^ fileName asFileReference
+	)
+	
+	gtExampleDirectory = (
+		| directory subDirectory |
+		directory := FileSystem memory workingDirectory / 'directory'.
+		directory createDirectory.
+		directory / 'file1.txt' writeStreamDo: [ :stream | stream nextPutAll: 'File1 contents' ].
+		directory / 'file2.txt' writeStreamDo: [ :stream | stream nextPutAll: 'File2 contents' ].
+		subDirectory := (directory / 'subdirectory') createDirectory.
+		subDirectory / 'file3.txt' writeStreamDo: [ :stream | stream nextPutAll: 'File3 contents' ].
+		^ directory
+	)
+	
+	gtExampleText = (
+		| receiver |
+		receiver := FileSystem memory workingDirectory / 'sample.txt'.
+		receiver writeStreamDo: [ :stream | stream nextPutAll: self comment ].
+		^ receiver yourself
+	)
+	
+	/ aString = (
+		"Answer a reference to the argument resolved against the root of the current disk filesystem."
+		
+		^ FileSystem disk / aString
+	)
+	
+	additionalInspectorClasses = (
+		^ super additionalInspectorClasses, { EyeFileSystemInspector }
+	)
+)

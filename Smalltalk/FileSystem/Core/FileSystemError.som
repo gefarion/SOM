@@ -1,0 +1,27 @@
+FileSystemError = Error (
+	"I am an abstract superclass for errors that may occur during filesystem operations."
+	| reference |
+	
+	isResumable = (
+		^ true
+	)
+	
+	reference = (
+		^ reference
+	)
+	
+	initializeWithReference: aReference = (
+		reference := aReference.
+		messageText := aReference printString
+	)
+	
+	----------------------------------
+	
+	reference: aReference = (
+		^ self basicNew initializeWithReference: aReference
+	)
+	
+	signalWith: aReference = (
+		^ (self reference: aReference) signal
+	)
+)

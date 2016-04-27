@@ -1,0 +1,21 @@
+DeleteVisitor = FileSystemVisitor (
+	"I delete the directory tree that I visit. I use the PostorderGuide so that I can delete files before deleting their containing directories."
+	
+	
+	visit: aReference = (
+		PostorderGuide 
+			show: aReference 
+			to: self 
+			selecting: [ :entry | entry isSymlink not ]
+	)
+	
+	visitReference: anEntry = (
+		anEntry reference delete
+	)
+	
+	----------------------------------
+	
+	delete: aReference = (
+		^ self new visit: aReference
+	)
+)

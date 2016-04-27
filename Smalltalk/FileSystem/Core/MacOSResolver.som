@@ -1,0 +1,58 @@
+MacOSResolver = PlatformResolver (
+	"I am an expert on Mac OS X filesystem conventions. I resolve origins according to these conventions."
+	
+	
+	preferences = ( 
+		^ self home / 'Library' / 'Preferences'
+	)
+	
+	systemApplicationSupport = (
+		^ self systemLibrary / 'Application Support'
+	)
+	
+	home = (
+		^ self directoryFromEnvVariableNamed: 'HOME'
+	)
+	
+	cache = (
+		^ self library / 'Caches'
+	)
+	
+	desktop = (
+		^ self home / 'Desktop'
+	)
+	
+	userApplicationSupport = (
+		^self userLibrary / 'Application Support'
+	)
+	
+	systemLibrary = (
+		^  FileSystem disk root / 'Library'
+	)
+	
+	documents = (
+		^ self home / 'Documents'
+	)
+	
+	library = (
+		^ self userLibrary
+	)
+	
+	supportedOrigins = (
+		^ super supportedOrigins , #(userApplicationSupport systemApplicationSupport systemLibrary userLibrary)
+	)
+	
+	userLibrary = (
+		^  self home / 'Library'
+	)
+	
+	temp = (
+		^ '/tmp' asFileReference
+	)
+	
+	----------------------------------
+	
+	platformName = (
+		^  'Mac OS'
+	)
+)

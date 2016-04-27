@@ -1,0 +1,23 @@
+IllegalName = FileSystemError (
+	"I am raised on an attempt to use an illegal file name"
+	| name |
+	
+	name = (
+		^ name
+	)
+	
+	initializeWithName: aName = (
+		name := aName.
+		self messageText: aName
+	)
+	
+	----------------------------------
+	
+	signalWith: aName = (
+		^ (self name: aName) signal
+	)
+	
+	name: aName = (
+		^ self basicNew initializeWithName: aName
+	)
+)

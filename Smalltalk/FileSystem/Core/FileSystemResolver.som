@@ -1,0 +1,49 @@
+FileSystemResolver = Object (
+	"I am an abstract superclass for objects that can resolve origins into references. Such objects use the Chain of Responsibility pattern, and when unable to resolve a particular origin, delegate that resolution request to the next resolver in the list.next	The next resolver in the list, or nil"
+	| next |
+	
+	resolve: aSymbol = (
+		^ (self canResolve: aSymbol)
+			ifTrue: [self perform: aSymbol]
+			ifFalse: [self unknownOrigin: aSymbol]
+	)
+	
+	unknownOrigin: aSymbol = (
+		^ next ifNotNil: [next resolve: aSymbol]
+	)
+	
+	canResolve: aSymbol = (
+		^ self supportedOrigins includes: aSymbol
+	)
+	
+	addResolver: aResolver = (
+		next
+			ifNil: [next := aResolver]
+			ifNotNil: [next addResolver: aResolver]
+	)
+	
+	resolveString: aString = (
+		| decoded fs |
+		decoded := FilePathEncoder decode: aString.
+		fs := FileSystem disk.
+		^ FileReference 
+			fileSystem: fs 
+			path: (fs pathFromString: decoded)
+	)
+	
+	flushLocalCache = (
+	)
+	
+	next = (
+		^ next
+	)
+	
+	supportedOrigins = (
+		^ #()
+	)
+	
+	flushCaches = (
+		self flushLocalCache.
+		next ifNotNil: [next flushCaches]
+	)
+)

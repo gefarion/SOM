@@ -1,0 +1,52 @@
+AbsolutePath = Path (
+	"I represent an absolute path (a position starting from Path root)"
+	
+	
+	isRoot = (
+		^ self size = 0
+	)
+	
+	withParents = (
+		| receiver |
+		receiver := super withParents.
+		receiver addFirst: Path root.
+		^ receiver yourself
+	)
+	
+	asZnUrl = (
+		"Convert the receiver in a file:// ZnUrl"
+	
+		| fileUrl |
+		fileUrl := ZnUrl new.
+		fileUrl scheme: #file.
+		self do: [ :each | fileUrl addPathSegment: each ].
+		^ fileUrl
+	)
+	
+	printOn: aStream = (
+		aStream nextPutAll: 'Path'.
+		self isRoot
+			ifTrue: [ aStream nextPutAll: ' root' ]
+			ifFalse: [ 
+				1 to: self size do: [ :i | 
+					aStream nextPutAll: ' / '''.
+					aStream nextPutAll: (self at: i).
+					aStream nextPut: '\'' ] ]
+	)
+	
+	isAbsolute = (
+		^ true
+	)
+	
+	----------------------------------
+	
+	addEmptyElementTo: result = (
+	)
+	
+	from: aString delimiter: aDelimiterCharater = (
+		aString = '/'
+			ifTrue: [ ^ self root ].
+			
+		^ super from: aString delimiter: aDelimiterCharater
+	)
+)
