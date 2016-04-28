@@ -4,7 +4,7 @@ DeltaBlueProfiled = DeltaBlue (
     oneTimeSetup = ( 
     	super oneTimeSetup.
     	metaobject := (EnvironmentMO 
-			operationalSemantics: nil 
+			operationalSemantics: CCTOperationalSemantics new 
 			message: CCTActivationSemantics new
 			layout: nil).
     )

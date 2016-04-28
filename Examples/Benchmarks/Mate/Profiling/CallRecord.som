@@ -4,10 +4,10 @@ CallRecord = Object (
 	initialize = (
 		self children: (Vector new: 3).
 		self metrics: (Array new: 5).
-		self metrics at: 2 put: (Vector new). "Return Types"
+		self metrics at: (self returnIndex) put: (Vector new). "Return Types"
 		self metrics at: (self numberOfInvokationsIndex) put: 0. "Number Of Invokations"
 		self metrics at: 4 put: 0. "Number Of Created Objects"
-		self metrics at: 5 put: 0.  "Allocated Memory"	
+		self metrics at: 5 put: 0. "Allocated Memory"	
 	)
 	
 	id: anObject = (
@@ -50,20 +50,31 @@ CallRecord = Object (
 		self metrics at: (self numberOfInvokationsIndex) put: ((self metrics at: (self numberOfInvokationsIndex)) + 1)  
 	)
 	
-	storeArguments: arguments = (
+	storeArgumentTypes: arguments = (
 		| args |
 		args := self metrics at: (self argumentsIndex). 
-		1 to: arguments length do: [:i | (args at: i) append: (arguments at: i)]
+		"1 and 2 are the ex.level and the environment"
+		3 to: arguments length do: [:i | (args at: i) append: (arguments at: i) class]
 	)
 	
-	numberOfInvokationsIndex = (
-		^3
+	addReturnType: aClass = (
+		(self metrics at: self returnIndex) append: aClass.
 	)
 	
 	argumentsIndex = (
 		"Receiver and Arguments"
 		^1
 	)
+	
+	returnIndex = (
+		^2
+	)
+	
+	numberOfInvokationsIndex = (
+		^3
+	)
+	
+	
 	
 	----------------------------------
 	

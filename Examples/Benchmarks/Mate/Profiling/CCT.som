@@ -17,12 +17,16 @@ CCT = (
 		^current
 	)
 	
-	activate: aMethod withArguments: arguments  = (
+	activate: aMethod withArguments: arguments = (
 		| record |
 		"self assert: current id = thisContext method."
 		record := self recordFor: aMethod calledFrom: current argumentsCount: arguments length.
 		self fillForMethodActivation: record withArguments: arguments.
 		current := record.
+	)
+	
+	return: aValue = (
+		self current addReturnType: aValue class 
 	)
 	
 	recordFor: aMethod calledFrom: aCallRecord argumentsCount: aNumber = (
@@ -53,7 +57,7 @@ CCT = (
 	fillForMethodActivation: record withArguments: arguments = (
 		"Here it should be the definition for storing in the call record the necessary information to profile about method activations"
 		record addInvokation.
-		record storeArguments: arguments.
+		record storeArgumentTypes: arguments.
 	)
 	
 	asString = (
