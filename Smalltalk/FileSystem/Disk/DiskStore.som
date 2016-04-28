@@ -11,7 +11,7 @@ DiskStore = FileSystemStore (
 		self flag: 'TODO: we need a decent primitive for this...'.
 		(self basicOpen: aPath writable: true) 
 			ifNotNil: [ :id|
-				Primitives close: id.
+				self class primitives close: id.
 				^ true].
 		^ false
 	)
@@ -21,23 +21,23 @@ DiskStore = FileSystemStore (
 			
 		index := 1.
 		pathString := self stringFromPath: aPath.
-		encodedPathString := Primitives encode: pathString.
-		entry := Primitives lookupEntryIn: encodedPathString index: index.
+		encodedPathString := self class primitives encode: pathString.
+		entry := self class primitives lookupEntryIn: encodedPathString index: index.
 		entry = #badDirectoryPath ifTrue: [ self signalDirectoryDoesNotExist: aPath ].
 		
 		[ entry isNil ]
 			whileFalse: [ 
-				entry at: 1 put: (Primitives decode: entry first).
+				entry at: 1 put: (self class primitives decode: entry first).
 				aBlock value: entry.
 				index := index + 1.
-				entry := Primitives lookupEntryIn: encodedPathString index: index ].
+				entry := self class primitives lookupEntryIn: encodedPathString index: index ].
 	)
 	
 	basicOpen: aPath writable: aBoolean = (
 		| string encoded |
 		string := self stringFromPath: aPath.
-		encoded := Primitives encode: string.
-		^ Primitives open: encoded writable: aBoolean
+		encoded := self class primitives encode: string.
+		^ self class primitives open: encoded writable: aBoolean
 	)
 	
 	createDirectory: path = (
@@ -48,8 +48,8 @@ DiskStore = FileSystemStore (
 	
 		| parent encodedPathString pathString result |
 		pathString := self stringFromPath: path.
-		encodedPathString := Primitives encode: pathString.
-		result := Primitives createDirectory: encodedPathString.
+		encodedPathString := self class primitives encode: pathString.
+		result := self class primitives createDirectory: encodedPathString.
 		result
 			ifNil: [ 
 				parent := path parent.
@@ -68,21 +68,22 @@ DiskStore = FileSystemStore (
 	
 		| sourcePathString encodedSourcePathString targetPathString encodedTargetPathString result |
 		sourcePathString := self stringFromPath: sourcePath.
-		encodedSourcePathString := Primitives encode: sourcePathString.
+		encodedSourcePathString := self class primitives encode: sourcePathString.
 		targetPathString := self stringFromPath: destinationPath.
-		encodedTargetPathString := Primitives encode: targetPathString.
-		^ Primitives rename: encodedSourcePathString to: encodedTargetPathString.
+		encodedTargetPathString := self class primitives encode: targetPathString.
+		^ self class primitives rename: encodedSourcePathString to: encodedTargetPathString.
 	)
 	
 	defaultWorkingDirectory = (
 		| pathString |
-		pathString := Primitives decode: Primitives imageFile.
+		pathString := self class primitives decode: self class primitives imageFile.
 		^ (self pathFromString: pathString) parent
 	)
 	
 	initialize = (
 		super initialize.
-		maxFileNameLength := Smalltalk vm maxFilenameLength ifNil: [ 255 ].
+		"maxFileNameLength := Smalltalk vm maxFilenameLength ifNil: [ 255 ]."
+		maxFileNameLength := 255.
 	)
 	
 	basicPosixPermissions: anEntry = (
@@ -129,13 +130,13 @@ DiskStore = FileSystemStore (
 			ifFalse: [ ^ FileDoesNotExist signalWith: path ].
 			
 		pathString := self stringFromPath: path.
-		encodedPathString := Primitives encode: pathString.
+		encodedPathString := self class self class primitives encode: pathString.
 		
 		(self isDirectory: path)
-			ifTrue: [ Primitives deleteDirectory: encodedPathString ]
+			ifTrue: [ self class primitives deleteDirectory: encodedPathString ]
 			ifFalse: [ 
 				StandardFileStream
-					retryWithGC: [ Primitives deleteFile: encodedPathString ]
+					retryWithGC: [ self class primitives deleteFile: encodedPathString ]
 					until: [ :result | result notNil ]
 					forFileNamed: pathString ]
 	)
@@ -168,7 +169,7 @@ DiskStore = FileSystemStore (
 		self flag: 'TODO: we need a decent primitive for this...'.
 		(self basicOpen: aPath writable: false) 
 			ifNotNil: [ :id|
-				Primitives close: id.
+				self class primitives close: id.
 				^ true].
 		^ false
 	)
@@ -192,10 +193,10 @@ DiskStore = FileSystemStore (
 	basicEntryAt: aPath = (
 		| encodedPath encodedBasename |
 		
-		encodedPath := Primitives encode: (self stringFromPath: aPath parent).
-		encodedBasename := Primitives encode: aPath basename.
+		encodedPath := self class primitives encode: (self stringFromPath: aPath parent).
+		encodedBasename := self class primitives encode: aPath basename.
 		
-		^ (Primitives lookupDirectory: encodedPath filename: encodedBasename)
+		^ (self class primitives lookupDirectory: encodedPath filename: encodedBasename)
 			ifNil: [ #badDirectoryPath ].
 		
 	)
@@ -263,6 +264,7 @@ DiskStore = FileSystemStore (
 	)
 	
 	----------------------------------
+	| CurrentFS Primitives |
 	
 	maxFileNameLength = (
 		self subclassResponsibility 
@@ -290,6 +292,10 @@ DiskStore = FileSystemStore (
 		Primitives := FilePluginPrims new
 	)
 	
+	primitives = (
+		^Primitives
+	)
+	
 	createDefault = (
 		^ self new
 	)
@@ -302,14 +308,14 @@ DiskStore = FileSystemStore (
 	
 	initialize = (
 		self useFilePlugin.
-		Smalltalk removeFromStartUpList: self.
+		"Smalltalk removeFromStartUpList: self.
 		Smalltalk removeFromShutDownList: self.
 		Smalltalk addToStartUpList: self after: OSPlatform.
-		Smalltalk addToShutDownList: self
+		Smalltalk addToShutDownList: self"
 	)
 	
 	isActiveClass = (
-		^ self delimiter = Primitives delimiter
+		^ self delimiter = self class primitives delimiter
 	)
 	
 	shutDown: quitting = (
@@ -330,4 +336,9 @@ DiskStore = FileSystemStore (
 		resuming 
 			ifTrue: [ self reset ]
 	)
+	
+	primitiveFailed = (
+		self error: 'Primitive fail'
+	)
+	
 )

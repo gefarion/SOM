@@ -1,5 +1,7 @@
 FilesTest = TestCase (
-  setUp = ()
+  setUp = (
+  	DiskStore initialize.
+  )
   
   testOpen = (
     | file |

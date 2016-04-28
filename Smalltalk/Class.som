@@ -54,4 +54,23 @@ Class = (
     "Mate"
     updateShapeForInstancesWith = primitive
     getShapeForInstances = primitive
+    
+    "FileSystem"
+    allSubclassesDo: aBlock = ( 
+		"Evaluate the argument, aBlock, for each of the receiver's subclasses."
+	
+		self subclassesDo: 
+			[:class | 
+			aBlock value: class.
+			class allSubclassesDo: aBlock]
+	)
+	
+	subclassesDo: aBlock = (
+		"Evaluate the argument, aBlock, for each of the receiver's immediate subclasses."
+		self subclasses do: aBlock
+	)
+	
+	subclasses = (
+		^#()
+	)
 )
