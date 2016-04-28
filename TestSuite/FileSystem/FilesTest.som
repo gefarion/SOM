@@ -1,5 +1,7 @@
 FilesTest = TestCase (
-  setUp = ()
+  setUp = (
+  	UnixStore initialize.
+  )
   
   testOpen = (
     | file |

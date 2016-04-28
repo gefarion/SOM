@@ -37,6 +37,8 @@ String = (
     
     "Info"
     length = primitive
+    isEmpty = (^self length = 0)
+    first = (^self charAt: 1)
     
     "Comparing"   
     = argument = primitive
@@ -83,5 +85,39 @@ String = (
     
     "Printing"
     print    = ( system printString: self )
-
+    
+    "Printing"
+    split: aSequenceableCollection = (
+		| result position oldPosition |
+		result := OrderedCollection new: (aSequenceableCollection length / 2) asInteger.
+		self split: aSequenceableCollection do: [ :item |
+			result add: item ].
+		^ result
+	)
+	
+	split: aSequenceableCollection do: aBlock = (
+		self split: aSequenceableCollection indicesDo: [ :start :end | 
+			aBlock value: (aSequenceableCollection copyFrom: start to: end) ]
+	)
+	
+	split: aSequenceableCollection indicesDo: aBlock = (
+		|  position oldPosition |
+		
+		position := 1.
+		oldPosition := position.
+		
+		position := aSequenceableCollection indexOf: self startingAt: position. 
+		[ position > 0 ] whileTrue: [
+			aBlock value: oldPosition value: position - 1.
+			position := position + 1.
+			oldPosition := position.
+			position := aSequenceableCollection indexOf: self startingAt: position.
+		].
+	
+		aBlock value: oldPosition value: aSequenceableCollection size.
+	)
+	
+	indexOf: anElement startingAt: start = (
+		^self indexOf: anElement startingAt: start ifAbsent: 0
+	)		
 )

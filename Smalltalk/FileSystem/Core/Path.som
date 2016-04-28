@@ -321,12 +321,11 @@ Path = Object (
 	)
 	
 	do: aBlock = ( 
-		1 
-			to: self size
-			do: 
-				[ :index || segment |
-				segment := self at: index.
-				segment isEmpty ifFalse: [ aBlock value: segment ] ]
+		1 to: self size do: [:index | 
+			| segment |
+			segment := self at: index.
+			segment isEmpty ifFalse: [ aBlock value: segment ] 
+		]
 	)
 	
 	resolve = (
@@ -341,7 +340,8 @@ Path = Object (
 		^ self fullName <= other fullName
 	)
 	
-	----------------------------------| absoluteWindowsPathRegex |
+	----------------------------------
+	| absoluteWindowsPathRegex |
 	
 	root = (
 		"Answer the root path - ie, / on unix"
@@ -433,7 +433,7 @@ Path = Object (
 		pathClass :=  ((self isAbsoluteUnixPath: aString) or: [self isAbsoluteWindowsPath: aString]) 
 			ifTrue: [ AbsolutePath ]
 			ifFalse:[ RelativePath ].
-		
+			
 		^ pathClass withAll: (pathClass canonicalizeElements: (aDelimiterCharacter split: aString))
 	)
 	
