@@ -47,6 +47,14 @@ Vector = (
         first to: last - 1 do: block
     )
     
+    withIndexDo: elementAndIndexBlock = ( 
+		first to: last - 1 do: [:index |
+			elementAndIndexBlock
+				value: (self at: index)
+				value: index
+		]
+	)
+    
     "Adding"
     , element = ( ^self append: element )
     

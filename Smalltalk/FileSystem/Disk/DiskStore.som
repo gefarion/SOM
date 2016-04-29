@@ -78,6 +78,7 @@ DiskStore = FileSystemStore (
 		| pathString |
 		pathString := self class primitives decode: self class primitives imageFile.
 		^ (self pathFromString: pathString) parent
+		
 	)
 	
 	initialize = (
@@ -130,7 +131,7 @@ DiskStore = FileSystemStore (
 			ifFalse: [ ^ FileDoesNotExist signalWith: path ].
 			
 		pathString := self stringFromPath: path.
-		encodedPathString := self class self class primitives encode: pathString.
+		encodedPathString := self class primitives encode: pathString.
 		
 		(self isDirectory: path)
 			ifTrue: [ self class primitives deleteDirectory: encodedPathString ]
@@ -265,7 +266,6 @@ DiskStore = FileSystemStore (
 	
 	----------------------------------
 	| CurrentFS Primitives |
-	
 	maxFileNameLength = (
 		self subclassResponsibility 
 	)
@@ -273,6 +273,10 @@ DiskStore = FileSystemStore (
 	currentFileSystem = (
 		^ CurrentFS ifNil: [
 			CurrentFS := FileSystem store: self activeClass createDefault]
+	)
+	
+	primitives = (
+		^Primitives.
 	)
 	
 	checkVMVersion = (
@@ -301,9 +305,9 @@ DiskStore = FileSystemStore (
 	)
 	
 	activeClass = (
-		self allSubclassesDo: [:ea | 
-			ea isActiveClass ifTrue: [^ ea]].
-		^ self
+		"self allSubclassesDo: [:ea | 
+			ea isActiveClass ifTrue: [^ ea]]."
+		^ UnixStore
 	)
 	
 	initialize = (

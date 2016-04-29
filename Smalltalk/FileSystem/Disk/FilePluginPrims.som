@@ -3,7 +3,8 @@ FilePluginPrims = Object (
 	
 	
 	decode: aString = (
-		^ aString convertFromWithConverter: LanguageEnvironment defaultFileNameConverter
+		^ aString
+		"^ aString convertFromWithConverter: LanguageEnvironment defaultFileNameConverter"
 	)
 	
 	getMacFile: fileName type: typeString creator: creatorString = (
@@ -111,11 +112,7 @@ FilePluginPrims = Object (
 		self primitiveFailed
 	)
 	
-	imageFile = (
-		"Answer the full path name for the current image."
-	
-		self primitiveFailed
-	)
+	imageFile = primitive
 	
 	open: fileName writable: writableFlag = (
 		"Open a file of the given name, and return the file ID obtained.
@@ -158,5 +155,10 @@ FilePluginPrims = Object (
 		Fail if the path is bad or if a directory by that name does not exist."
 	
 		self primitiveFailed
+	)
+	
+	primitiveFailed = (
+		thisContext sender sender sender method println.
+		self error: 'Primitive ' + thisContext sender method signature printString + ' failed'.
 	)
 )

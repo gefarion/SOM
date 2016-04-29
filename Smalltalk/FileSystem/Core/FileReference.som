@@ -1,5 +1,6 @@
 FileReference = AbstractFileReference (
-	"I combine a filesystem and path, which is sufficient to refer to a concrete file or directory. I provide methods for navigating my filesystem, performing filesystem operations and opening and closing files.  I am the primary mechanism for working with files and directories. | working |working := FileSystem disk workingDirectory.working files | disk |disk := FileSystem disk.disk root.                               	"a reference to the root directory"disk working.                         	"a reference to the working directory""
+	"I combine a filesystem and path, which is sufficient to refer to a concrete file or directory. I provide methods for navigating my filesystem, performing filesystem operations and opening and closing files.  I am the primary mechanism for working with files and directories. 	| working |	working := FileSystem disk workingDirectory.	working files 	| disk |	disk := FileSystem disk.	disk root.                               	a reference to the root directory	disk working.                         	a reference to the working directory
+	"
 	| filesystem path |
 	
 	isRoot = (
@@ -218,28 +219,6 @@ FileReference = AbstractFileReference (
 		
 	)
 	
-	spotterPreviewItemsIn: aComposite = (
-		self isDirectory
-			ifFalse: [ ^ self ].
-		aComposite list
-			title: [ self gtDisplayString ];
-			display: #yourself;
-			format: [ :folder | 
-						| receiver |
-						receiver := GTSpotterItemBrick new.
-						receiver text: folder basename.
-						receiver
-							icon:
-								(folder isDirectory
-									ifTrue: [ Smalltalk ui theme icons glamorousFolder ]
-									ifFalse: [ Smalltalk ui theme icons glamorousBrowse ]).
-						receiver disable.
-						receiver yourself ];
-			styled: [ :brick | brick ];
-			entity: self directories , self files.
-		self flag: 'move "entity: self" somewhere else, maybe'
-	)
-	
 	, extension = (
 		^ self withPath: self path, extension
 	)
@@ -265,42 +244,6 @@ FileReference = AbstractFileReference (
 	
 	fullPath = (
 		^ self path
-	)
-	
-	gtInspectorZipItemsIn: composite = (
-		^ composite table
-			title: 'Items';
-			display: [ 
-						| children root |
-						root := (FileSystem zip: self) open workingDirectory.
-						children := root directories , root files.
-						self isRoot
-							ifTrue: [ children ]
-							ifFalse: [ 
-								| receiver |
-								receiver := children asOrderedCollection.
-								receiver addFirst: self parent.
-								receiver yourself ] ];
-			column: 'Name'
-				evaluated: [ :each | 
-						self parent = each
-							ifTrue: [ '..' ]
-							ifFalse: [ each basename ] ]
-				width: 400;
-			column: 'Size' evaluated: [ :each | each humanReadableSize ] width: 100;
-			column: 'Creation'
-				evaluated: [ :each | 
-						String
-							streamContents: [ :s | 
-								each creationTime printYMDOn: s.
-								s nextPut: Character space.
-								each creationTime printHMSOn: s ] ];
-			icon: [ :each | 
-						each isDirectory
-							ifTrue: [ GLMUIThemeExtraIcons glamorousFolder ]
-							ifFalse: [ GLMUIThemeExtraIcons glamorousBrowse ] ];
-			when: [ self isFile and: [ #('zip' 'jar' 'ear' 'war') includes: self extension ] ];
-			act: [ :table | table update ] icon: GLMUIThemeExtraIcons glamorousRefresh entitled: 'Refresh'
 	)
 	
 	delete = (
@@ -339,45 +282,6 @@ FileReference = AbstractFileReference (
 		^ receiver title: 'Materialize'
 	)
 	
-	gtInspectorItemsIn: composite = (
-		^ composite table
-			title: 'Items';
-			display: [ 
-						| children |
-						children := self directories , self files.
-						self isRoot
-							ifTrue: [ children ]
-							ifFalse: [ 
-								| receiver |
-								receiver := children asOrderedCollection.
-								receiver addFirst: self parent.
-								receiver yourself ] ];
-			column: 'Name'
-				evaluated: [ :each | 
-						(self isChildOf: each)
-							ifTrue: [ '..' ]
-							ifFalse: [ each basename ] ]
-				width: 400;
-			column: 'Size' evaluated: [ :each | each humanReadableSize ] width: 100;
-			column: 'Creation'
-				evaluated: [ :each | 
-						String
-							streamContents: [ :s | 
-								each creationTime printYMDOn: s.
-								s nextPut: Character space.
-								each creationTime printHMSOn: s ] ];
-			icon: [ :each | 
-						each isDirectory
-							ifTrue: [ GLMUIThemeExtraIcons glamorousFolder ]
-							ifFalse: [ GLMUIThemeExtraIcons glamorousBrowse ] ];
-			when: [ self isDirectory and: [ self hasChildren ] ];
-			selectionAct: [ :table | 
-						table selection delete.
-						table update ]
-				entitled: 'Delete';
-			act: [ :table | table update ] icon: GLMUIThemeExtraIcons glamorousRefresh entitled: 'Refresh'
-	)
-	
 	setFileSystem: aFilesystem path: aPath = (
 		filesystem := aFilesystem.
 		path := aPath
@@ -414,29 +318,6 @@ FileReference = AbstractFileReference (
 				receiver itemName: #basename.
 				receiver itemIcon: [ GLMUIThemeExtraIcons glamorousFolder ].
 				receiver filter: GTFilterSubstring ]
-	)
-	
-	spotterPreviewZipItemsIn: aComposite = (
-		| zip |
-		self isZipFile
-			ifFalse: [ ^ self ].
-		zip := (FileSystem zip: self) open workingDirectory.
-		aComposite list
-			title: [ self gtDisplayString ];
-			display: #yourself;
-			format: [ :folder | 
-						| receiver |
-						receiver := GTSpotterItemBrick new.
-						receiver text: folder basename.
-						receiver
-							icon:
-								(folder isDirectory
-									ifTrue: [ Smalltalk ui theme icons glamorousFolder ]
-									ifFalse: [ Smalltalk ui theme icons glamorousBrowse ]).
-						receiver disable.
-						receiver yourself ];
-			styled: [ :brick | brick ];
-			entity: zip directories , zip files
 	)
 	
 	createDirectory = (
@@ -598,23 +479,6 @@ FileReference = AbstractFileReference (
 		^ self isFile and: [ #('zip' 'jar' 'ear' 'war') includes: self extension ]
 	)
 	
-	gtInspectorStScriptIn: composite = (
-		composite smalltalkCode
-			title: 'Script';
-			display: [ self readStreamDo: [ :s | s contents ] ];
-			selectionPopulate: #selection
-				on: 'o'
-				entitled: 'Do it and open (o)'
-				with: [ :text :object | Smalltalk compiler evaluate: text selectedText for: object logged: false ];
-			act: [ :text | 
-					self ensureDelete.
-					self writeStreamDo: [ :s | s nextPutAll: text text asString ] ]
-				icon: GLMUIThemeExtraIcons glamorousSave
-				on: 's'
-				entitled: 'Save';
-			when: [ self extension = 'st' or: [ self extension = 'ph' ] ]
-	)
-	
 	renameTo: newBasename = (
 		
 		| destinationPath |
@@ -713,9 +577,5 @@ FileReference = AbstractFileReference (
 		"Answer a reference to the argument resolved against the root of the current disk filesystem."
 		
 		^ FileSystem disk / aString
-	)
-	
-	additionalInspectorClasses = (
-		^ super additionalInspectorClasses, { EyeFileSystemInspector }
 	)
 )

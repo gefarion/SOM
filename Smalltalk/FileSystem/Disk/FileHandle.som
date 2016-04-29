@@ -12,7 +12,7 @@ FileHandle = FileSystemHandle (
 	
 	size = (
 		
-		self flag: 'TODO: remove once FileHandles are really used!'.
+		"TODO: remove once FileHandles are really used!"
 		self assureOpen.
 		
 		^ Primitives size: id
@@ -32,7 +32,7 @@ FileHandle = FileSystemHandle (
 	)
 	
 	at: index write: buffer startingAt: start count: count = (
-		self flag: 'TODO: remove once FileHandles are really used!'.
+		"TODO: remove once FileHandles are really used!"
 		self assureOpen.
 		Primitives setPosition: id to: index - 1.
 		Primitives
@@ -60,7 +60,7 @@ FileHandle = FileSystemHandle (
 	)
 	
 	at: index read: buffer startingAt: start count: count = (
-		self flag: 'TODO: remove once FileHandles are really used!'.
+		"TODO: remove once FileHandles are really used!"
 		self assureOpen.
 		Primitives setPosition: id to: index - 1.
 		^ Primitives
@@ -93,14 +93,14 @@ FileHandle = FileSystemHandle (
 	
 	flush = (
 		
-		self flag: 'TODO: remove once FileHandles are really used!'.
+		"TODO: remove once FileHandles are really used!"
 		self assureOpen.
 		
 		Primitives flush: id
 	)
 	
 	open = (
-		self flag: 'TODO: for now we solely rely on the old FileStreams'
+		"TODO: for now we solely rely on the old FileStreams"
 		"id := self basicOpen.
 		id ifNil: 	[
 			reference exists ifFalse: [FileDoesNotExist signalWith: reference].
@@ -113,6 +113,7 @@ FileHandle = FileSystemHandle (
 	)
 	
 	----------------------------------
+	| Registry |
 	
 	registry = (
 		^Registry ifNil: [Registry := WeakRegistry new]

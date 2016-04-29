@@ -1,11 +1,12 @@
 FilesTest = TestCase (
   setUp = (
-  	DiskStore initialize.
+  	UnixStore initialize.
   )
   
   testOpen = (
     | file |
     file := FileSystem / '/home/guido/Documents/Projects/TruffleMATE/core-lib/Smalltalk/Array.som'.
+    file contents.
     self assert: true
   )
 )
