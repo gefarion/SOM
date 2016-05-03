@@ -1,0 +1,33 @@
+FileStreamException = Error (
+	"Common superclass for exceptions while using file streams"
+	| fileName |
+	
+	messageText = (
+		
+		"Return an exception's message text."
+	
+		^messageText == nil
+			ifTrue: [fileName printString]
+			ifFalse: [messageText]
+	)
+	
+	fileName: aFileName = (
+		fileName := aFileName
+	)
+	
+	fileName = (
+		^fileName
+	)
+	
+	isResumable = (
+		"Determine whether an exception is resumable."
+	
+		^true
+	)
+	
+	----------------------------------
+	
+	fileName: aFileName = (
+		^self new fileName: aFileName
+	)
+)

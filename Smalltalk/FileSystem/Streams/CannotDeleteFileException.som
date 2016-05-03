@@ -1,0 +1,4 @@
+CannotDeleteFileException = FileStreamException (
+	"Notfify when not able to delete"
+	
+)

@@ -1,0 +1,369 @@
+WriteStream = PositionableStream (
+	"I represent an accessor for a sequence of objects that can only store objects in the sequence."
+	| writeLimit |
+	
+	withAttributes: attributes do: strmBlock = (
+	
+		"No-op here is overriden in TextStream for font emphasis"
+		^ strmBlock value
+	)
+	
+	ensureCr = (
+		"Append a cr character to the receiver IFF there is not one on the end."
+	
+		self ensureEndsWith: Character cr
+	)
+	
+	nextChunkPut: aString = (
+		"Append the argument, aString, to the receiver, doubling embedded terminators."
+	 
+		| i remainder terminator | 
+		terminator := '!'.
+		remainder := aString asString.
+		[(i := remainder indexOf: terminator) = 0] whileFalse:
+			[self nextPutAll: (remainder copyFrom: 1 to: i).
+			self nextPut: terminator.  "double imbedded terminators"
+			remainder := remainder copyFrom: i+1 to: remainder size].
+		self nextPutAll: remainder. 
+		aString asString includesUnifiedCharacter ifTrue: [
+			self nextPut: terminator.
+			self nextPutAll: ']lang['.
+			aString asString writeLeadingCharRunsOn: self.
+		].
+		self nextPut: terminator.
+		self flush.
+	)
+	
+	pastEndPut: anObject = (
+		"Grow the collection by doubling the size, but keeping the growth between 20 and 1000000.
+		Then put <anObject> at the current write position."
+	
+		collection := collection grownBy: ((collection size max: 20) min: 1000000).
+		writeLimit := collection size.
+		collection at: (position := position + 1) put: anObject.
+		^ anObject
+	)
+	
+	crtab = (
+		"Append a return character, followed by a single tab character, to the 
+		receiver."
+	
+		self nextPut: Character cr.
+		self nextPut: Character tab
+	)
+	
+	greaseNext: anInteger putAll: aCollection startingAt: startIndex = (
+		"Store the next anInteger elements from the given collection."
+		^ self next: anInteger putAll: aCollection startingAt: startIndex
+	)
+	
+	crlf = (
+		"Append a line feed character to the receiver."
+		self nextPut: Character cr.
+		self nextPut: Character lf.
+	)
+	
+	next = (
+	
+		self shouldNotImplement
+	)
+	
+	ensureNoSpace = (
+		"If there is not one on the end, remove it."
+	
+		(position > 0 and: [(collection at: position) = Character space]) 
+			ifTrue: [self skip: -1].
+	)
+	
+	position: anInteger = (
+	
+		"Refer to the comment in PositionableStream|position:."
+	
+		readLimit := readLimit max: position.
+		super position: anInteger
+	)
+	
+	braceArray: anArray = (
+		"This method is used in compilation of brace constructs.
+		It MUST NOT be deleted or altered."
+	
+		collection := anArray.
+		position := 0.
+		readLimit := 0.
+		writeLimit := anArray size.
+	)
+	
+	<< aCollection = ( 
+		"we want a readable version of nextPutAll, that also works with non Collection arguments"
+
+		collection class == aCollection class ifFalse:
+			[ aCollection putOn: self. ^ self ].
+		self nextPutAll: aCollection
+	)
+	
+	peekLast = (
+		"Return that item just put at the end of the stream"
+	
+		^ position > 0 
+			ifTrue: [collection at: position]
+			ifFalse: [nil]
+	)
+	
+	store: anObject = (
+		"Have anObject print on the receiver for purposes of rereading."
+	
+		anObject storeOn: self
+	)
+	
+	nextPutAll: aCollection = (
+	 	| newEnd |
+	 	collection class == aCollection class ifFalse:
+	 		[^ super nextPutAll: aCollection ].
+	 
+	 	newEnd := position + aCollection size.
+	 	newEnd > writeLimit ifTrue:
+	 		[self growTo: newEnd + 10].
+	 
+	 	collection replaceFrom: position+1 to: newEnd  with: aCollection startingAt: 1.
+	 	position := newEnd.
+		
+		^ aCollection
+	)
+	
+	tab: anInteger = (
+		"Append anInteger tab characters to the receiver."
+	
+		anInteger timesRepeat: [self tab]
+	)
+	
+	on: aCollection = (
+		super on: aCollection.
+		readLimit := 0.
+		writeLimit := aCollection size
+	)
+	
+	braceArray = (
+		"This method is used in compilation of brace constructs.
+		It MUST NOT be deleted or altered."
+	
+		^ collection
+	)
+	
+	timeStamp = (
+		"Append the current time to the receiver as a String."
+		self nextChunkPut:	"double string quotes and !s"
+			(String streamContents: [:s | Smalltalk timeStamp: s]) printString.
+		self cr
+	)
+	
+	setToEnd = ( 
+		"Refer to the comment in PositionableStream|setToEnd."
+	
+		readLimit := readLimit max: position.
+		super setToEnd.
+	)
+	
+	withAttribute: att do: strmBlock = (
+		"No-op here is overriden in TextStream for font emphasis"
+		^ strmBlock value
+	)
+	
+	tab = (
+		"Append a tab character to the receiver."
+	
+		self nextPut: Character tab
+	)
+	
+	nextChunkPutWithStyle: aString = (
+		"Deprecated.  Append the argument, aText, to the receiver, doubling embedded terminators.  Put out one chunk for the string and one for the style runs.  Mark the style with ]style[."
+	 
+		^ self nextChunkPut: aString asString.
+	
+	)
+	
+	cr = (
+		"Append a return character to the receiver."
+	
+		self nextPut: Character cr
+	)
+	
+	asLineStream = (
+		^ AJLineStream on: self
+	)
+	
+	size = (
+		^readLimit := readLimit max: position
+	)
+	
+	lf = (
+		"Append a line feed character to the receiver."
+	
+		self nextPut: Character lf
+	)
+	
+	nextBytesPutAll: aCollection = (
+		"Append the bytes of aCollection to the sequence of bytes accessible 
+		by the receiver. Answer aCollection."
+	 
+	 	| newEnd |
+	 	collection class instSpec == aCollection class instSpec ifFalse:
+	 		[^ super nextPutAll: aCollection ].
+	 
+	 	newEnd := position + aCollection size.
+	 	newEnd > writeLimit ifTrue:
+	 		[self growTo: newEnd + 10].
+	 
+	 	collection replaceFrom: position+1 to: newEnd  with: aCollection startingAt: 1.
+	 	position := newEnd.
+		
+		^ aCollection
+	)
+	
+	nextPut: anObject = (
+		"Primitive. Insert the argument at the next position in the Stream
+		represented by the receiver. Fail if the collection of this stream is not an
+		Array or a String. Fail if the stream is positioned at its end, or if the
+		position is out of bounds in the collection. Fail if the argument is not
+		of the right type for the collection. Optional. See Object documentation
+		whatIsAPrimitive.
+		<primitive: 66>
+		"
+	
+		position >= writeLimit
+			ifTrue: [^ self pastEndPut: anObject]
+			ifFalse: 
+				[position := position + 1.
+				^collection at: position put: anObject]
+	)
+	
+	with: aCollection = (
+	
+		super on: aCollection.
+		position := readLimit := writeLimit := aCollection size
+	)
+	
+	reset = ( 
+		"Refer to the comment in PositionableStream|reset."
+	
+		readLimit := readLimit max: position.
+		position := 0
+	)
+	
+	space = (
+		"Append a space character to the receiver."
+	
+		self nextPut: Character space
+	)
+	
+	ensureASpace = (
+		"Append a space character to the receiver IFF there is not one on the end."
+	
+		(position > 0 and: [(collection at: position) = Character space]) ifTrue: [^self].
+		self nextPut: Character space
+	)
+	
+	resetToStart = (
+		readLimit := position := 0.
+	)
+	
+	ensureEndsWith: anObject = (
+		"Append anObject to the receiver IFF there is not one on the end."
+	
+		(position > 0 and: [(collection at: position) = anObject]) ifTrue: [^self].
+		self nextPut: anObject
+	)
+	
+	on: aCollection from: firstIndex to: lastIndex = (
+	
+		| len |
+		collection := aCollection.
+		readLimit := 
+			writeLimit := lastIndex > (len := collection size)
+							ifTrue: [len]
+							ifFalse: [lastIndex].
+		position := firstIndex <= 1
+					ifTrue: [0]
+					ifFalse: [firstIndex - 1]
+	)
+	
+	next: anInteger putAll: aCollection startingAt: startIndex = (
+		"Store the next anInteger elements from the given collection."
+	
+		| newEnd numPut |
+		collection class == aCollection class ifFalse:
+			[^ super next: anInteger putAll: aCollection startingAt: startIndex ].
+	
+		numPut := anInteger min: (aCollection size - startIndex + 1).
+		newEnd := position + numPut.
+		newEnd > writeLimit ifTrue:
+			[^ super next: anInteger putAll: aCollection startingAt: startIndex "Trigger normal pastEndPut: logic"].
+	
+		collection replaceFrom: position+1 to: newEnd with: aCollection startingAt: startIndex.
+		position := newEnd.
+	
+	)
+	
+	crtab: anInteger = (
+	
+		"Append a return character, followed by anInteger tab characters, to the 
+		receiver."
+	
+		self nextPut: Character cr.
+		anInteger timesRepeat: [self nextPut: Character tab]
+	)
+	
+	contents = (
+	
+		readLimit := readLimit max: position.
+		^collection copyFrom: 1 to: position
+	)
+	
+	space: anInteger = (
+	
+		"Append anInteger space characters to the receiver."
+	
+		anInteger timesRepeat: [self space]
+	)
+	
+	growTo: anInteger = (
+	 
+	    " anInteger is the required minimal new size of the collection "
+	 	| oldSize length |
+	 	oldSize := collection size.
+	      length := anInteger + (oldSize // 4 max: 20) - oldSize.
+	 	collection := collection grownBy: length.
+	 	writeLimit := collection size.
+	 
+	)
+	
+	----------------------------------
+	
+	with: aCollection from: firstIndex to: lastIndex = (
+	
+		"Answer an instance of me on the subcollection of the argument, 
+		aCollection, determined by the indices firstIndex and lastIndex. Position 
+		the instance to store at the end of the subcollection."
+	
+		^self basicNew with: (aCollection copyFrom: firstIndex to: lastIndex)
+	)
+	
+	on: aCollection from: firstIndex to: lastIndex = (
+	
+		"Answer an instance of me on a copy of the argument, aCollection, 
+		determined by the indices firstIndex and lastIndex. Position the instance 
+		at the beginning of the collection."
+	
+		^self basicNew
+			on: aCollection
+			from: firstIndex
+			to: lastIndex
+	)
+	
+	with: aCollection = (
+	
+		"Answer an instance of me on the argument, aCollection, positioned to 
+		store objects at the end of aCollection."
+	
+		^self basicNew with: aCollection
+	)
+)

@@ -1,0 +1,606 @@
+FileStream = ReadWriteStream (
+	"I represent a Stream that accesses a FilePage from a File. One use for my instance is to access larger 'virtual Strings' than can be stored contiguously in main memory. I restrict the objects stored and retrieved to be Integers or Characters. An end of file pointer terminates reading; it can be extended by writing past it, or the file can be explicitly truncated.	To use the file system for most applications, you typically create a FileStream. This is done by sending a message to a FileDirectory (file:, oldFile:, newFile:, rename:newName:) which creates an instance of me. Accesses to the file are then done via my instance.*** On DOS, files cannot be shortened!  ***  To overwrite a file with a shorter one, first delete the old file (FileDirectory deleteFilePath: 'Hard Disk:aFolder:dataFolder:foo') or (aFileDirectory deleteFileNamed: 'foo').  Then write your new shorter version."
+	| rwmode |
+	
+	file = (
+		"Answer the file for the page the receiver is streaming over."
+	
+		self subclassResponsibility
+	)
+	
+	skip: n = (
+		"Set the character position to n characters from the current position.
+		Error if not enough characters left in the file."
+	 
+		self subclassResponsibility
+	)
+	
+	binary = (
+		"Set this file to binary mode."
+	
+		self subclassResponsibility
+	
+	)
+	
+	close = (
+		"Close this file."
+	
+		self subclassResponsibility
+	
+	)
+	
+	next = (
+		(position >= readLimit and: [self atEnd])
+			ifTrue: [^nil]
+			ifFalse: [^collection at: (position := position + 1)]
+	)
+	
+	position: pos = (
+		"Set the current character position in the file to pos."
+	
+		self subclassResponsibility
+	)
+	
+	contentsOfEntireFile = (
+		"Read all of the contents of the receiver."
+	
+		| s binary |
+		self readOnly.
+		binary := self isBinary.
+		self reset.	"erases knowledge of whether it is binary"
+		binary ifTrue: [self binary].
+		s := self next: self size.
+		self close.
+		^s
+	)
+	
+	text = (
+		"Set this file to text (ascii) mode."
+	
+		self ascii.
+	
+	)
+	
+	reopen = (
+		"Ensure that the receiver is open, re-open it if necessary."
+		"Details: Files that were open when a snapshot occurs are no longer valid when the snapshot is resumed. This operation re-opens the file if that has happened."
+	
+		self subclassResponsibility
+	
+	)
+	
+	truncate: pos = (
+		"Truncate file to pos"
+	
+		self subclassResponsibility
+	)
+	
+	asZnUrl = (
+		"Convert the receiver in a file:// ZnUrl"
+	
+		| fileUrl |
+		fileUrl := ZnUrl new.
+		fileUrl scheme: #file.
+		self directory pathSegments do: [ :each | fileUrl addPathSegment: each ].
+		fileUrl addPathSegment: self localName.
+		^ fileUrl
+	)
+	
+	printOn: aStream = (
+		super printOn: aStream.
+		aStream nextPutAll: ' on '.
+		self file printOn: aStream
+	)
+	
+	mimeTypes = (
+		^ self name asFileReference mimeTypes.
+	)
+	
+	nextPutAll: aCollection = (
+		"1/31/96 sw: made subclass responsibility"
+	
+		self subclassResponsibility
+	)
+	
+	longPrintOn: aStream = (
+		"Do nothing, so it will print short.  Called to print the error file.  If the error was in a file operation, we can't read the contents of that file.  Just print its name instead."
+	
+	)
+	
+	readWrite = (
+		"Set this file's mode to read-write."
+	
+		self subclassResponsibility
+	
+	)
+	
+	setToEnd = (
+		"Set the current character position to the end of the File. The same as
+		self position: self size."
+	
+		self subclassResponsibility
+	)
+	
+	ascii = (
+		"Set this file to ascii (text) mode."
+	
+		self subclassResponsibility
+	
+	)
+	
+	fileIntoNewChangeSet = (
+		"File all of my contents into a new change set." 
+	
+		self readOnly.
+		ChangeSet newChangesFromStream: self named: (self localName)
+	
+	)
+	
+	viewGZipContents = (
+	       "View the contents of a gzipped file"
+	
+	       | stringContents |
+	       self binary.
+	       stringContents := self contentsOfEntireFile.
+	       stringContents := Cursor wait showWhile: [(GZipReadStream on: stringContents) upToEnd].
+	       stringContents := stringContents asString withSqueakLineEndings.
+	
+	       UIManager default
+	               edit: stringContents
+	               label: 'Decompressed contents of: ', self localName
+	)
+	
+	size = (
+		"Answer the size of the file in characters."
+	
+		self subclassResponsibility
+	)
+	
+	localName = (
+		^ self name asFileReference basename
+	
+	)
+	
+	atEnd = (
+		"Answer true if the current position is >= the end of file position."
+	
+		self subclassResponsibility
+	)
+	
+	nextPut: aByte = (
+		"1/31/96 sw: subclassResponsibility"
+	
+		self subclassResponsibility
+	)
+	
+	edit = (
+		"Create and schedule an editor on this file."
+	
+		Smalltalk tools fileList openEditorOn: self editString: nil.
+	
+	)
+	
+	directoryEntry = (
+		^(self directory / self localName) entry
+	)
+	
+	reset = (
+		"Set the current character position to the beginning of the file."
+	
+		self subclassResponsibility
+	)
+	
+	next: anInteger = (
+		| newCollection howManyRead increment |
+		newCollection := self collectionSpecies new: anInteger.
+		howManyRead := 0.
+		[howManyRead < anInteger] whileTrue:
+			[self atEnd ifTrue:
+				[(howManyRead + 1) to: anInteger do: [:i | newCollection at: i put: (self next)].
+				^newCollection].
+			increment := (readLimit - position) min: (anInteger - howManyRead).
+			newCollection replaceFrom: (howManyRead + 1)
+				to: (howManyRead := howManyRead + increment)
+				with: collection
+				startingAt: (position + 1).
+			position := position + increment].
+		^newCollection
+	)
+	
+	url = (
+		"Convert my path into a file:// type url String."
+		
+		^self asUrl asString
+	)
+	
+	asUrl = (
+		^ self asZnUrl 
+	)
+	
+	readOnlyStream = (
+		^self readOnly
+	)
+	
+	longPrintOn: aStream limitedTo: sizeLimit indent: indent = (
+	
+		"Do nothing, so it will print short.  Called to print the error file.  If the error was in a file operation, we can't read the contents of that file.  Just print its name instead."
+	
+		aStream cr
+	)
+	
+	position = (
+		"Answer the current character position in the file."
+	
+		self subclassResponsibility
+	)
+	
+	flush = (
+		"When writing, flush the current buffer out to disk."
+	
+		self subclassResponsibility
+	
+	)
+	
+	fileIn = (
+		"Guarantee that the receiver is readOnly before fileIn for efficiency and
+		to eliminate remote sharing conflicts."
+	
+		self readOnly.
+		CodeImporter evaluateFileStream: self.
+	)
+	
+	readOnly = (
+		"Set this file's mode to read-only."
+	
+		self subclassResponsibility
+	
+	)
+	
+	asBinaryOrTextStream = (
+		"I can switch between binary and text data"
+	
+		^ self
+	)
+	
+	name = (
+		"Answer the name of the file for the page the receiver is streaming over."
+	
+		self subclassResponsibility
+	)
+	
+	contents = (
+		"Return the contents of the receiver. Do not close or otherwise touch the receiver. Return data in whatever mode the receiver is in (e.g., binary or text)."
+		| s savePos |
+		savePos := self position.
+		self position: 0.
+		s := self next: self size.
+		self position: savePos.
+		^s
+	)
+	
+	closed = (
+		"Answer true if this file is closed."
+	
+		self subclassResponsibility
+	
+	)
+	
+	----------------------------------
+	| Stderr Stdin StdioFiles Stdout TheStdioHandles|
+	
+	fullName: fileName = (
+		^ fileName asFileReference fullName 
+	)
+	
+	removeLineFeeds: fullName = (
+		| fileContents fileStream |
+		fileContents := ((FileStream readOnlyFileNamed: fullName) wantsLineEndConversion: true) contentsOfEntireFile.
+		fileStream := (FileStream newFileNamed: fullName).
+		fileStream nextPutAll: fileContents.
+		fileStream close.
+	)
+	
+	oldFileNamed: fileName do: aBlock = (
+		"Returns the result of aBlock."
+		
+		^ self detectFile: [ self oldFileNamed: fileName ] do: aBlock
+	)
+	
+	newFileNamed: fileName = (
+	
+		^ self concreteStream newFileNamed: (self fullName: fileName)
+	)
+	
+	concreteStream = (
+		"Who should we really direct class queries to?  "
+		^ MultiByteFileStream.
+	
+	)
+	
+	serviceRemoveLineFeeds = (
+		"Answer a service for removing linefeeds from a file"
+	
+		^ FileModifyingSimpleServiceEntry
+			provider: self 
+			label: 'Remove line feeds'
+			selector: #removeLineFeeds:	
+			description: 'Remove line feeds in file'
+			buttonLabel: 'Remove lfs'
+	)
+	
+	forceNewFileNamed: fileName = (
+	 	"Create a new file with the given name, and answer a stream opened for writing on that file. If the file already exists, delete it without asking before creating the new file."
+	
+		^self concreteStream forceNewFileNamed: fileName
+	)
+	
+	services = (
+			^ Array 
+				with: self serviceRemoveLineFeeds
+				with: self serviceFileIn
+		
+	)
+	
+	initialize = (
+		TheStdioHandles := Array new: 3.
+		
+		"original comment was: the intent being before: AutoStart"
+		"Smalltalk addToStartUpList: self after: DiskStore; 
+			addToShutDownList: self after: DiskStore"
+	)
+	
+	fileNamed: fileName do: aBlock = (
+		"Returns the result of aBlock."
+		
+		^ self detectFile: [ self fileNamed: fileName ] do: aBlock
+	)
+	
+	readOnlyFileNamed: fileName = (
+	
+		^ self concreteStream readOnlyFileNamed: (self fullName: fileName)
+	)
+	
+	onHandle: aFileSystemHandle = (
+		^ self concreteStream new
+			open: aFileSystemHandle fullName
+			forWrite: aFileSystemHandle isWritable
+	)
+	
+	stdioHandles = primitive
+	
+	sourceFileSuffixes = (
+	
+		^#('st' 'cs')
+	
+	
+	)
+	
+	unload = (
+	
+		FileServices unregisterFileReader: self 
+	)
+	
+	flushAndVoidStdioFiles = (
+	
+		StdioFiles ifNotNil: [
+			StdioFiles do: [ :file |
+				file ifNotNil: [ 
+					file isReadOnly ifFalse: [
+						[ file flush ]
+							on: Error
+							do: [ :ex | "care less" ] ] ] ].
+			self voidStdioFiles ]
+	)
+	
+	requestDropStream: dropIndex = (
+		"Request a read-only stream for some file that was dropped onto the application"
+		^self concreteStream new requestDropStream: dropIndex.
+	)
+	
+	isSourceFileSuffix: suffix = (
+	
+		^ self sourceFileSuffixes includes: suffix
+	
+	)
+	
+	startUp: resuming = (
+		resuming
+			ifFalse: [ ^ self ].
+		self voidStdioFiles.
+		[ TheStdioHandles := self stdioHandles ]
+			on: Error
+			do: [ :ex | 
+				TheStdioHandles isArray
+					ifFalse: [ TheStdioHandles := Array new: 3 ] ]
+	)
+	
+	fileIn: fullName = (
+		"File in the entire contents of the file specified by the name provided"
+	
+		| ff fn |
+		fullName ifNil: [^ self inform: 'Filename is nil.'].
+		fn := fullName asFileReference.
+		fn := (Smalltalk hasClassNamed: #GZipReadStream) 
+			ifTrue: [(Smalltalk classNamed:  #GZipReadStream) uncompressedFileName: fn fullName]
+			ifFalse: [fn fullName].
+		ff := self readOnlyFileNamed: fn.
+		ff fileIn.
+	
+	)
+	
+	oldFileNamed: fileName = (
+		^ self concreteStream oldFileNamed: (self fullName: fileName)
+	)
+	
+	stdin = (
+		^Stdin ifNil: [
+			Stdin := self standardIOStreamNamed: #stdin forWrite: false.
+			Stdin disableReadBuffering.
+		 	^Stdin ].
+	)
+	
+	newFileNamed: fileName do: aBlock = (
+		"Returns the result of aBlock."
+		
+		^ self detectFile: [ self newFileNamed: fileName ] do: aBlock
+	)
+	
+	readOnlyFileNamed: fileName do: aBlock = (
+		"Open the existing file with the given name for read-only access and pass it as argument to aBlock.
+		Returns the result of aBlock."
+		
+		^ self detectFile: [ self readOnlyFileNamed: fileName ] do: aBlock
+	)
+	
+	isAFileNamed: fName = (
+		"return whether a file exists with the given name"
+		^self concreteStream isAFileNamed: (self fullName: fName)
+	)
+	
+	voidStdioFiles = (
+	
+		 Stdin := Stdout := Stderr := StdioFiles := nil
+	)
+	
+	standardIOStreamNamed: moniker forWrite: forWrite = (
+		"Create if necessary and store default stdin, stdout and other files based on the their names"
+		
+		| index |
+		
+		self flag: #todo. "This is an ugly hack, while waiting for a real fix for windows. There  several problems with this approach, but it allow us to run tests, etc."
+		Smalltalk os isWin32 
+			ifTrue: [ 
+				[ ^ MultiByteFileStream forceNewFileNamed: moniker asString ]
+				on: CannotDeleteFileException do: [
+					"HACK: if the image is opened a second time windows barks about the already opened locked file"
+					^ MultiByteFileStream forceNewFileNamed: moniker asString, '_', (Random new nextInt: SmallInteger maxVal) asString   ]]. 	
+		
+		index := #(stdin stdout stderr) identityIndexOf: moniker.
+		^((StdioFiles ifNil: [ StdioFiles := Array new: 3 ]) at: index)
+			ifNil: [
+				StdioFiles
+					at: index 
+					put: (
+						(TheStdioHandles at: index)
+							ifNil: [ ^self error: moniker, ' is unavailable' ]
+							ifNotNil: [ :handle |
+								MultiByteFileStream newForStdio
+									openOnHandle: handle
+									name: moniker
+									forWrite: forWrite ]) ]
+	
+	)
+	
+	oldFileOrNoneNamed: fileName = (
+		"If the file exists, answer a read-only FileStream on it. If it doesn't, answer nil."
+	
+		| fullName |
+		fullName := self fullName: fileName.
+		^ (self concreteStream isAFileNamed: fullName)
+			ifTrue: [ self concreteStream readOnlyFileNamed: fullName]
+			ifFalse: [ nil].
+	
+	)
+	
+	detectFile: aBlock do: anotherBlock = (
+	
+		^aBlock value
+			ifNil: [nil]
+	      	ifNotNil: [:file| [anotherBlock value: file] ensure: [file close]]
+	)
+	
+	convertCRtoLF: fileName = (
+		"Convert the given file to LF line endings. Put the result in a file with the extention '.lf'"
+	
+		| in out c justPutCR |
+		in := (self readOnlyFileNamed: fileName) binary.
+		out :=  (self newFileNamed: fileName, '.lf') binary.
+		justPutCR := false.
+		[in atEnd] whileFalse: [
+			c := in next.
+			c = 10
+				ifTrue: [
+					out nextPut: 13.
+					justPutCR := true]
+				ifFalse: [
+					(justPutCR and: [c = 10]) ifFalse: [out nextPut: c].
+					justPutCR := false]].
+		in close.
+		out close.
+	
+	)
+	
+	newForStdio = (
+		"This is a hook for subclasses to initialize themselves properly."
+	
+		^self new
+	)
+	
+	writeSourceCodeFrom: aStream baseName: baseName isSt: stOrCsFlag = (
+	
+		| extension converter fileName  |
+		[ 	extension :=  stOrCsFlag ifTrue: ['.st']  ifFalse: ['.cs'].
+			converter := aStream contents isAsciiString 
+				ifTrue: [MacRomanTextConverter new] 
+				ifFalse: [UTF8TextConverter new].
+			fileName := baseName, extension.
+			fileName := FileSystem disk checkName: fileName fixErrors: true.
+			[FileStream newFileNamed: fileName do: [:fileStream |
+				fileName := fileStream name. "in case it is changed when handling FileExistsException"
+				(converter isMemberOf: UTF8TextConverter)
+					ifTrue: [fileStream binary.
+							UTF8TextConverter writeBOMOn: fileStream].
+				fileStream text.
+				fileStream converter: converter.
+				fileStream nextPutAll: aStream contents.
+				fileStream close]
+			] on: Abort do: [:e | ^self ]
+		] on: Error do: [:error | 
+			error isResumable 
+				ifTrue: [ error resumeUnchecked: error defaultAction]
+				ifFalse: [ error pass ]
+		].
+		self inform: 'Filed out to: ', String cr, fileName.
+	)
+	
+	serviceFileIn = (
+		"Answer a service for filing in an entire file"
+	
+		^ SimpleServiceEntry 
+			provider: self 
+			label: 'FileIn entire file'
+			selector: #fileIn:
+			description: 'File in the entire contents of the file, which is expected to contain Smalltalk code in fileout ("chunk") format'
+			buttonLabel: 'Filein'
+	)
+	
+	new = (
+		^ self basicNew
+	)
+	
+	shutDown: quitting = (
+	
+		quitting ifTrue: [ self flushAndVoidStdioFiles ]
+	)
+	
+	forceNewFileNamed: fileName do: aBlock = (
+		"Returns the result of aBlock."
+		
+		^ self detectFile: [ self forceNewFileNamed: fileName ] do: aBlock
+	)
+	
+	fileNamed: fileName = (
+	
+		^ self concreteStream fileNamed: (self fullName: fileName)
+	)
+	
+	stderr = (
+	
+		^Stderr ifNil: [ Stderr := self standardIOStreamNamed: #stderr forWrite: true ]
+	)
+	
+	stdout = (
+	
+		^Stdout ifNil: [ Stdout := self standardIOStreamNamed: #stdout forWrite: true ]
+	)
+)

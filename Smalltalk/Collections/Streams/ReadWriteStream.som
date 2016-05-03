@@ -1,0 +1,112 @@
+ReadWriteStream = WriteStream (
+	"I represent an accessor for a sequence of objects. My instances can both read and store objects."
+	
+	
+	piecesStartingOnLinesThat: aLineConditionBlock do: aBlock = (
+		| reader current |
+		current := String new.
+		reader := ZnFastLineReader on: self.
+		reader linesDo: [ :each | 
+				current := (aLineConditionBlock value: each)
+						ifTrue: [ 
+							current notEmpty ifTrue: [ 
+								aBlock value: current ].
+							each ]
+						ifFalse: [ current , each ] ].
+		(current notEmpty and: [ aLineConditionBlock value: current ])
+			ifTrue: [ aBlock value: current ]
+	)
+	
+	hash = (
+	
+		self class == ReadWriteStream ifFalse: [^ super hash].
+		^ (self position + readLimit + 53) hash
+	)
+	
+	asUnZippedStream = (
+		| isGZip outputStream first strm archive |
+		"Decompress this file if needed, and return a stream.  No file is written.  File extension may be .gz or anything else.  Also works on archives (.zip, .gZip)."
+		strm := self binary.
+		strm isZipArchive
+			ifTrue: [ 
+				archive := ZipArchive new readFrom: strm.
+				archive members
+					detect: [ :any | any fileName asLowercase endsWith: '.ttf' ]
+					ifFound: [ :which | 
+						strm := which contentStream.
+						archive close ]
+					ifNone: [ 
+						archive close.
+						^ self error: 'Can not find .ttf file in archive' ] ].
+		first := strm next.
+		isGZip := strm next * 256 + first = GZipConstants gzipMagic.
+		strm skip: -2.
+		isGZip
+			ifTrue: [ 
+				outputStream := (MultiByteBinaryOrTextStream with: (GZipReadStream on: strm) upToEnd) reset.
+				strm close ]
+			ifFalse: [ outputStream := strm ].
+		^ outputStream
+	)
+	
+	= other = ( 
+		(self class == ReadWriteStream and: [other class == ReadWriteStream]) ifFalse: [
+			^ super = other].	"does an identity test.  Don't read contents of FileStream"
+		^ self position = other position and: [self contents = other contents]
+	)
+	
+	next = (
+		"Primitive. Return the next object in the Stream represented by the
+		receiver. Fail if the collection of this stream is not an Array or a String.
+		Fail if the stream is positioned at its end, or if the position is out of
+		bounds in the collection. Optional. See Object documentation
+		whatIsAPrimitive.
+		<primitive: 65>
+		"
+	
+		"treat me as a FIFO"
+		position >= readLimit
+			ifTrue: [^nil]
+			ifFalse: [^collection at: (position := position + 1)]
+	)
+	
+	next: anInteger = (
+	
+		"Answer the next anInteger elements of my collection.  overriden for efficiency"
+	
+		| ans endPosition |
+		readLimit := readLimit max: position.
+	
+		endPosition := position + anInteger  min:  readLimit.
+		ans := collection copyFrom: position+1 to: endPosition.
+		position := endPosition.
+		^ans
+	
+	)
+	
+	readStream = (
+		"polymorphic with SequenceableCollection.  Return self"
+	
+		^ self
+	)
+	
+	isZipArchive = (
+		"Determine if this appears to be a valid Zip archive"
+		| sig |
+		self binary.
+		sig := self next: 4.
+		self position: self position - 4. "rewind"
+		^ZipArchive validSignatures includes: sig
+	)
+	
+	name = (
+		^ 'a stream'   "for fileIn compatibility"
+	)
+	
+	contents = (
+		"Answer with a copy of my collection from 1 to readLimit."
+	
+		readLimit := readLimit max: position.
+		^collection copyFrom: 1 to: readLimit
+	)
+)

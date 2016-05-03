@@ -1,0 +1,28 @@
+FileExistsException = FileStreamException (
+	"Notify when file exists"
+	| fileClass |
+	
+	fileClass: aClass = (
+		fileClass := aClass
+	)
+	
+	fileClass = (
+		^ fileClass ifNil: [StandardFileStream]
+	)
+	
+	defaultAction = (
+		"The default action taken if the exception is signaled."
+	
+		^ UIManager default fileExistsDefaultAction: self
+	
+	)
+	
+	----------------------------------
+	
+	fileName: aFileName fileClass: aClass = (
+	
+		^ self new
+			fileName: aFileName;
+			fileClass: aClass
+	)
+)
