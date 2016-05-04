@@ -73,10 +73,24 @@ Integer = (
         self to: limit by: 1 do: block
     )
     
+    to: limit do: block separatedBy: separatorBlock = (
+        self to: limit by: 1 do: block separatedBy: separatorBlock
+    )
+    
     to: limit by: step do: block = (
         | i |
         i := self.
         [ i <= limit ] whileTrue: [ block value: i. i := i + step ]
+    )
+    
+    to: limit by: step do: block separatedBy: separatorBlock = (
+        | i |
+        i := self.
+        [ i <= limit ] whileTrue: [ 
+        	i = 1 ifFalse: [separatorBlock value].
+        	block value: i. 
+        	i := i + step 
+        ]
     )
     
     downTo: limit do: block = (

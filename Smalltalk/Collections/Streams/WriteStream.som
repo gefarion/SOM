@@ -39,8 +39,8 @@ WriteStream = PositionableStream (
 		Then put <anObject> at the current write position."
 	
 		collection := collection grownBy: ((collection size max: 20) min: 1000000).
-		writeLimit := collection size.
-		collection at: (position := position + 1) put: anObject.
+		writeLimit := collection capacity.
+		self nextPut: anObject.
 		^ anObject
 	)
 	
@@ -230,10 +230,12 @@ WriteStream = PositionableStream (
 		"
 	
 		position >= writeLimit
-			ifTrue: [^ self pastEndPut: anObject]
+			ifTrue: [ ^self pastEndPut: anObject]
 			ifFalse: 
-				[position := position + 1.
-				^collection at: position put: anObject]
+				[
+				position := position + 1.
+				collection append: anObject.
+				^anObject]
 	)
 	
 	with: aCollection = (
@@ -313,7 +315,6 @@ WriteStream = PositionableStream (
 	)
 	
 	contents = (
-	
 		readLimit := readLimit max: position.
 		^collection copyFrom: 1 to: position
 	)

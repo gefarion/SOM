@@ -1,0 +1,48 @@
+Latin1Environment = LanguageEnvironment (
+	"This class provides the support for the languages in 'Latin-1' category.  Although we could have different language environments for different languages in the category, so far nobody seriously needed it."
+	
+	
+	----------------------------------
+	
+	systemConverterClass = (
+		Smalltalk os isWin32
+			ifTrue: [^ UTF8TextConverter].
+	 	Smalltalk os isMacOSX
+			ifTrue: [ ^ UTF8TextConverter ].
+		Smalltalk os isMacOS
+			ifTrue: [^MacRomanTextConverter].
+	       Smalltalk os isUnix
+	              ifTrue: [^ UTF8TextConverter].
+	       ^ Latin1TextConverter 
+	)
+	
+	nextPutRightHalfValue: ascii toStream: aStream withShiftSequenceIfNeededForTextConverterState: state = (
+	
+		^ self traditionalCharsetClass nextPutRightHalfValue: ascii toStream: aStream withShiftSequenceIfNeededForTextConverterState: state.
+	
+	)
+	
+	supportedLanguages = (
+		"Return the languages that this class supports. 
+		Any translations for those languages will use this class as their environment."
+		
+		^#('fr' 'es' 'ca' 'eu' 'pt' 'it' 'sq' 'rm' 'nl' 'de' 'da' 'sv' 'no' 'fi' 'fo' 'is' 'ga' 'gd' 'en' 'af' 'sw')
+	)
+	
+	nextPutValue: ascii toStream: aStream withShiftSequenceIfNeededForTextConverterState: state = (
+	
+		^ self traditionalCharsetClass nextPutValue: ascii toStream: aStream withShiftSequenceIfNeededForTextConverterState: state.
+	)
+	
+	leadingChar = (
+	
+		^ 0.
+	
+	)
+	
+	traditionalCharsetClass = (
+	
+		^ Latin1.
+	
+	)
+)

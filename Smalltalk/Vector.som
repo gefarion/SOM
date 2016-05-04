@@ -30,9 +30,11 @@ Vector = (
     | first last storage |
     
     "Accessing"
-    at: index = ( ^ self checkIndex: index ifValid: [ storage at: index ] )
+    at: index = ( 
+    ^ self checkIndex: index ifValid: [ storage at: index ] )
     
     at: index put: value = (
+        thisContext sender method println.
         ^ self checkIndex: index ifValid: [ storage at: index put: value ]
     )
     
@@ -178,6 +180,50 @@ Vector = (
 		^ aCollection
 	)
 	
+	grownBy: length = (
+		"Answer a copy of receiver collection with size grown by length"
+		| newCollection size |
+		size := self size.
+		newCollection := Vector new: size + length.
+		self doIndexes: [:i | newCollection append: (self at: i)].
+		^ newCollection
+	)
+	
+	replaceFrom: start to: stop with: replacement startingAt: repStart = ( 
+		"This destructively replaces elements from start to stop in the receiver 
+		starting at index, repStart, in the sequenceable collection, 
+		replacementCollection. Answer the receiver. No range checks are 
+		performed."
+	
+		| index repOff |
+		thisContext sender method println.
+		repOff := repStart - start.
+		index := start - 1.
+		index println. stop println.
+		[(index := index + 1) <= stop] whileTrue: [ 
+			self at: index put: (replacement at: repOff + index)
+		]
+	)
+	
+	copyFrom: start to: stop = ( 
+		"Answer a copy of a subset of the receiver, starting from element at 
+		index start until element at index stop."
+	
+		| newSize newVector |
+		newSize := stop - start + 1.
+		newVector := (self species new: newSize).
+		start to: stop do: [:i | newVector append: (self at: i)].
+		^newVector
+	)
+	
+	"Pharo Compatibility"
+	species = (^self class)
+	
+	"FileSystem"
+	asVmPathName = (^ FilePathEncoder encode: self)
+	
+	
+		
     ----------------------------
     
     "Allocation"
@@ -190,5 +236,16 @@ Vector = (
         newVector append: elem.
         ^ newVector
     )
+    
+    streamContents: blockWithArg = (
+		^ self new: 100 streamContents: blockWithArg
+	)
+	
+	new: newSize streamContents: blockWithArg = (
+		| stream |
+		stream := WriteStream on: (self streamSpecies new: newSize).
+		blockWithArg value: stream.
+		^ stream contents
+	)
     
 )

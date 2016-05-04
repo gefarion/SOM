@@ -134,4 +134,23 @@ String = (
 		anIndex > anotherIndex ifTrue: [^''].
 		^self substringFrom: anIndex to: anotherIndex.
 	)
+	
+	do: aBlock = (
+		"Refer to the comment in Collection|do:."
+		1 to: self length do:
+			[:index | aBlock value: (self charAt: index)]
+	)
+	
+	-------------------------------------------------------------
+	
+	streamContents: blockWithArg = (
+		^ self new: 100 streamContents: blockWithArg
+	)
+	
+	new: newSize streamContents: blockWithArg = (
+		| stream |
+		stream := WriteStream on: (Vector new: newSize).
+		blockWithArg value: stream.
+		^ stream contents
+	)
 )

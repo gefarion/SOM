@@ -29,7 +29,6 @@ LimitedWriteStream = WriteStream (
 		| newEnd |
 		collection class == aCollection class 
 			ifFalse: [ ^ super nextPutAll: aCollection ].
-	
 		newEnd := position + aCollection size.
 		newEnd > limit ifTrue: [
 			super nextPutAll: (aCollection copyFrom: 1 to: (limit - position max: 0)).
