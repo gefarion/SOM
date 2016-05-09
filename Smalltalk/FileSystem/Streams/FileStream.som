@@ -136,20 +136,6 @@ FileStream = ReadWriteStream (
 	
 	)
 	
-	viewGZipContents = (
-	       "View the contents of a gzipped file"
-	
-	       | stringContents |
-	       self binary.
-	       stringContents := self contentsOfEntireFile.
-	       stringContents := Cursor wait showWhile: [(GZipReadStream on: stringContents) upToEnd].
-	       stringContents := stringContents asString withSqueakLineEndings.
-	
-	       UIManager default
-	               edit: stringContents
-	               label: 'Decompressed contents of: ', self localName
-	)
-	
 	size = (
 		"Answer the size of the file in characters."
 	
@@ -313,8 +299,8 @@ FileStream = ReadWriteStream (
 	
 	concreteStream = (
 		"Who should we really direct class queries to?  "
-		^ MultiByteFileStream.
-	
+		"^ MultiByteFileStream."
+		^ StandardFileStream.
 	)
 	
 	serviceRemoveLineFeeds = (
@@ -376,7 +362,6 @@ FileStream = ReadWriteStream (
 	)
 	
 	unload = (
-	
 		FileServices unregisterFileReader: self 
 	)
 	
@@ -503,7 +488,6 @@ FileStream = ReadWriteStream (
 	)
 	
 	detectFile: aBlock do: anotherBlock = (
-	
 		^aBlock value
 			ifNil: [nil]
 	      	ifNotNil: [:file| [anotherBlock value: file] ensure: [file close]]
@@ -579,7 +563,6 @@ FileStream = ReadWriteStream (
 	)
 	
 	shutDown: quitting = (
-	
 		quitting ifTrue: [ self flushAndVoidStdioFiles ]
 	)
 	
@@ -590,17 +573,14 @@ FileStream = ReadWriteStream (
 	)
 	
 	fileNamed: fileName = (
-	
 		^ self concreteStream fileNamed: (self fullName: fileName)
 	)
 	
 	stderr = (
-	
 		^Stderr ifNil: [ Stderr := self standardIOStreamNamed: #stderr forWrite: true ]
 	)
 	
 	stdout = (
-	
 		^Stdout ifNil: [ Stdout := self standardIOStreamNamed: #stdout forWrite: true ]
 	)
 )

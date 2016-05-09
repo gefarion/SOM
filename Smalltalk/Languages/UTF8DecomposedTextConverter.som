@@ -1,32 +1,0 @@
-UTF8DecomposedTextConverter = UTF8TextConverter (
-	"An UTF8DecomposedTextConverter converts from decomposed UTF8 using the UnicodeCompositionStream.Instance Variables"
-	| combinedChar |
-	
-	nextFromStream: aStream = (
-	
-		| char resultChar |
-		char := super nextFromStream: aStream.
-		(CombinedChar isCompositionCharacter: char charCode)
-			ifFalse: [^char].
-		combinedChar
-			ifNil: [
-				combinedChar := CombinedChar new.
-				combinedChar simpleAdd: char]
-			ifNotNil: [
-				[combinedChar simpleAdd: char]
-					whileFalse: [char := super nextFromStream: aStream].
-				resultChar := combinedChar combined.
-				combinedChar := CombinedChar new.
-				combinedChar simpleAdd: char.
-				^resultChar]
-	
-	)
-	
-	----------------------------------
-	
-	encodingNames = (
-	
-		^Array new
-	
-	)
-)

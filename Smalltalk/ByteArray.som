@@ -1,6 +1,6 @@
 "
 
-$Id: Block1.som 27 2009-07-31 11:17:53Z michael.haupt $
+$Id: Array.som 29 2009-07-31 11:28:44Z michael.haupt $
 
 Copyright (c) 2001-2013 see AUTHORS file
 
@@ -23,15 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-Block1 = Block (
-
-    "For the creation of Block instances, see Universe_new_block()."
-
-    "Evaluating"
-    value = primitive
-    ensure: aBlock = (
-    	"Implemented for FileSystem support. It still does not comply with ensure behavior when the block fails"
-    	self value. 
-    	aBlock value
-    )
+ByteArray = Array (
+    "Accessing"
+    at: index put: value = primitive
+    asString = primitive
+    -------------------------------------
+    
+    isBytes = (
+		"Answer whether the receiver has 8-bit instance variables."
+		"^ self instSpec >= 8"
+		^true.
+	)
 )

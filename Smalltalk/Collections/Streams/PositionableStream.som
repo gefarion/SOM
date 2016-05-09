@@ -45,7 +45,7 @@ PositionableStream = Stream (
 		"Read the next elements of the receiver into aCollection.
 		Return aCollection or a partial copy if less than aCollection
 		size elements have been read."
-		^self next: aCollection size into: aCollection startingAt: 1.
+		^self next: aCollection length into: aCollection startingAt: 1.
 	)
 	
 	nextStringOld = (
@@ -950,7 +950,6 @@ PositionableStream = Stream (
 	)
 	
 	on: aCollection from: firstIndex to: lastIndex = (
-	
 		"Answer an instance of me, streaming over the elements of aCollection 
 		starting with the element at firstIndex and ending with the one at 
 		lastIndex."

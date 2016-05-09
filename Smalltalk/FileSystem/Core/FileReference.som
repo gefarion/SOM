@@ -80,25 +80,6 @@ FileReference = AbstractFileReference (
 			ifFalse: aBlock
 	)
 	
-	spotterPreviewContentsIn: aComposite = (
-		| receiver |
-		self isFile
-			ifFalse: [ ^ self ].
-		receiver := aComposite text.
-		receiver title: [ self gtDisplayString ].
-		receiver display: #yourself.
-		receiver
-			entity:
-				(self
-					readStreamDo: [ :stream | 
-						| result |
-						result := [ (stream next: 10000) asString ]
-							on: Error
-							do: [ (stream binary next: 10000) asString ].
-						stream size > 10000
-							ifTrue: [ result , '  ... truncated ...' ]
-							ifFalse: [ result ] ])
-	)
 	
 	path = (
 		"Return the path internal representation that denotes the receiver in the context of its filesystem. "
@@ -450,24 +431,6 @@ FileReference = AbstractFileReference (
 		^ filesystem permissions: self path
 	)
 	
-	gtInspectorContentsIn: composite = (
-		| receiver |
-		receiver := composite rubricText.
-		receiver title: 'Contents'.
-		receiver
-			display: [ 
-				self
-					readStreamDo: [ :stream | 
-						| result |
-						result := [ (stream next: 10000) asString ]
-							on: Error
-							do: [ (stream binary next: 10000) asString ].
-						stream size > 10000
-							ifTrue: [ result , '  ... truncated ...' ]
-							ifFalse: [ result ] ] ].
-		receiver withLineNumbers: true.
-		receiver when: [ self isFile ]
-	)
 	
 	= other = (
 		^ self species = other species
@@ -504,17 +467,6 @@ FileReference = AbstractFileReference (
 		receiver description: self fullName.
 		receiver type: 'directory'.
 		^ receiver yourself
-	)
-	
-	spotterPreviewStScriptIn: aComposite = (
-		| receiver |
-		(self extension = 'st' or: [ self extension = 'ph' ])
-			ifFalse: [ ^ self ].
-		receiver := aComposite pharoMethod.
-		receiver title: [ self gtDisplayString ].
-		receiver display: #yourself.
-		receiver smalltalkClass: [ nil ].
-		receiver entity: (self readStreamDo: #contents)
 	)
 	
 	setMacType: aTypeString creator: aCreatorString = (

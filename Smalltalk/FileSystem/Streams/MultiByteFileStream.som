@@ -3,13 +3,10 @@ MultiByteFileStream = StandardFileStream (
 	| converter lineEndConvention wantsLineEndConversion |
 	
 	basicNext: anInteger putAll: aCollection startingAt: startIndex = (
-	
-	
-	        ^super next: anInteger putAll: aCollection startingAt: startIndex
+		^super next: anInteger putAll: aCollection startingAt: startIndex
 	)
 	
 	setConverterForCode = (
-	
 		| current |
 		(SourceFiles at: 2)
 			ifNotNil: [self fullName = (SourceFiles at: 2) fullName ifTrue: [^ self]].
@@ -28,50 +25,41 @@ MultiByteFileStream = StandardFileStream (
 	)
 	
 	basicNext: anInteger = (
-	
 		^ super next: anInteger.
 	
 	)
 	
 	converter: aConverter = (
-	
 		converter := aConverter.
 		self installLineEndConventionInConverter
 	
 	)
 	
 	basicNextPut: char = (
-	
 		^ super nextPut: char.
 	
 	)
 	
 	binary = (
-	
 		super binary.
 		self lineEndConvention: nil
 	)
 	
 	lineEndConvention: aSymbol = (
-	
 		(lineEndConvention := aSymbol) ifNotNil: [wantsLineEndConversion := true].
 		self installLineEndConventionInConverter
 	)
 	
 	peekFor: item = (
-	
-	
 		| next state |
 		state := converter saveStateOf: self.
 		(next := self next) == nil ifTrue: [^ false].
 		item = next ifTrue: [^ true].
 		converter restoreStateOf: self with: state.
 		^ false.
-	
 	)
 	
 	basicReadInto: byteArray startingAt: startIndex count: count = (
-	
 		^ super readInto: byteArray startingAt: startIndex count: count.
 	
 	)
@@ -94,16 +82,13 @@ MultiByteFileStream = StandardFileStream (
 	)
 	
 	ascii = (
-	
 		super ascii.
 		self detectLineEndConvention.
 	
 	)
 	
 	basicUpTo: delim = (
-	
 		^ super upTo: delim.
-	
 	)
 	
 	requestDropStream: dropIndex = (
@@ -148,7 +133,6 @@ MultiByteFileStream = StandardFileStream (
 	)
 	
 	open: fileName forWrite: writeMode = (
-	
 		| result |
 		result := super open: fileName forWrite: writeMode.
 		result ifNotNil: [
