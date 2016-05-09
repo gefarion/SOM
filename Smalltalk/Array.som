@@ -122,6 +122,8 @@ Array = (
         ^ new
     )
     
+    asString = primitive
+    
     ----------------------------
     
     "Allocation"

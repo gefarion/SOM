@@ -141,6 +141,10 @@ String = (
 			[:index | aBlock value: (self charAt: index)]
 	)
 	
+		
+	"FileSystem"
+	asVmPathName = (^self)
+	
 	-------------------------------------------------------------
 	
 	streamContents: blockWithArg = (

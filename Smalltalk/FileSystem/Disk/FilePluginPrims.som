@@ -159,7 +159,6 @@ FilePluginPrims = Object (
 	)
 	
 	primitiveFailed = (
-		thisContext sender sender sender method println.
 		self error: 'Primitive ' + thisContext sender method signature printString + ' failed'.
 	)
 )

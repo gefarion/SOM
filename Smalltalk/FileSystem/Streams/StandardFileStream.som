@@ -132,7 +132,6 @@ StandardFileStream = FileStream (
 	
 		| rawName |
 		rawName := self primDropRequestFileName: dropIndex.
-	 	'a' println.
 		name := FilePathEncoder decode: rawName.
 		fileID := self primDropRequestFileHandle: dropIndex.
 		fileID == nil
@@ -497,8 +496,7 @@ StandardFileStream = FileStream (
 	atEnd = (
 		"Answer whether the receiver is at its end.  "
 		
-		collection ifNotNil: [
-			position < readLimit ifTrue: [ ^false ] ].
+		collection ifNotNil: [position < readLimit ifTrue: [ ^false ] ].
 		^self primAtEnd: fileID
 	)
 	

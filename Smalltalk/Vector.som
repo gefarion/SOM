@@ -34,7 +34,6 @@ Vector = (
     ^ self checkIndex: index ifValid: [ storage at: index ] )
     
     at: index put: value = (
-        thisContext sender method println.
         ^ self checkIndex: index ifValid: [ storage at: index put: value ]
     )
     
@@ -196,10 +195,8 @@ Vector = (
 		performed."
 	
 		| index repOff |
-		thisContext sender method println.
 		repOff := repStart - start.
 		index := start - 1.
-		index println. stop println.
 		[(index := index + 1) <= stop] whileTrue: [ 
 			self at: index put: (replacement at: repOff + index)
 		]
@@ -219,11 +216,6 @@ Vector = (
 	"Pharo Compatibility"
 	species = (^self class)
 	
-	"FileSystem"
-	asVmPathName = (^ FilePathEncoder encode: self)
-	
-	
-		
     ----------------------------
     
     "Allocation"

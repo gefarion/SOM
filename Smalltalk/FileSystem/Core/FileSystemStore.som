@@ -199,8 +199,8 @@ FileSystemStore = Object (
 	)
 	
 	stringFromPath: aPath = (
-		^ String streamContents: [ :out | 
-			self printPath: aPath on: out ]
+		^ (String streamContents: [ :out | 
+			self printPath: aPath on: out ])
 	)
 	
 	isWritable: aPath = (

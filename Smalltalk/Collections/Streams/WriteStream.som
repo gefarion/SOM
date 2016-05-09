@@ -228,14 +228,13 @@ WriteStream = PositionableStream (
 		whatIsAPrimitive.
 		<primitive: 66>
 		"
-	
 		position >= writeLimit
 			ifTrue: [ ^self pastEndPut: anObject]
-			ifFalse: 
-				[
+			ifFalse: [
 				position := position + 1.
 				collection append: anObject.
-				^anObject]
+				^anObject
+			]
 	)
 	
 	with: aCollection = (
@@ -316,7 +315,7 @@ WriteStream = PositionableStream (
 	
 	contents = (
 		readLimit := readLimit max: position.
-		^collection copyFrom: 1 to: position
+		^(collection copyFrom: 1 to: position) asArray asString 
 	)
 	
 	space: anInteger = (

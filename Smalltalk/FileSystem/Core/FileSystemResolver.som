@@ -24,7 +24,6 @@ FileSystemResolver = Object (
 	
 	resolveString: aString = (
 		| decoded fs |
-		'A' println.
 		decoded := FilePathEncoder decode: aString.
 		fs := FileSystem disk.
 		^ FileReference 

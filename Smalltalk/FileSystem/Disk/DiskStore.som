@@ -77,7 +77,7 @@ DiskStore = FileSystemStore (
 	defaultWorkingDirectory = (
 		| pathString |
 		pathString := self class primitives decode: self class primitives imageFile.
-		^ (self pathFromString: pathString) parent
+		^ (self pathFromString: pathString) parent parent
 		
 	)
 	
@@ -334,13 +334,6 @@ DiskStore = FileSystemStore (
 	current = (
 		^ self currentFileSystem store
 	)
-	
-	startUp: resuming = (
-		self checkVMVersion.
-		resuming 
-			ifTrue: [ self reset ]
-	)
-	
 	primitiveFailed = (
 		self error: 'Primitive fail'
 	)

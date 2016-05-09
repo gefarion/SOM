@@ -16,12 +16,11 @@ RelativePath = Path (
 		self isWorkingDirectory
 			ifTrue: [ aStream nextPutAll: 'workingDirectory' ]
 			ifFalse: [ 
-				aStream
-					nextPutAll: '* ''';
-					nextPutAll: (self at: 1) asString;
-					nextPut: '\''.
+				aStream nextPutAll: '* \''.
+				aStream nextPutAll: (self at: 1) asString.
+				aStream	nextPut: '\''.
 				2 to: self size do: [ :i | 
-					aStream nextPutAll: ' / '''.
+					aStream nextPutAll: ' / \''.
 					aStream nextPutAll: (self at: i).
 					aStream nextPut: '\'' ] ]
 	)

@@ -123,13 +123,11 @@ Path = Vector (
 		elements."
 		
 		| elements |
-		
 		aPath isAbsolute ifTrue: [^ aPath].
 		elements := Array new: self size + aPath size.
 		
 		1 to: self size do: [:i | elements at: i put: (self at: i)].
 		1 to: aPath size do: [:i | elements at: self size + i put: (aPath at: i)].
-		
 		^ self class withAll: (self class canonicalizeElements: elements)
 	)
 	
@@ -409,7 +407,7 @@ Path = Vector (
 	
 		| inst |
 		inst := self new: 1.
-		inst at: 1 put: aString.
+		inst append: aString.
 		^ inst
 	)
 	
@@ -484,7 +482,6 @@ Path = Vector (
 		
 		"Note: aString is not parsed, so supplying a string like '/griffle/plonk'
 		will not create an absolute path."
-		
 		^ RelativePath with: aString
 	)
 	

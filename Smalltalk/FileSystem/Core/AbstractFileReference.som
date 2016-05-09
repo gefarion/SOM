@@ -1,7 +1,6 @@
 AbstractFileReference = Object (
 	"I am an abstract superclass for FileLocator and FileReference. By implementing most of the methods on myself most code duplucation between the locator and the reference can be avoided"
 	
-	
 	isRoot = (
 		^ self resolve isRoot
 	)
@@ -82,7 +81,6 @@ AbstractFileReference = Object (
 	)
 	
 	extension = (
-		
 		^ self fullPath extension.
 	)
 	
@@ -157,7 +155,6 @@ AbstractFileReference = Object (
 	)
 	
 	fileIn = (
-	
 		self readStreamDo: [ :stream | 
 			CodeImporter evaluateFileStream: stream ]
 	)
@@ -405,7 +402,6 @@ AbstractFileReference = Object (
 	)
 	
 	fullName = (
-	
 		^ self resolve fullName
 	)
 	

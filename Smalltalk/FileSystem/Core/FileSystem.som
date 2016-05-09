@@ -34,7 +34,6 @@ FileSystem = Object (
 	referenceTo: aResolvable = ( 
 		"Answer a reference to the argument from the context of the receiver filesystem.  	
 			Example: Filesystem disk referenceTo: 'plonk.taz'"
-	
 		^ FileReference 
 			fileSystem: self
 			path: (self pathFromObject: aResolvable)
@@ -71,10 +70,6 @@ FileSystem = Object (
 		The store is expected to raise an exception if it cannot do so."
 	
 		^ store createDirectory: (self resolve: aResolvable)
-	)
-	
-	gtInspectorWorkingDirectoryItemsIn: composite = (
-		(self workingDirectory gtInspectorItemsIn: composite) title: 'Working directory'
 	)
 	
 	workingDirectoryPath = (
@@ -180,10 +175,6 @@ FileSystem = Object (
 		^ (self permissions: aResolvable) isReadable
 	)
 	
-	gtInspectorRootItemsIn: composite = (
-		(self root gtInspectorItemsIn: composite) title: 'Root directory'
-	)
-	
 	workingDirectory = (
 		"Returns a reference to the directory from where the image was launched"
 	
@@ -196,7 +187,6 @@ FileSystem = Object (
 			> cd /a/b/c
 			> cd b
 			The shell will attempt to make /a/b/c/b the current directory. "
-	
 		^ workingDirectory resolve: aPath
 	)
 	
@@ -285,7 +275,6 @@ FileSystem = Object (
 	/ anObject = (
 		"Return the absolute reference obtained by resolving anObject against the
 		root of this filesystem."
-		
 		^ self root / anObject
 	)
 	
@@ -564,16 +553,6 @@ FileSystem = Object (
 		^ self disk workingDirectory
 	)
 	
-	gtExampleZip = (
-		| zipFile zip receiver |
-		zipFile := FileSystem memory workingDirectory / 'test.zip'.
-		zip := (FileSystem zip: zipFile) open.
-		receiver := zip / 'sample.txt'.
-		receiver writeStreamDo: [ :stream | stream nextPutAll: self comment ].
-		receiver yourself.
-		^ zip
-	)
-	
 	disk = (
 		"Answer a filesystem that represents the 'on-disk' filesystem used by the host operating system."
 	
@@ -597,13 +576,6 @@ FileSystem = Object (
 	
 	memory = (
 		^ self store: (MemoryStore new)
-	)
-	
-	startUp: aBoolean = (
-		"This is only here to deal with migration from older versions of
-		FileSystem that wanted to receive startup notifcations."
-		
-		Smalltalk removeFromStartUpList: self
 	)
 	
 	/ aFileOrDirectoryName = (

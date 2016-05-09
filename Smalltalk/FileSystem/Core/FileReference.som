@@ -22,58 +22,6 @@ FileReference = AbstractFileReference (
 		^ filesystem binaryReadStreamOn: self path
 	)
 	
-	gtInspectorFuelIn: composite = (
-		"(FileSystem disk workingDirectory / 'GTtest.fuel') writeStreamDo: [ :stream |
-		FLSerializer newDefault
-			at: #author putAdditionalObject: 'Author: Max Leske';
-			at: #date putAdditionalObject: DateAndTime now;
-			addPreMaterializationAction: [ Smalltalk inform: 'starting materialization' ];
-			addPostMaterializationAction: [ :materialization | materialization inspect ];
-			serialize: 'foo' on: stream binary ].
-		
-	FLMaterializer materializeFromFileNamed: 'GTtest.fuel'"
-	
-		| receiver |
-		receiver := composite table.
-		receiver title: 'Fuel Header'.
-		receiver display: [ (FLMaterializer materializeHeaderFromFileNamed: self fullName) gtGetMetaData ].
-		receiver column: 'Property' evaluated: [ :assoc | assoc key ].
-		receiver column: 'Value' evaluated: [ :assoc | assoc value ].
-		receiver when: [ self extension = 'fuel' ]
-	)
-	
-	spotterForZipFilesFor: aStep = (
-		| zipFileSystem receiver |
-		self isZipFile
-			ifFalse: [ ^ self ].
-		receiver := aStep listProcessor.
-		receiver
-			allCandidates: [ 
-				zipFileSystem := (FileSystem zip: self) open.
-				zipFileSystem workingDirectory files ].
-		receiver title: 'Files'.
-		receiver candidatesLimit: Float infinity.
-		receiver itemName: #basename.
-		receiver itemIcon: [ GLMUIThemeExtraIcons glamorousBrowse ].
-		receiver filter: GTFilterSubstring
-	)
-	
-	spotterForZipDirectoriesFor: aStep = (
-		| zipFileSystem receiver |
-		self isZipFile
-			ifFalse: [ ^ self ].
-		receiver := aStep listProcessor.
-		receiver
-			allCandidates: [ 
-				zipFileSystem := (FileSystem zip: self) open.
-				zipFileSystem workingDirectory directories ].
-		receiver title: 'Directories'.
-		receiver candidatesLimit: Float infinity.
-		receiver itemName: #basename.
-		receiver itemIcon: [ GLMUIThemeExtraIcons glamorousFolder ].
-		receiver filter: GTFilterSubstring
-	)
-	
 	deleteIfAbsent: aBlock = (
 		self exists 
 			ifTrue: [ self delete ]
@@ -116,19 +64,6 @@ FileReference = AbstractFileReference (
 			ifTrue: [ filesystem resolve: self path ]
 	)
 	
-	spotterForFilesFor: aStep = (
-		^ self isDirectory
-			ifTrue: [ 
-				| receiver |
-				receiver := aStep listProcessor.
-				receiver allCandidates: [ self files ].
-				receiver title: 'Files'.
-				receiver candidatesLimit: Float infinity.
-				receiver itemName: #basename.
-				receiver itemIcon: [ GLMUIThemeExtraIcons glamorousBrowse ].
-				receiver filter: GTFilterSubstring ]
-	)
-	
 	mimeTypes = (
 		"Return the possible mime types for the given path."
 		^ filesystem mimeTypesAt: path
@@ -139,14 +74,6 @@ FileReference = AbstractFileReference (
 		"FileSystem workingDirectory hasDirectories"
 		
 		^ filesystem hasDirectories: path
-	)
-	
-	gtInspectorPngIn: composite = (
-		| receiver |
-		receiver := composite morph.
-		receiver title: 'Picture'.
-		receiver display: [ self binaryReadStreamDo: [ :stream | PNGReadWriter formFromStream: stream ] ].
-		receiver when: [ self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imagePng ] ]
 	)
 	
 	exists = (
@@ -250,55 +177,9 @@ FileReference = AbstractFileReference (
 		^ filesystem isFile: path
 	)
 	
-	gtInspectorActionMaterializeFuel = (
-		| receiver |
-		receiver := GLMGenericAction new.
-		receiver
-			action: [ :composite | 
-				| result |
-				result := FLMaterializer materializeFromFileNamed: self fullName.
-				composite selection: result ].
-		receiver icon: GLMUIThemeExtraIcons glamorousAdd.
-		receiver condition: [ self extension = 'fuel' ].
-		^ receiver title: 'Materialize'
-	)
-	
 	setFileSystem: aFilesystem path: aPath = (
 		filesystem := aFilesystem.
 		path := aPath
-	)
-	
-	spotterPreviewPngIn: aComposite = (
-		(self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imagePng ])
-			ifFalse: [ ^ self ].
-		aComposite
-			custom:
-				((self binaryReadStreamDo: [ :stream | PNGReadWriter formFromStream: stream ]) asAlphaImageMorph asBrick margin: 20)
-	)
-	
-	gtInspectorJpegIn: composite = (
-		| receiver |
-		receiver := composite morph.
-		receiver title: 'Picture'.
-		receiver display: [ self binaryReadStreamDo: [ :stream | ImageReadWriter formFromStream: stream ] ].
-		receiver when: [ self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imageJpeg ] ]
-	)
-	
-	fileTreeUtilityClass = (
-	    ^ MCFileTreeFileSystemUtils
-	)
-	
-	spotterForDirectoriesFor: aStep = (
-		^ self isDirectory
-			ifTrue: [ 
-				| receiver |
-				receiver := aStep listProcessor.
-				receiver allCandidates: [ self directories ].
-				receiver title: 'Directories'.
-				receiver candidatesLimit: Float infinity.
-				receiver itemName: #basename.
-				receiver itemIcon: [ GLMUIThemeExtraIcons glamorousFolder ].
-				receiver filter: GTFilterSubstring ]
 	)
 	
 	createDirectory = (
@@ -318,27 +199,6 @@ FileReference = AbstractFileReference (
 		^ filesystem isSymlink: path
 	)
 	
-	gtInspectorGroupedFilesIn: composite = (
-		| receiver |
-		receiver := composite roassal2.
-		receiver title: 'Grouped files'.
-		receiver initializeView: [ RTDoubleBarBuilder new ].
-		receiver
-			painting: [ :builder :presentation | 
-				| metric all grouped |
-				metric := #size.
-				all := self allFiles.
-				grouped := (all groupedBy: [ :each | each extension ]) associations
-					sorted: [ :a :b | (a value sumNumbers: metric) > (b value sumNumbers: metric) ].
-				grouped := (grouped first: (20 min: grouped size)) select: [ :each | (each value sumNumbers: metric) > 0 ].
-				builder pointName: [ :each | each key ].
-				builder points: grouped.
-				builder bottomValue: [ :each | each value size ] titled: 'Number of files'.
-				builder topValue: [ :each | (each value sumNumbers: metric) / 1000000 ] titled: 'Total size in MB' ].
-		receiver send: #value.
-		^ receiver when: [ self isDirectory and: [ self hasChildren ] ]
-	)
-	
 	isDirectory = (
 		^ filesystem isDirectory: path
 	)
@@ -346,14 +206,6 @@ FileReference = AbstractFileReference (
 	printOn: aStream = (
 		filesystem forReferencePrintOn: aStream.
 		filesystem printPath: path on: aStream
-	)
-	
-	gtInspectorGifIn: composite = (
-		| receiver |
-		receiver := composite morph.
-		receiver title: 'Picture'.
-		receiver display: [ self binaryReadStreamDo: [ :stream | GIFReadWriter formFromStream: stream ] ].
-		receiver when: [ self mimeTypes notNil and: [ self mimeTypes first matches: ZnMimeType imageGif ] ]
 	)
 	
 	nextVersion = (
@@ -386,10 +238,6 @@ FileReference = AbstractFileReference (
 		^ (filesystem = aReference fileSystem or: [aReference isRelative])
 			ifTrue: [filesystem referenceTo: (path resolvePath: aReference path)]
 			ifFalse: [aReference]
-	)
-	
-	gtDisplayOn: stream = (
-		filesystem printPath: path on: stream
 	)
 	
 	entries = (
@@ -461,14 +309,6 @@ FileReference = AbstractFileReference (
 		^ self
 	)
 	
-	asRepositorySpecFor: aMetacelloMCProject = (
-		| receiver |
-		receiver := aMetacelloMCProject repositorySpec.
-		receiver description: self fullName.
-		receiver type: 'directory'.
-		^ receiver yourself
-	)
-	
 	setMacType: aTypeString creator: aCreatorString = (
 		self flag: 'TODO'.
 		
@@ -479,21 +319,7 @@ FileReference = AbstractFileReference (
 	)
 	
 	----------------------------------
-	
-	gtExampleGif = (
-		| receiver |
-		receiver := FileSystem memory workingDirectory / 'pharoicon.gif'.
-		receiver writeStreamDo: [ :stream | GIFReadWriter putForm: ThemeIcons current pharoIcon onStream: stream ].
-		^ receiver yourself
-	)
-	
-	gtExamplePng = (
-		| receiver |
-		receiver := FileSystem memory workingDirectory / 'pharoicon.png'.
-		receiver writeStreamDo: [ :stream | PNGReadWriter putForm: ThemeIcons current pharoIcon onStream: stream ].
-		^ receiver yourself
-	)
-	
+
 	fileSystem: aFilesystem path: aPath = (
 		^ self new setFileSystem: aFilesystem path: aPath
 	)
@@ -505,24 +331,6 @@ FileReference = AbstractFileReference (
 		[ random := UUIDGenerator default generateRandomBitsOfLength: 100.
 		fileName := prefix , random asString, suffix ] doWhileTrue: [ (tmpDir / fileName) exists ].
 		^ fileName asFileReference
-	)
-	
-	gtExampleDirectory = (
-		| directory subDirectory |
-		directory := FileSystem memory workingDirectory / 'directory'.
-		directory createDirectory.
-		directory / 'file1.txt' writeStreamDo: [ :stream | stream nextPutAll: 'File1 contents' ].
-		directory / 'file2.txt' writeStreamDo: [ :stream | stream nextPutAll: 'File2 contents' ].
-		subDirectory := (directory / 'subdirectory') createDirectory.
-		subDirectory / 'file3.txt' writeStreamDo: [ :stream | stream nextPutAll: 'File3 contents' ].
-		^ directory
-	)
-	
-	gtExampleText = (
-		| receiver |
-		receiver := FileSystem memory workingDirectory / 'sample.txt'.
-		receiver writeStreamDo: [ :stream | stream nextPutAll: self comment ].
-		^ receiver yourself
 	)
 	
 	/ aString = (
