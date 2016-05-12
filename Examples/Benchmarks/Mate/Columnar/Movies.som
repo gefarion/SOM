@@ -1,0 +1,24 @@
+Movies = Benchmark (
+    oneTimeSetup = (
+    	UnixStore initialize.
+    	self loadMovies.
+    )
+    
+    benchmark = (
+		^true
+    )
+    
+    verifyResult: result = (
+     	^true
+    )
+    
+    loadMovies = (
+    	| file stream ratingForMovie |
+    	file := FileSystem * 'core-lib/Examples/Benchmarks/Mate/Columnar/MovieLens/ratings.dat'.
+    	stream := file readStream.
+    	[stream atEnd] whileFalse: [
+    		ratingForMovie := stream nextLine asString.
+    		ratingForMovie println.
+    	]
+    )
+)    

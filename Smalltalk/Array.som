@@ -46,7 +46,7 @@ Array = (
     
     "Copying (inclusively)"
     copyFrom: start to: end = ( | result i |
-        result := Array new: end - start + 1.
+        result := self species new: end - start + 1.
         i := 1.
         self from: start to: end do: [ :e |
             result at: i put: e.
@@ -122,7 +122,21 @@ Array = (
         ^ new
     )
     
+    "Files / Pharo Compatibility"
     asString = primitive
+    
+    indexOfAnyOf: aCollection = (^self indexOfAnyOf: aCollection startingAt: 1)
+	indexOfAnyOf: aCollection startingAt: start = (
+		start to: self length do: [:index |
+			(aCollection contains: (self at: index)) ifTrue: [ ^index]
+		].
+		^0
+	)
+	
+	"Accessing"
+    species = (
+    	^self class
+    )
     
     ----------------------------
     

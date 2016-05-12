@@ -1,0 +1,18 @@
+Rating = Object (
+    | movie rating |
+    
+	movie = (^movie)
+	movie: aMovieId = ( movie := aMovieId)
+	
+	rating = (^rating)
+	rating: aRating = ( rating := movie: aMovieId = ( movie := aMovieId))
+	
+	----------------------------------
+	
+	movie: aMovieId rating: aRating = (
+		| rating |
+		rating := self new
+		rating movie: aMovieId.
+		rating rating: aRating  
+	)
+)    
