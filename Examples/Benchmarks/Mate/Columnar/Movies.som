@@ -1,24 +1,45 @@
 Movies = Benchmark (
+    | ratings |
     oneTimeSetup = (
     	UnixStore initialize.
+    	ratings := Vector new.
     	self loadMovies.
     )
     
     benchmark = (
-		^true
+		| mean |
+		mean := 0.
+		ratings do: [:rating | mean := mean + rating rating].
+		mean := mean // self count.
+		^mean.
     )
     
     verifyResult: result = (
-     	^true
+     	self count = 50000 ifTrue:[^result = 3.62896].
+     	self count = 100000 ifTrue:[^result = 3.56631].
+     	result println.
+     	^false.
     )
     
     loadMovies = (
-    	| file stream ratingForMovie |
+    	| i file stream ratingForMovie rating |
     	file := FileSystem * 'core-lib/Examples/Benchmarks/Mate/Columnar/MovieLens/ratings.dat'.
     	stream := file readStream.
-    	[stream atEnd] whileFalse: [
-    		ratingForMovie := stream nextLine asString.
-    		ratingForMovie println.
+    	i := 0.
+    	[stream atEnd or: [i > self count]] whileFalse: [
+    		ratingForMovie := self delimitor split: (stream nextLine asString).
+    		ratingForMovie size = 4 ifTrue: [
+	    		rating := Rating new.
+	    		rating movie: (ratingForMovie at: self movieIndex).
+	    		rating rating: (ratingForMovie at: self ratingIndex) asInteger.
+	    		ratings append: rating.
+	    		i := i + 1.
+	    	]
     	]
     )
+    
+    delimitor = (^'::')
+    movieIndex = (^2)
+    ratingIndex = (^3)
+    count = (^100000)
 )    

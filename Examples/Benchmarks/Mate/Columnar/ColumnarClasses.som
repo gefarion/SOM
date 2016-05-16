@@ -1,0 +1,21 @@
+ColumnarClasses = (
+    | columnarData |
+    
+    newInstanceFor: aClass = (
+    	(columnarData containsKey: aClass) ifFalse: [
+    		aClass println.
+    		aClass columnarDescriptor println.
+    		columnarData at: aClass put: 
+    			(ColumnarData fromDescriptor: aClass columnarDescriptor)	
+    	].
+    	^(columnarData get: aClass) newInstance.
+    )
+    
+    initialize = (columnarData := Hashtable new)
+    
+    ------------------------
+    | current |
+    current = (^current)
+    initialize = (current := self new)
+    
+)    

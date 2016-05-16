@@ -1,0 +1,33 @@
+ColumnarData = (
+    | columns lastPosition descriptor class |
+    
+    initialize = (
+    	columns := Array new: descriptor countOfColumns.
+    	lastPosition := 0.
+		1 to: columns length do: [:index | 
+			columns at: index put: (Array new: descriptor initialSize)
+		].    	
+    )
+    
+    newInstanceFor = (
+    	| environment |
+    	lastPosition := lastPosition + 1.
+    	environment := class columnarEnvironment.
+    	environment columns: columns.
+    	environment descriptor: descriptor.
+    	^aClass basicNew installEnvironment: environment 
+    )
+    
+    descriptor: aColumnarClassDescriptor = (descriptor := aColumnarClassDescriptor)
+    
+    
+    ---------------------------
+    
+    fromDescriptor: aDescriptor = (
+    	| instance |
+    	instance := self basicNew.
+    	instance descriptor: aColumnarClassDescriptor.
+    	instance initialize.
+    	^instance. 
+    )
+)    

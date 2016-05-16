@@ -1,0 +1,12 @@
+MoviesColumnar = Movies (
+    oneTimeSetup = (
+    	| environment |
+    	ColumnarClasses initialize.
+    	environment := EnvironmentMO 
+							operationalSemantics: nil 
+							message: ColumnarMessageMO new
+							layout: nil.
+		Rating installEnvironment: environment.
+		super oneTimeSetup.
+    )
+)    
