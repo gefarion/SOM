@@ -102,17 +102,15 @@ String = (
 	)
 	
 	split: aSequenceableCollection indicesDo: aBlock = (
-		|  position oldPosition |
-		
+		| position oldPosition |
 		position := 1.
 		oldPosition := position.
-		
-		position := aSequenceableCollection indexOf: self startingAt: position. 
+		position := aSequenceableCollection indexOfSubCollection: self startingAt: position.
 		[ position > 0 ] whileTrue: [
 			aBlock value: oldPosition value: position - 1.
-			position := position + 1.
+			position := position + self length.
 			oldPosition := position.
-			position := aSequenceableCollection indexOf: self startingAt: position.
+			position := aSequenceableCollection indexOfSubCollection: self startingAt: position.
 		].
 	
 		aBlock value: oldPosition value: aSequenceableCollection length.
@@ -128,6 +126,25 @@ String = (
 		].
 		^ exceptionBlock value
 	)
+	
+	indexOfSubCollection: aSubCollection startingAt: anIndex = ( 
+		| index |
+		index := self findString: aSubCollection startingAt: anIndex.
+		index = 0 ifTrue: [^0].
+		^ index
+	)
+	
+	findString: key startingAt: start = (
+		self length = 0 ifTrue: [^ 0].
+		start to: self length - key length + 1 do: [:startIndex | | index |
+			index := 1.
+			[(self charAt: startIndex+index-1) = (key charAt: index)] whileTrue: [
+					index = key length ifTrue: [^ startIndex].
+					index := index+1
+			]
+		].
+		^ 0
+	)	
 	
 	"Pharo Compatibility"
 	copyFrom: anIndex to: anotherIndex = (

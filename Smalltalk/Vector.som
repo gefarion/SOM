@@ -31,7 +31,7 @@ Vector = (
     
     "Accessing"
     at: index = ( 
-    ^ self checkIndex: index ifValid: [ storage at: index ] )
+    	^ self checkIndex: index ifValid: [ storage at: index ] )
     
     at: index put: value = (
         ^ self checkIndex: index ifValid: [ storage at: index put: value ]
@@ -169,6 +169,14 @@ Vector = (
 					ifTrue: [ ^ foundBlock value: each ] ].
 		^ exceptionBlock value
 	)
+	
+	select: aBlock = (
+        | newCollection |
+        newCollection := self species new: self size.
+        self do: [:each | (aBlock value: each)  
+                            ifTrue: [newCollection append: each]].
+        ^ newCollection
+    )
 	
 	errorNotFound: anObject = (
 		^nil

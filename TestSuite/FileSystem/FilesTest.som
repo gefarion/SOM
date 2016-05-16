@@ -5,7 +5,7 @@ FilesTest = TestCase (
   
   testOpen = (
     | file |
-    file := FileSystem / 'Users/guidochari/Documents/Projects/TruffleMATE/core-lib/Smalltalk/Array.som'.
+    file := FileSystem * 'core-lib/Smalltalk/Array.som'.
     file contents asString println.
     self assert: true
   )
