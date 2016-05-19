@@ -1,0 +1,15 @@
+ColumnarFieldSemanticsMO = LayoutMO (
+	read: anIndex = (
+		^(ColumnarFieldSemanticsMO columnarDataFor: self) getDataFor: self at: anIndex + 1.
+	)
+	
+	write: anIndex value: aValue = (
+		^(ColumnarFieldSemanticsMO columnarDataFor: self) setDataFor: self at: anIndex + 1 value: aValue.
+	)
+	
+	-------------------------------
+	
+	columnarDataFor: anInstance = (
+		^ColumnarClasses current at: anInstance class
+	)
+)

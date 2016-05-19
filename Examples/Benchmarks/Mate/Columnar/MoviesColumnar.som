@@ -1,6 +1,7 @@
 MoviesColumnar = Movies (
     oneTimeSetup = (
     	| environment |
+    	Rating initialize.
     	ColumnarClasses initialize.
     	environment := EnvironmentMO 
 							operationalSemantics: nil 

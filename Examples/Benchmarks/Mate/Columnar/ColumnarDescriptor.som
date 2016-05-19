@@ -1,0 +1,37 @@
+ColumnarDescriptor = (
+    | descriptor initialSize klass environment |
+    
+    initialize = (
+    	descriptor := Vector new.
+    	initialSize := 10000.  
+    )
+    
+    "Accessing"
+    initialSize = (^initialSize)
+    initialSize: aNumber  = (initialSize := aNumber)
+    klass = (^klass)
+    klass: aNumber  = (klass := aNumber)
+    environment = (^environment)
+    environment: aNumber  = (environment := aNumber)
+    
+    
+    makeColumnarInstVarNamed: aName = (
+    	descriptor append: 
+    		(Pair withKey: (klass fields indexOf: aName) andValue: descriptor size + 1)
+    )
+    
+    columnIndexFor: anIndex = (
+    	^(descriptor detect: [:pair | pair key = anIndex]) value
+    )
+    
+    countOfColumns = (^descriptor size)
+
+	-----------------------------------
+	
+	newFor: aClass = (
+		| instance |
+		instance := self new.
+		instance klass: aClass.
+		^instance.
+	)
+)

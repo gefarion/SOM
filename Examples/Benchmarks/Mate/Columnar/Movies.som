@@ -15,6 +15,7 @@ Movies = Benchmark (
     )
     
     verifyResult: result = (
+     	self count = 10000 ifTrue:[^result = 3.6303].
      	self count = 50000 ifTrue:[^result = 3.62896].
      	self count = 100000 ifTrue:[^result = 3.56631].
      	result println.
@@ -26,7 +27,7 @@ Movies = Benchmark (
     	file := FileSystem * 'core-lib/Examples/Benchmarks/Mate/Columnar/MovieLens/ratings.dat'.
     	stream := file readStream.
     	i := 0.
-    	[stream atEnd or: [i > self count]] whileFalse: [
+    	[stream atEnd or: [i >= self count]] whileFalse: [
     		ratingForMovie := self delimitor split: (stream nextLine asString).
     		ratingForMovie size = 4 ifTrue: [
 	    		rating := Rating new.
@@ -41,5 +42,5 @@ Movies = Benchmark (
     delimitor = (^'::')
     movieIndex = (^2)
     ratingIndex = (^3)
-    count = (^100000)
+    count = (^10000)
 )    

@@ -8,10 +8,29 @@ Rating = Object (
 	rating: aRating = ( rating := aRating)
 
 	----------------------------------
+	| columnarDescriptor columnarInstanceEnvironment |
+	
 	movie: aMovieId rating: aRating = (
 		| rating |
-		rating := self new
+		rating := self new.
 		rating movie: aMovieId.
 		rating rating: aRating  
+	)
+	
+	columnarDescriptor = (
+		| descriptor |
+		descriptor := ColumnarDescriptor newFor: self.
+		descriptor makeColumnarInstVarNamed: #movie.
+		descriptor makeColumnarInstVarNamed: #rating.
+		descriptor environment: columnarInstanceEnvironment.
+		^descriptor
+	)
+	
+	initialize = (
+		columnarInstanceEnvironment := 
+			EnvironmentMO 
+				operationalSemantics: nil 
+				message: nil
+				layout: ColumnarFieldSemanticsMO new.
 	)
 )    

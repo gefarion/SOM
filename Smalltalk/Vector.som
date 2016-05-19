@@ -63,10 +63,9 @@ Vector = (
         (last >= storage length) ifTrue: [
             "Need to expand capacity first"
             | newStorage |
-            newStorage := Array new: (2 * storage length).
+            newStorage := Array new: ((2 * storage length) max: 1).
             storage doIndexes: [ :i | newStorage at: i put: (storage at: i) ].
             storage := newStorage. ].
-        
         storage at: last put: element.
         last := last + 1.
         ^self

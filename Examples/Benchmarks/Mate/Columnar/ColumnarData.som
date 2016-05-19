@@ -1,33 +1,53 @@
 ColumnarData = (
-    | columns lastPosition descriptor class |
+    | columns lastPosition descriptor |
     
-    initialize = (
+    fillFromDescriptor = (
     	columns := Array new: descriptor countOfColumns.
     	lastPosition := 0.
 		1 to: columns length do: [:index | 
 			columns at: index put: (Array new: descriptor initialSize)
-		].    	
+		].
+		    	
     )
     
-    newInstanceFor = (
-    	| environment |
+    newInstance = (
+    	| environment instance |
     	lastPosition := lastPosition + 1.
-    	environment := class columnarEnvironment.
-    	environment columns: columns.
-    	environment descriptor: descriptor.
-    	^aClass basicNew installEnvironment: environment 
+    	environment := descriptor environment.
+    	instance := descriptor klass basicNew.
+    	self rowIndexFor: instance put: lastPosition.
+    	instance installEnvironment: environment.
+    	^instance 
     )
     
     descriptor: aColumnarClassDescriptor = (descriptor := aColumnarClassDescriptor)
     
+    getDataFor: anInstance at: anIndex = (
+    	^(columns at: (descriptor columnIndexFor: anIndex))
+    		at: (self rowIndexFor: anInstance)
+    ) 
+    
+    setDataFor: anInstance at: anIndex value: aValue = (
+    	^(columns at: (descriptor columnIndexFor: anIndex)) 
+    		at: (self rowIndexFor: anInstance)
+    		put: aValue
+    )
+    
+	rowIndexFor: anInstance = (
+		^anInstance instVarAt: 1
+	)
+	
+	rowIndexFor: anInstance put: aValue= (
+		^anInstance instVarAt: 1 put: lastPosition.
+	)
     
     ---------------------------
     
     fromDescriptor: aDescriptor = (
     	| instance |
     	instance := self basicNew.
-    	instance descriptor: aColumnarClassDescriptor.
-    	instance initialize.
+    	instance descriptor: aDescriptor.
+    	instance fillFromDescriptor.
     	^instance. 
     )
 )    
