@@ -25,11 +25,12 @@ NonLocalVars = (
      
      writeDifferentTypes = (
         | value |
-        1 to: 10 do: [:index |
+        1 to: 2 do: [:index |
 			value := 0.
 			self collection do: [:index | value := value + index].
 			value := value // 4.
 		].
+		value println.
 		^value.
     )
     
