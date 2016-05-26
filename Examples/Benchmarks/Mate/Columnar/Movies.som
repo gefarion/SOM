@@ -9,15 +9,9 @@ Movies = Benchmark (
     
     initialize = (
     	| harness |
-    	'a' println.
-    	harness := thisContext sender.
-    	harness println.
-    	harness method println.
-    	'b' println.
+    	harness := thisContext sender sender receiver.
     	self problemSize: harness innerIterations.
-    	'c' println.
     	harness innerIterations: 2.
-    	'd' println.
     	super initialize.
     )
     
@@ -32,8 +26,7 @@ Movies = Benchmark (
     verifyResult: result = (
      	self problemSize = 10000 ifTrue:[^result = 3.6303].
      	self problemSize = 50000 ifTrue:[^result = 3.62886].
-     	self problemSize = 100000 ifTrue:[^result = 3.56631].
-     	result println.
+     	self problemSize = 100000 ifTrue:[^result = 3.56627].
      	^false.
     )
     
