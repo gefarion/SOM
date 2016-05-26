@@ -1,3 +1,5 @@
 Context = (
-	method = primitive
+	method   = primitive
+	sender   = primitive
+	receiver = primitive
 )
