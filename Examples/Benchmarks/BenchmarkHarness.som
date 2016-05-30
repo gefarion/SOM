@@ -181,4 +181,7 @@ BenchmarkHarness = (
     printTotal = (
         ('Total Runtime: ' + total asString + 'us') println.
     )
+    
+    innerIterations: aNumber = (innerIterations := aNumber)
+    innerIterations = (^innerIterations)
 )
