@@ -2,8 +2,8 @@ DeltaBlueMate = DeltaBlue (
 	
     oneTimeSetup = ( 
     	| metaobject |
-    	super oneTimeSetup.
     	Counter initialize.
+    	super oneTimeSetup.
     	metaobject := (EnvironmentMO 
 			operationalSemantics: nil 
 			message: TracingMessageMO new
@@ -14,10 +14,10 @@ DeltaBlueMate = DeltaBlue (
     innerBenchmarkLoop: innerIterations = (
         self installEnvironment: TracingMessageMO instrumentationMO.
         self runIterations: innerIterations.
-        self installEnvironment: nil.
-        "Counter methodCalls println.
-        Counter methods do: [:name | name println.]. 
-        self verifyResult ifFalse: [ ^ false ]."
+        "self installEnvironment: nil."
+        Counter methodCalls println.
+        "Counter methods do: [:name | name println.]." 
+        self verifyResult ifFalse: [ ^ false ].
         ^ true
     )
     
