@@ -62,6 +62,10 @@ Dictionary = (
     
     ----
     
+    new: size = (
+    	^ super new initialize: size
+  	)
+  	
     new = (
         | newDictionary |
         newDictionary := super new.
