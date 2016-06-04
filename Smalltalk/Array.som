@@ -54,6 +54,7 @@ Array = (
         ^result
     )
     
+    copy = (^self copyFrom: 1)
     copyFrom: start = ( ^self copyFrom: start to: self length )
     
     replaceFrom: start to: stop with: replacement startingAt: repStart = (
@@ -67,8 +68,6 @@ Array = (
         [(index := index + 1) <= stop]
             whileTrue: [self at: index put: (replacement at: repOff + index)]
     )
-
-    copy = (^self copyFrom: 1)
     
     "Numerical"
     sum     = ( ^self inject: 0 into: [ :sub :elem | sub + elem ] )

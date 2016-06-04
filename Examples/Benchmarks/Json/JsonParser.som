@@ -278,9 +278,19 @@ JsonParser = (
   )
 
   pauseCapture = (
-    captureBuffer := captureBuffer concatenate: (
-      input substringFrom: captureStart to: index - 1).
+    (captureStart < index) ifTrue: [
+    	captureBuffer := captureBuffer concatenate: (
+      		input substringFrom: captureStart to: index - 1).
+    ].
     captureStart := -1
+  )
+  
+  printStatus = (
+  	index println.
+    line  println.
+    column println.
+    current println.
+    captureBuffer println.
   )
 
   endCapture = (
@@ -298,7 +308,6 @@ JsonParser = (
         captured := captureBuffer.
         captureBuffer := '' ].
     captureStart := -1.
-    
     ^ captured
   )
 

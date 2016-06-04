@@ -1,11 +1,14 @@
 Json = Benchmark (
-
-    oneTimeSetup = (
+	| parser |
+	
+	oneTimeSetup = (
       JsonLiteral initialize.
+      parser := JsonParser with: self contents.
     )
 
     benchmark = (
-      ^ (JsonParser with: Json RapBenchmarkMinified) parse.
+      parser reset.
+      ^ parser parse.
     )
     
     verifyResult: result = (
@@ -15,6 +18,8 @@ Json = Benchmark (
       (result asObject at: 'operations') isArray ifFalse: [^ false].
       ^ (result asObject at: 'operations') asArray size = 156
     )
+    
+    contents = (^Json RapBenchmarkMinified)
     
     ----
     

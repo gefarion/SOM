@@ -5,21 +5,11 @@ JsonTrace = JsonBig (
 		| metaobject |
 		super oneTimeSetup.
 		Counter initialize.
-    	parser := JsonParser with: self class AllSets.
-        metaobject := (EnvironmentMO 
+		metaobject := (EnvironmentMO 
 				operationalSemantics: nil 
 				message: TracingMessageMO new
 				layout: nil). 
       	TracingMessageMO instrumentationMO: metaobject.
       	parser installEnvironment: metaobject.
-    )
-	
-    benchmark = (
-      parser reset.
-      ^parser parse.
-    )
-    
-    verifyResult: result = (
-      ^true
     )
 )

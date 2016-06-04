@@ -1,0 +1,21 @@
+JsonBig = Json (
+	oneTimeSetup = (
+		UnixStore initialize.
+		super oneTimeSetup.
+	)
+	contents = (
+		| content |
+		content := (FileSystem * (self filename)) readStream contents.
+		^content asString 
+	)
+    
+    verifyResult: result = (
+      result class = ParseException ifTrue: [ result println ].
+      result isObject ifFalse: [^ false].
+      ^true
+    )
+    
+    filename = (
+    	^'core-lib/Examples/Benchmarks/Json/AllSets-xCleaned.json'
+    )
+)
