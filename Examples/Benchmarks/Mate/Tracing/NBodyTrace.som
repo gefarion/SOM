@@ -1,0 +1,20 @@
+NBodyTrace = NBody (
+    oneTimeSetup = ( 
+    	| metaobject |
+    	super oneTimeSetup.
+    	Counter initialize.
+    	metaobject := (EnvironmentMO 
+			operationalSemantics: nil 
+			message: TracingMessageMO new
+			layout: nil).
+		PropagationMessageMO instrumentationMO: metaobject.
+		self installEnvironment: PropagationMessageMO instrumentationMO.
+    )
+    
+    innerBenchmarkLoop: innerIterations = (
+    	| value |
+    	value := super innerBenchmarkLoop: innerIterations.
+    	"Counter methodCalls println."
+    	^value
+    )
+)    

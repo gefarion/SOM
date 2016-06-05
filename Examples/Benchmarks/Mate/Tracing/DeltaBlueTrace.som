@@ -1,6 +1,5 @@
 DeltaBlueTrace = DeltaBlue (
-	
-    oneTimeSetup = ( 
+	oneTimeSetup = ( 
     	| metaobject |
     	Counter initialize.
     	super oneTimeSetup.
@@ -26,7 +25,7 @@ DeltaBlueTrace = DeltaBlue (
         Planner projectionTest: innerIterations.
     )
     
-    verifyResult = (
+    "verifyResult = (
     	^(Counter methodCalls - 2 % self iterationOperations) = 0.
     )
     
@@ -36,5 +35,5 @@ DeltaBlueTrace = DeltaBlue (
     
     oneIteration = (
     	^3866 + 5217 + 6998 + 8233 + 3033
-    )
+    )"
 )
