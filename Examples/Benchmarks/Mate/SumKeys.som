@@ -7,7 +7,7 @@ SumKeys = Benchmark (
     propagation: aNumber = (propagation := aNumber)
     
     oneTimeSetup = (
-		self listSize: 20.
+		self listSize: 110.
 		self propagation: 5.
     	self initializePairArrays.
    	)
