@@ -28,7 +28,7 @@ Handle = (
     "Accessing"
     target 				= ( ^target )
     target: anObject 	= ( target := anObject )
-    
+    == other 			= (^target == other)
     ----------------------------
     
     | semantics |
@@ -49,7 +49,7 @@ Handle = (
 		self updateShapeForInstancesWith: (shape installEnvironment: self semantics).
 	)
     
-    target: anObject = (
-    	^(self new target: anObject) "installEnvironment: self semantics"
+    targetBaseeeeee: anObject = (
+    	^(self basicNew target: anObject) "installEnvironment: self semantics"
     )
  )
