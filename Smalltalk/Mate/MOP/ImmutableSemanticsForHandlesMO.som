@@ -24,9 +24,6 @@ THE SOFTWARE.
 "
 
 ImmutableSemanticsForHandlesMO = OperationalSemanticsMO (
-    read: anIndex = (^(self instVarAt: anIndex + 1) readOnly)
-    write: anIndex value: aValue = (
-    	self class = Handle 
-    		ifTrue:[self instVarAt: anIndex + 1 put: aValue] 
-    		ifFalse:[^aValue])
+    read: anIndex = (^(self target instVarAt: anIndex + 1) readOnly)
+    write: anIndex value: aValue = (^aValue)
 )

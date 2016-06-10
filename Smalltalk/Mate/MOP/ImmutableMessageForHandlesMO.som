@@ -11,12 +11,15 @@ ImmutableMessageForHandlesMO = MessageMO (
 	)
 	
     activate: aMethod withArguments: arguments = (
-		| realArguments target | 
-		target := self target.
-		target isNil ifTrue: [^arguments].
+		| realArguments | 
+		(aMethod signature = #target:) ifTrue:[ 
+			self instVarAt: 1 put: (arguments at: 4).
+			^arguments
+		].
+		aMethod signature = #== ifFalse: [^arguments].
 		realArguments := arguments copy.
-		realArguments at: 1 put: Handle semantics.
-		realArguments at: 3 put: target.
+		"realArguments at: 1 put: Handle semantics."
+		realArguments at: 3 put: self target.
 		^realArguments.
 	)
 )

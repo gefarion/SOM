@@ -51,14 +51,15 @@ ImmutabilityTest = TestCase (
 		self readOnlyReferenceOf: object withReference: object readOnly
 	)
 	
-	testReferenceReadOnlyProxies = (
+	"testReferenceReadOnlyProxies = (
 		| object readOnlyReference |
 		object := Pair new.
 		readOnlyReference := PairProxy handler: ReadOnlyPropagationHandler new target: object.
 		self readOnlyReferenceOf: object withReference: readOnlyReference
-	)
+	)"
 	
 	readOnlyReferenceOf: aPair withReference: aReference = (
+		| paramToTest |
 		aPair key: 1.
 		self assert: aPair key equals: 1.
 		aReference key: 2.
@@ -66,6 +67,9 @@ ImmutabilityTest = TestCase (
 		aPair key: 2.
 		self assert: aPair key equals: 2.
 		self assert: aReference equals: aPair.
-		self assert: aReference key equals: 2
+		self assert: aReference key equals: 2.
+		paramToTest := Pair withKey: 5 andValue: 5.
+		aReference asa: paramToTest.
+		self assert: paramToTest key equals: 1.
 	)
 )
