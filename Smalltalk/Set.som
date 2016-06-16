@@ -27,7 +27,11 @@ Set = (
 
     | items |
     
-    = otherSet = (
+    forEach: block = ( items forEach: block )
+  	hasSome: block = ( ^ items hasSome: block )
+  	getOne:  block = ( ^ items getOne:  block )
+  
+  	= otherSet = (
         self size = otherSet size ifFalse: [^ false ].
         
         self do: [:item | (otherSet contains: item) ifFalse: [^ false]. ].

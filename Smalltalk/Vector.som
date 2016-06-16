@@ -29,13 +29,32 @@ Vector = (
 
     | first last storage |
     
+    initialize: size = (
+	    first := 1.
+	    last  := 1.
+	    storage := Array new: size.
+	)
+	
     "Accessing"
     at: index = ( 
-    	^ self checkIndex: index ifValid: [ storage at: index ] )
-    
-    at: index put: value = (
-        ^ self checkIndex: index ifValid: [ storage at: index put: value ]
+   		index > storage length ifTrue: [ ^ nil ].
+    	^ storage at: index
     )
+    
+    at: index put: val = (
+	    index > storage length ifTrue: [
+	      | newLength newStorage |
+	      newLength := storage length.
+	      [ newLength < index ] whileTrue: [
+	        newLength := newLength * 2 ].
+	      newStorage := Array new: newLength.
+	      storage doIndexes: [:i | newStorage at: i put: (storage at: i) ].
+	      storage := newStorage ].
+	
+	    storage at: index put: val.
+	    last < (index + 1) ifTrue: [
+	      last := index + 1 ]
+  	)
     
     first = ( ^ (self size > 0) ifTrue: [storage at: 1] ifFalse: [nil] )
     
@@ -143,6 +162,17 @@ Vector = (
     forEach: block = (
 		first to: last - 1 do: [ :i | block value: (storage at: i) ]
 	)
+	
+	hasSome: block = (
+	    first to: last - 1 do: [ :i |
+	      (block value: (storage at: i))
+	        ifTrue: [ ^ true ] ].
+	    ^ false
+  	)
+  
+  	getOne: block = (
+	    ^self detect: block
+  	)
 	
 	sort: aBlock = (
 		" Make the argument, aBlock, be the criterion for ordering elements of
@@ -287,6 +317,31 @@ Vector = (
 		start to: stop do: [:i | newVector append: (self at: i)].
 		^newVector
 	)
+	
+	removeAll = (
+	    first := 1.
+	    last  := 1.
+	    storage  := Array new: storage length
+	)
+  
+  	remove: object = (
+	    | newArray newLast found |
+	    newArray := Array new: self capacity.
+	    newLast := 1.
+	    found := false.
+	   
+	    self forEach: [ :it |
+	      it == object
+	          ifTrue:  [ found := true ]
+	          ifFalse: [
+	              newArray at: newLast put: it.
+	              newLast := newLast + 1 ] ].
+	
+	    storage := newArray.
+	    last := newLast.
+	    first := 1.
+	    ^ found
+  	)
 	
 	"Pharo Compatibility"
 	species = (^self class)
