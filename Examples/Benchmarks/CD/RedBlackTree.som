@@ -192,7 +192,7 @@ RedBlackTree = (
               x value: value.
               ^ InsertResult new: false node: nil value: oldValue ] ] ].
 
-    z := Node key: key value: value.
+    z := CDNode key: key value: value.
     z parent: y.
     y isNil
       ifTrue: [ root := z ]

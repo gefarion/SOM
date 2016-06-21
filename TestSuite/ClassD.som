@@ -1,0 +1,17 @@
+ClassD = (
+  | c |
+
+  set: anInt = (
+    c := anInt.
+  )
+
+  inc = (
+    c := c + 1.
+    ^nil.
+  )
+
+  get = (
+    ^c.
+  )
+  ----
+)
