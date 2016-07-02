@@ -33,4 +33,25 @@ MethodCascadeTest = TestCase (
     self assert: 3 equals: (obj set: 0; inc; inc; inc; get).
     self assert: 4 equals: (obj set: 4; get).
   )
+
+  testExpCall = (
+    | obj |
+  	obj := ClassD new.
+    obj set: 0.
+    
+    (obj incSelf) inc; inc; inc.
+    
+    self assert: 4 equals: obj get.
+  )
+
+  testCascadeIntoCascade = (
+    | obj |
+
+    obj := ClassD new.
+    obj set: 0.
+
+    obj set: (obj inc; inc; get); inc.
+    self assert: 3 equals: obj get.
+  )
+
 )
