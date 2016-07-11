@@ -30,7 +30,8 @@ Dictionary = (
     at: aKey put: aValue = (
         (self containsKey: aKey)
             ifTrue:  [ (self pairAt: aKey) value: aValue ]
-            ifFalse: [ pairs add: (Pair withKey: aKey andValue: aValue) ]
+            ifFalse: [ pairs add: (Pair withKey: aKey andValue: aValue) ].
+        ^aValue    
     )
     
     at: aKey = (
@@ -38,6 +39,16 @@ Dictionary = (
         ^nil
     )
     
+    at: key ifAbsent: aBlock = (
+    	^((self at: key) 
+			ifNil: [aBlock] 
+			ifNotNil: [:value | value]) value
+    )
+    
+    at: key ifAbsentPut: aBlock = (
+		^ self at: key ifAbsent: [self at: key put: aBlock value]
+	)
+	    
     containsKey: aKey = (
         pairs do: [ :p | p key = aKey ifTrue: [ ^true ] ].
         ^false
@@ -60,17 +71,15 @@ Dictionary = (
     print = ( '{' print. pairs do: [ :p | p print ]. '}' print )
     println = ( self print. '' println )
     
-    ----
-    
-    new: size = (
-    	^ super new initialize: size
+    keysAndValuesDo: aBlock = (
+		^self do:[:pair| aBlock value: pair key value: pair value]
   	)
-  	
+ 
+ 	----
     new = (
         | newDictionary |
         newDictionary := super new.
         newDictionary pairs: Set new.
         ^newDictionary
     )
-    
 )

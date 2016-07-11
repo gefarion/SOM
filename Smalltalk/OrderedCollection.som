@@ -7,6 +7,11 @@ OrderedCollection = Vector (
         ^ self append: elem
     )
     
+    addAll: aCollection = (
+    	aCollection do: [:each | self add: each].
+		^ aCollection
+	)
+    
     remove: obj ifAbsent: aBlock = (
         (self remove: obj) ifFalse: aBlock
     )
@@ -119,6 +124,10 @@ OrderedCollection = Vector (
                with: aBlock
         ]
     )
+    
+    removeLast = (
+		^ self remove
+	)
     
     ----------
     

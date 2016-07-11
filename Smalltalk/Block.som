@@ -35,6 +35,8 @@ Block = (
         [ self value not ] whileTrue: block 
     )
     
+    whileFalse = (self value ifFalse: [ self whileFalse ])
+    
     whileTrue: block = (
         self value ifFalse: [ ^nil ].
         block value.
@@ -43,5 +45,8 @@ Block = (
     
     "Restarting"
     restart = primitive
+    
+    " Petit Parser" 
+    asParser = (^ PPPluggableParser on: self)
     
 )

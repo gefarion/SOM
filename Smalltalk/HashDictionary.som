@@ -179,7 +179,17 @@ HashDictionary = (
         current := current next ] ].
     ^ values
   )
-
+  
+  keysAndValuesDo: aBlock = (
+	buckets do: [:b |
+      | current |
+      current := b.
+      [ current notNil ] whileTrue: [
+        aBlock value: current key value: current value.
+        current := current next ] 
+    ].
+  )
+  	
   ----
 
   new: size = (

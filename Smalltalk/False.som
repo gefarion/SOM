@@ -31,6 +31,7 @@ False = Boolean (
     "Conditional evaluation"
     ifTrue:  block = ( ^nil )
     ifFalse: block = ( ^block value )
+    ifFalse: aBlock ifTrue: anotherBlock = ( ^aBlock value )
     
     "Logical operations"
     not        = ( ^true )

@@ -23,18 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
 
-Block3 = Block (
+Block4 = Block (
 
     "For the creation of Block instances, see Universe_new_block()."
 
     "Evaluating"
-    value                  = ( self value: nil with: nil )
-    value: arg             = ( self value: arg with: nil )
-    value: arg1 with: arg2 = primitive
+    value                  = ( self value: nil with: nil value: nil)
+    value: arg             = ( self value: arg with: nil value: nil)
+    value: arg1 with: arg2 = ( self value: arg1 with: arg2 value: nil)
+    
+    value: arg1 with: arg2 with: arg3 = primitive
     
     "Pharo Compatibility"
-    value: arg1 value: arg2 = (self value: arg1 with: arg2)
-    
-    numArgs = (^2)
+    value: arg1 value: arg2 value: arg3 = (self value: arg1 with: arg2 with: arg3)
+    valueWithArguments: args = (^self value: (args at: 1) with: (args at: 2) with: (args at: 3))
+    numArgs = (^3)
     
 )

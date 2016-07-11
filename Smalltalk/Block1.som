@@ -34,4 +34,6 @@ Block1 = Block (
     	self value. 
     	aBlock value
     )
+	
+	numArgs = (^0)
 )

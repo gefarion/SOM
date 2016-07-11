@@ -26,6 +26,8 @@ THE SOFTWARE.
 String = (
     "Strings are immutable"
 
+    size = (self printLastMethods: 5)
+    
     "Concatenate: returns a new string object"
     concatenate: argument = primitive
     + argument            = ( ^self concatenate: argument asString )
@@ -33,6 +35,7 @@ String = (
     "Converting"
     asString = ( ^self )
     asSymbol = primitive
+    asNumber = primitive
     hashcode = primitive
     
     "Info"
@@ -58,7 +61,7 @@ String = (
         self length < prefix length ifTrue: [ ^ false ].
         
         1 to: prefix length do: [:i | 
-            ((self charAt: i) = (prefix charAt: i)) ifFalse: [ ^ false ].  
+            ((self at: i) = (prefix at: i)) ifFalse: [ ^ false ].  
         ].
         
         ^ true
@@ -71,7 +74,7 @@ String = (
       l < sufL ifTrue: [ ^ false ].
 
       1 to: sufL do: [:i |
-          (self charAt: l - sufL + i) = (suffix charAt: i) ifFalse: [ ^ false ]
+          (self at: l - sufL + i) = (suffix at: i) ifFalse: [ ^ false ]
       ].
       ^ true
     )
@@ -80,9 +83,15 @@ String = (
         ^ Integer fromString: self
     )
     
-    charAt: argument = (
-        ^self substringFrom: argument to: argument
-    )
+    "Deprecated and change for at: and the return of a char instead of a one char string"
+    "charAt: argument = (
+        self printLastMethods: 3.
+        self error: 'deprecated method charAt: use at: instead'.
+        ^self at: argument."
+        "^self substringFrom: argument to: argument"
+    ")"
+    
+    at = primitive
     
     "Printing"
     print    = ( system printString: self )
@@ -120,9 +129,11 @@ String = (
 		^self indexOf: anElement startingAt: start ifAbsent: 0
 	)
 	
+	includes: aChar = ((self indexOf: aChar startingAt: 1) > 0)
+	
 	indexOf: anElement startingAt: start ifAbsent: exceptionBlock = (
 		start to: self length do: [:index |
-			(self charAt: index) = anElement ifTrue: [^ index]
+			(self at: index) = anElement ifTrue: [^ index]
 		].
 		^ exceptionBlock value
 	)
@@ -161,6 +172,15 @@ String = (
 		
 	"FileSystem"
 	asVmPathName = (^self)
+	
+	"Petit Parser"
+	asParser = (
+		^ PPLiteralSequenceParser on: self
+	)
+		
+	asPetitStream = (^ PPStream on: self)
+	
+	
 	
 	-------------------------------------------------------------
 	

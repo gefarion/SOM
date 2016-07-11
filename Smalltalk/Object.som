@@ -105,7 +105,6 @@ Object = nil (
     
     perform: aSymbol = primitive
     perform: aSymbol withArguments: args = primitive
-    
     perform: aSymbol inSuperclass: cls = primitive
     perform: aSymbol withArguments: args inSuperclass: cls = primitive
     
@@ -122,4 +121,18 @@ Object = nil (
 	changeShape: aShape = primitive
 	shape = primitive
 	target = (^self)
+	
+	"debugging stuff"
+	printLastMethods: aNumber = (
+		| ctx |
+		ctx := thisContext.
+		1 to: aNumber do: [:i | 
+			ctx := ctx sender.
+			ctx method println.
+		]
+	)
+	
+	"Petit Parser"
+	isPetitFailure = (^false)
+	asParser = (^ PPPredicateObjectParser expect: self)
 )

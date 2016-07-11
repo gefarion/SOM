@@ -45,8 +45,8 @@ Integer = (
     exp: aNumber = (
     	| value |
     	value := self.
-    	1 to: aNumber - 1 do: [:i | value := value * self].
-    	^value
+    	1 to: aNumber abs - 1 do: [:i | value := value * self].
+    	^aNumber negative ifTrue: [1 // value] ifFalse: [value]
     )
     
     "Random numbers"
@@ -80,7 +80,11 @@ Integer = (
     to: limit by: step do: block = (
         | i |
         i := self.
-        [ i <= limit ] whileTrue: [ block value: i. i := i + step ]
+        step < 0 ifTrue:[
+	        	[ i >= limit] whileTrue: [ block value: i. i := i - step]
+	        ] ifFalse: [  
+	        	[ i <= limit ] whileTrue: [ block value: i. i := i + step ]
+	        ]
     )
     
     to: limit by: step do: block separatedBy: separatorBlock = (
@@ -139,8 +143,11 @@ Integer = (
 	
 	"Readonly"
 	readOnly = (^self)
+	
     ----
     
     fromString: aString = primitive
+    
+    maxVal = (^2147483647 "Max java integer???")
     
 )

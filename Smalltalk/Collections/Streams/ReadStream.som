@@ -1,7 +1,6 @@
 ReadStream = PositionableStream (
 	"I represent an accessor for a sequence of objects that can only read objects from the sequence."
 	
-	
 	size = (
 		"Compatibility with other streams (e.g., FileStream)"
 		^readLimit
@@ -16,28 +15,10 @@ ReadStream = PositionableStream (
 	)
 	
 	next = (
-		"Primitive. Answer the next object in the Stream represented by the
-		receiver. Fail if the collection of this stream is not an Array or a String.
-		Fail if the stream is positioned at its end, or if the position is out of
-		bounds in the collection. Optional. See Object documentation
-		whatIsAPrimitive."
-	
-		<primitive: 65>
+		"<primitive: 65>"
 		position >= readLimit
 			ifTrue: [^nil]
 			ifFalse: [^collection at: (position := position + 1)]
-	)
-	
-	gtInspectorStreamStateIn: composite = (
-		<gtInspectorPresentationOrder: 50>
-		(composite wrapper with: [ :w | 
-			w title: 'Contents'.
-			w show: [ :a | 
-				a text
-					display: [ self contents ];
-					initialize: [ :aPresentation | 
-						aPresentation selectionInterval: (1 to: self position) ] ] ])
-			startOn: self
 	)
 	
 	next: anInteger = (
@@ -97,8 +78,7 @@ ReadStream = PositionableStream (
 		^collection copyFrom: start to: (end-1)
 	)
 	
-	ascii = (
-	)
+	ascii = ()
 	
 	upToEnd = (
 		| start |
@@ -124,16 +104,6 @@ ReadStream = PositionableStream (
 	
 	----------------------------------
 	
-	gtExampleReadStreamEmpty = (
-		<gtExample: 'Empty stream'>
-		^ '' readStream
-	)
-	
-	gtExampleReadStream = (
-		<gtExample: 'Stream'>
-		^ 'GTInspector' readStream
-	)
-	
 	on: aCollection from: firstIndex to: lastIndex = (
 	
 		"Answer with a new instance streaming over a copy of aCollection from
@@ -143,20 +113,5 @@ ReadStream = PositionableStream (
 			on: aCollection
 			from: firstIndex
 			to: lastIndex
-	)
-	
-	gtExampleReadStreamAtEnd = (
-		<gtExample: 'Stream at end'>
-		^ 'GTInspector' readStream 
-			upToEnd;
-			yourself
-	)
-	
-	gtExampleReadStreamWithPosition = (
-		<gtExample: 'Stream with position'>
-		^ 'GTInspector' readStream 
-			next; 
-			next; 
-			yourself
 	)
 )

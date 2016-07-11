@@ -31,15 +31,23 @@ Array = (
     length               = primitive
     putAll: block        = ( self doIndexes: [ :i |
                                 self at: i put: block value ] )
-    first = ( ^ self at: 1 )
-    last  = ( ^ self at: self length )
+    first  = ( ^ self at: 1 )
+    second = ( ^ self at: 2 )
+    last   = ( ^ self at: self length )
     
+    asArray = (^ self)
     
     "Iterating"
     do: block            = ( self doIndexes: [ :i |
                                 block value: (self at: i) ] )
     doIndexes: block     = ( 1 to: self length do: [:i |
                                 block value: i. ] )
+                                
+    withIndexDo: aBlock = ( 1 to: self length do: 
+    						[:i | aBlock value: i value: (self at: i)])
+	
+	
+	keysAndValuesDo: aBlock = (^self withIndexDo: aBlock)    	    
     
     from: start to: end do: block = ( | i |
         start to: end do: [:i | block value: (self at: i) ] )
@@ -56,6 +64,20 @@ Array = (
     
     copy = (^self copyFrom: 1)
     copyFrom: start = ( ^self copyFrom: start to: self length )
+    
+    copyWith: newElement = ( 
+		"Answer a copy of the receiver that is 1 bigger than the receiver and has 
+		newElement at the last element."
+		| newIC |
+		newIC := self species new: self length + 1.
+		newIC 
+			replaceFrom: 1
+			to: self length
+			with: self
+			startingAt: 1.
+		newIC at: newIC length put: newElement.
+		^newIC
+	)
     
     replaceFrom: start to: stop with: replacement startingAt: repStart = (
         "This destructively replaces elements from start to stop in the
@@ -136,6 +158,26 @@ Array = (
     species = (
     	^self class
     )
+    
+    "PetitParser"
+    asParser = (    
+		(self allSatisfy: [ :e | e isCharacter ]) ifTrue: [ 
+			| charSet |
+			charSet := PPCharSetPredicate on: [ :char | self includes: char ] .
+	     	^ PPPredicateObjectParser on: charSet message: 'One of these charactes expected: ', self printString.
+		].
+		^ super asParser
+	)
+    
+    asChoiceParser = (
+		^ PPChoiceParser withAll: (self collect: [ :each | each asParser ])
+	)
+	
+	asSequenceParser = (
+		^ PPSequenceParser withAll: (self collect: [ :each | each asParser ])
+	) 
+	
+	asPetitStream = (^ PPStream on: self)
     
     ----------------------------
     

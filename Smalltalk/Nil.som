@@ -43,4 +43,7 @@ Nil = (
     )
     
     readOnly = (^nil)
+    
+    "Petit Parser"
+    asParser = (^ PPEpsilonParser new)
 )

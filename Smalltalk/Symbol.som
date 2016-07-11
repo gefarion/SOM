@@ -36,4 +36,10 @@ Symbol = String (
     "Printing"
     print    = ( '#' print. super print )
     
+    "Petit Parser"
+    asParser = ( 
+		^ PPPredicateObjectParser perform: self
+	)
+
+    copy = (^self) 
 )

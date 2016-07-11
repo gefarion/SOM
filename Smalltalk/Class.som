@@ -79,4 +79,6 @@ Class = (
 		"^ self instSpec >= 8"
 		^false.
 	)
+	
+	customHash = (^self name hashcode)
 )
