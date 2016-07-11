@@ -1,0 +1,46 @@
+PPPluggableParser = PPParser (
+	"A pluggable parser that passes the parser stream into a block. This enables users to perform manual parsing or to embed other parser frameworks into PetitParser.Instance Variables:	block	<BlockClosure>	The pluggable one-argument block."
+	| block |
+	
+	displayName = (
+		^ String streamContents: [ :stream | block sourceNode printOn: stream ]
+	)
+	
+	block = (
+		"Answer the pluggable block."
+	
+		^ block
+	)
+	
+	isIslandBorder = (
+		^ false
+	)
+	
+	initializeOn: aBlock = (
+		block := aBlock
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self block = aParser block ]
+	)
+	
+	parseOn: aPPContext = (
+		| memento result |
+		memento := aPPContext remember.
+		result := block value: aPPContext.
+		result isPetitFailure
+			ifTrue: [ aPPContext restore: memento ].
+		^ result
+	)
+	
+	acceptsEpsilon = (
+		^ false
+	)
+	
+	----------------------------------
+	
+	
+	on: aBlock = (
+		^ self new initializeOn: aBlock
+	)
+)

@@ -1,0 +1,41 @@
+PPMemento = Object (
+	"PPMemento is an internal class used by PPMemoizedParser to cache results and detect left-recursive calls.Instance Variables:	result	<Object>	The cached result.	count	<Integer>	The number of recursive cycles followed.	"
+	| result count context |
+	
+	contextMemento = (
+		^ context
+	)
+	
+	result = (
+		^ result
+	)
+	
+	increment = (
+		count := count + 1
+	)
+	
+	initialize = (
+		count := 0
+		
+	)
+	
+	count = (
+		^ count
+	)
+	
+	contextMemento: aPPContextMemento = (
+		context  := aPPContextMemento 
+	
+	)
+	
+	result: anObject = (
+		result := anObject
+	)
+	
+	----------------------------------
+	
+	
+	new = (
+		^ self basicNew initialize
+	)
+)

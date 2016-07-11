@@ -1,0 +1,77 @@
+PPCompositeParserTest = PPAbstractParserTest (
+	| parser result parsers |
+	
+	parserInstanceFor: aSymbol = (
+		^ aSymbol = #start
+			ifTrue: [ self parserInstance ]
+			ifFalse: [
+				self parserInstance
+					productionAt: aSymbol 
+					ifAbsent: [ self error: 'Production ' , self parserClass name , '>>' , aSymbol printString , ' not found.' ] ]
+	)
+	
+	fail: aString rule: aSymbol = ( 
+		| production context |
+		production := self parserInstanceFor: aSymbol.
+		context := self context.
+		
+		result := production end parse: aString withContext: context.
+		
+		self
+			assert: result isPetitFailure
+			description: 'Able to parse ' , aString printString.
+		^ result
+	)
+	
+	tearDown = (
+		super tearDown.
+		parser := result := nil
+	)
+	
+	assert: aCollection is: anObject = (
+		self parse: aCollection.
+		self
+			assert: result = anObject
+			description: 'Got: ' , result printString , '; Expected: ' , anObject printString
+	)
+	
+	setUp = (
+		super setUp.
+		parsers := Dictionary new.
+		parser := self parserInstance.
+	)
+	
+	parse: aString = ( 
+		^ self parse: aString rule: #start
+	)
+	
+	parserInstance = (
+		^self parserAt: self parserClass
+	)
+	
+	parserAt: aParserClass = (
+		^ parsers at: aParserClass name ifAbsentPut: [ aParserClass new ]
+	)
+	
+	parserClass = (
+		self subclassResponsibility
+	)
+	
+	parse: aString rule: aSymbol = (
+		| production context |
+		production := self parserInstanceFor: aSymbol.
+		context := self context.
+		
+		result := production end parse: aString withContext: context.
+		self
+			deny: result isPetitFailure
+			description: 'Unable to parse ' , aString printString.
+		^ result
+	)
+	
+	----------------------------------
+	
+	isAbstract = (
+		^ self name = #PPCompositeParserTest
+	)
+)

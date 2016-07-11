@@ -1,0 +1,43 @@
+PPFailingParser = PPParser (
+	"A parser that consumes nothing and always fails.Instance Variables:	message <String>	The failure message."
+	| message |
+	
+	setMessage: aString = (
+		message := aString
+	)
+	
+	displayName = (
+		^ message
+	)
+	
+	message = (
+		"Answer the error message of the receiving parser."
+	
+		^ message
+	)
+	
+	displayColor = (
+		^ Color red
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self message = aParser message ]
+	)
+	
+	parseOn: aPPContext = (
+		^ PPFailure message: message context: aPPContext
+	)
+	
+	printNameOn: aStream = (
+		super printNameOn: aStream.
+		aStream nextPutAll: ', '.
+		aStream print: message
+	)
+	
+	----------------------------------
+	
+	
+	message: aString = (
+		^ self new setMessage: aString
+	)
+)

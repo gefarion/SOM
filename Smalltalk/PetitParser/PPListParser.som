@@ -1,0 +1,75 @@
+PPListParser = PPParser (
+	"Abstract parser that parses a list of things in some way (to be specified by the subclasses).Instance Variables:	parsers	<SequenceableCollection of: PPParser>	A sequence of other parsers to delegate to."
+	| parsers |
+	
+	copyWith: aParser = (
+		^ self species withAll: (parsers copyWith: aParser)
+	)
+	
+	children = (
+		^ parsers
+	)
+	
+	initialize = (
+		super initialize.
+		self setParsers: #()
+	)
+	
+	replace: aParser with: anotherParser = (
+		super replace: aParser with: anotherParser.
+		parsers keysAndValuesDo: [ :index :parser |
+			parser == aParser
+				ifTrue: [ parsers at: index put: anotherParser ] ]
+	)
+	
+	postCopy = (
+		super postCopy.
+		parsers := parsers copy
+	)
+	
+	isIslandBorder = (
+		^ self isIslandBorderOpenSet: IdentitySet new
+	)
+	
+	setParsers: aCollection = (
+		parsers := aCollection asArray
+	)
+	
+	copyInContext: aDictionary seen: aSeenDictionary = (
+		| copy copies |
+		aSeenDictionary at: self ifPresent: [ :value | ^ value ].
+		copy := aSeenDictionary at: self put: self copy.
+		copies := OrderedCollection new.
+		parsers
+			do: [ :each | 
+				| result |
+				result := each copyInContext: aDictionary seen: aSeenDictionary.
+				result isCollection
+					ifTrue: [ copies addAll: result ]
+					ifFalse: [ copies add: result ] ].
+		copy setParsers: copies.
+		^ copy yourself
+	)
+	
+	acceptsEpsilon = (
+		^ self acceptsEpsilonOpenSet: IdentitySet new.
+	)
+	
+	----------------------------------
+	
+	
+	with: aParser = (
+		^ self withAll: (Array with: aParser)
+	)
+	
+	withAll: aCollection = (
+		| receiver |
+		receiver := self basicNew.
+		receiver initialize.
+		^ receiver setParsers: aCollection
+	)
+	
+	with: aFirstParser with: aSecondParser = (
+		^ self withAll: (Array with: aFirstParser with: aSecondParser)
+	)
+)

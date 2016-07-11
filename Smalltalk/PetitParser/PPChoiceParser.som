@@ -1,0 +1,39 @@
+PPChoiceParser = PPListParser (
+	"A parser that uses the first parser that succeeds."
+	
+	exampleOn: aStream = (
+		"If there is already a lot written, try to pick an empty possiblity."
+		
+		aStream position > 512 ifTrue: [
+			(parsers anySatisfy: [ :each | each isNullable ])
+				ifTrue: [ ^ self ] ].
+		parsers atRandom exampleOn: aStream
+	)
+	
+
+	acceptsEpsilonOpenSet: set = (
+		set add: self.
+		^ self children anySatisfy: [:e | e acceptsEpsilonOpenSet: set ].
+	)
+	
+	isIslandBorderOpenSet: set = (
+		set add: self.
+		^ self children allSatisfy: [:e | e isIslandBorderOpenSet: set ].
+	)
+	
+	parseOn: aPPContext = (
+		"This is optimized code that avoids unnecessary block activations, do not change. When all choices fail, the last failure is answered."
+	
+		| element |
+		1 to: parsers length do: [ :index |
+			element := (parsers at: index)
+				parseOn: aPPContext.
+			element isPetitFailure
+				ifFalse: [ ^ element ] ].
+		^ element
+	)
+	
+	/ aRule = ( 
+		^ self copyWith: aRule
+	)
+)

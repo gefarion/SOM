@@ -1,0 +1,41 @@
+PPConditionalParserTest = PPAbstractParserTest (
+	| context |
+	
+	testConditionCtxAccess = (
+		| parser |
+	
+		parser := ('a' asParser if: [ :ctx | (ctx propertyAt: #foo) = #bar ]).
+		
+		context propertyAt: #foo put: #bar.
+		self assert: parser parse: 'a'. 
+		
+		context propertyAt: #foo put: #zorg.
+		self assert: parser fail: 'a' . 
+	
+	)
+	
+	setUp = (
+		super setUp.
+		context := PPContext new
+	)
+	
+	testConditionTrue = (
+		| parser |
+		parser := ('a' asParser if: [ :ctx | true ]).
+		
+		self assert: parser parse: 'a'.
+		self assert: parser fail: 'b'.
+	)
+	
+	testConditionFalse = (
+		| parser |
+		parser := ('a' asParser if: [ :ctx | false ]).
+		
+		self assert: parser fail: 'a'.
+		self assert: parser fail: 'b'.
+	) 
+	
+	context = (
+		^ context
+	)
+)

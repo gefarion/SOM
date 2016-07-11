@@ -1,0 +1,60 @@
+PPDelegateParser = PPParser (
+	"A parser that delegates to another parser.Instance Variables:	parser	<PPParser>	The parser to delegate to."
+	| parser |
+	
+	children = (
+		^ Array with: parser
+	)
+	
+	exampleOn: aStream = (
+		parser exampleOn: aStream
+	)
+	
+	setParser: aParser = (
+		parser := aParser
+	)
+	
+	replace: aParser with: anotherParser = (
+		super replace: aParser with: anotherParser.
+		parser == aParser ifTrue: [ parser := anotherParser ]
+	)
+	
+	isIslandBorder = (
+		^ parser isIslandBorderOpenSet: (IdentitySet with: self).
+	)
+	
+	acceptsEpsilonOpenSet: set = (
+		(set includes: parser) ifFalse: [ 
+			set add: parser.
+			^ parser acceptsEpsilonOpenSet: set 
+		].
+		^ false
+	)
+	
+	isIslandBorderOpenSet: set = (
+		(set includes: parser) ifFalse: [ 
+			set add: parser.
+			^ parser isIslandBorderOpenSet: set 
+		].
+		^ false
+	)
+	
+	parseOn: aPPContext = (
+		^ parser parseOn: aPPContext
+	)
+	
+	displayDescription = (
+		^ nil
+	)
+	
+	acceptsEpsilon = (
+		^ parser acceptsEpsilonOpenSet: (IdentitySet with: self).
+	)
+	
+	----------------------------------
+	
+	
+	on: aParser = (
+		^ self new setParser: aParser
+	)
+)

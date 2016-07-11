@@ -1,0 +1,44 @@
+PPArithmeticParser = PPCompositeParser (
+	| terms addition factors multiplication power primary parentheses number |
+	
+	parentheses = (
+		^ '(' asParser trim , terms , ')' asParser trim
+			==> [ :nodes | nodes at: 2 ]
+	)
+	
+	addition = (
+		^ (factors separatedBy: ('+' asParser / '-' asParser) trim) 
+			foldLeft: [ :a :op :b | a perform: op asSymbol withArguments: b ]
+	)
+	
+	primary = (
+		^ number / parentheses
+	)
+	
+	terms = (
+		^ addition / factors
+	)
+	
+	multiplication = (
+		^ (power separatedBy: ('*' asParser / '/' asParser) trim)
+			foldLeft: [ :a :op :b | a perform: op asSymbol withArguments: b ]
+	)
+	
+	number = (
+		^ ('-' asParser optional , #digit asParser plus , ('.' asParser , #digit asParser plus) optional) flatten trim 
+			==> [ :value | value asNumber ]
+	)
+	
+	power = (
+		^ (primary separatedBy: '^' asParser trim)
+			foldRight: [ :a :op :b | a exp: b ]
+	)
+	
+	start = (
+		^ terms end
+	)
+	
+	factors = (
+		^ multiplication / power
+	)
+)

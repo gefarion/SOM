@@ -1,0 +1,8 @@
+PPWrappingParser = PPActionParser (
+	"A parser that performs an action block upon activation with the stream and a continuation block."
+	
+	
+	parseOn: aPPContext = (
+		^ block value: aPPContext value: [ parser parseOn: aPPContext ]
+	)
+)

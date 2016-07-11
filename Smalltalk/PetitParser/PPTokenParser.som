@@ -1,0 +1,29 @@
+PPTokenParser = PPFlattenParser (
+	"A parser that answers a token with the value of my delegate parses.Instance Variables:	tokenClass	<PPToken class>	The token sub-class to be used."
+	| tokenClass |
+	
+	initialize = (
+		tokenClass := self defaultTokenClass
+		
+	)
+	
+	tokenClass = (
+		^ tokenClass
+	)
+	
+	on: aCollection start: aStartInteger stop: aStopInteger value: anObject = (
+		^ self tokenClass on: aCollection start: aStartInteger stop: aStopInteger value: anObject
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self tokenClass = aParser tokenClass ]
+	)
+	
+	defaultTokenClass = (
+		^ PPToken
+	)
+	
+	tokenClass: aTokenClass = (
+		tokenClass := aTokenClass
+	)
+)

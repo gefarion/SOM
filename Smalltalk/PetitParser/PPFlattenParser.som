@@ -1,0 +1,16 @@
+PPFlattenParser = PPDelegateParser (
+	"A parser that answers a flat copy of the range my delegate parses."
+	
+	
+	on: aCollection start: aStartInteger stop: aStopInteger value: anObject = (
+		^ aCollection copyFrom: aStartInteger to: aStopInteger
+	)
+	
+	parseOn: aPPContext = (
+		| start element |
+		start := aPPContext position.
+		element := parser parseOn: aPPContext.
+		element isPetitFailure ifTrue: [ ^ element ].
+		^ self on: aPPContext stream collection start: start + 1 stop: aPPContext position value: element
+	)
+)

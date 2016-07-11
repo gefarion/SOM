@@ -1,0 +1,38 @@
+PPTrimmingParser = PPDelegateParser (
+	"A parser that silently consumes spaces before and after the delegate parser."
+	| trimmer |
+	
+	setTrimmer: aParser = (
+		trimmer := aParser
+	)
+	
+	exampleOn: aStream = (
+		super exampleOn: aStream.
+		aStream nextPut: Character space
+	)
+	
+	parseOn: aPPContext = (
+		| memento element |
+		memento := aPPContext remember.
+		[ (trimmer parseOn: aPPContext) isPetitFailure ]
+			whileFalse.
+		element := parser parseOn: aPPContext.
+		element isPetitFailure ifTrue: [
+			aPPContext restore: memento.
+			^ element ].
+		[ (trimmer parseOn: aPPContext) isPetitFailure ]
+			whileFalse.
+		^ element
+	)
+	
+	----------------------------------
+	
+	
+	on: aParser trimmer: aTrimParser = (
+		| receiver |
+		receiver := self new.
+		receiver setParser: aParser.
+		receiver setTrimmer: aTrimParser.
+		^receiver
+	)
+)

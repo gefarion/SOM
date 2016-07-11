@@ -1,0 +1,14 @@
+PPParserResource = TestResource (
+	| parsers |
+	
+	setUp = (
+		super setUp.
+		parsers := Dictionary new
+	)
+	
+	parserAt: aParserClass = (
+		"Answer a cached instance of aParserClass."
+		
+		^ parsers at: aParserClass name ifAbsentPut: [ aParserClass new ]
+	)
+)

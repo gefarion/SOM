@@ -1,0 +1,64 @@
+PPLiteralParser = PPParser (
+	"Abstract literal parser that parses some kind of literal type (to be specified by subclasses).Instance Variables:	literal	<Object>	The literal object to be parsed.	message	<String>	The error message to be generated."
+	| literal message |
+	
+	caseInsensitive = (
+		"Answer a parser that can parse the receiver case-insensitive."
+		
+		self subclassResponsibility
+	)
+	
+	printNameOn: aStream = (
+		super printNameOn: aStream.
+		aStream nextPutAll: ', '.
+		aStream print: literal
+	)
+	
+	displayName = (
+		^ literal printString
+	)
+	
+	initializeOn: anObject message: aString = (
+		literal := anObject.
+		message := aString
+	)
+	
+	isIslandBorder = (
+		^ true
+	)
+	
+	visualizationGraphType = (
+		^ literal printString
+	)
+	
+	message = (
+		"Answer the failure message."
+		
+		^ message
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self literal = aParser literal and: [ self message = aParser message ] ]
+	)
+	
+	acceptsEpsilon = (
+		^ false
+	)
+	
+	literal = (
+		"Answer the parsed literal."
+	
+		^ literal
+	)
+	
+	----------------------------------
+	
+	
+	on: anObject message: aString = (
+		^ self new initializeOn: anObject message: aString
+	)
+	
+	on: anObject = (
+		^ self on: anObject message: anObject printString , ' expected'
+	)
+)

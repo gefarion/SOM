@@ -1,0 +1,52 @@
+PPLambdaParser = PPCompositeParser (
+	| expression abstraction application variable |
+	
+	expression = (
+		^ variable / abstraction / application
+	)
+	
+	variable = (
+		^ (#letter asParser , #word asParser star) flatten trim
+	)
+	
+	start = (
+		^ expression end
+	)
+	
+	application = (
+		^ '(' asParser trim , expression , expression , ')' asParser trim 
+				==> [ :node | Array with: (node at: 2) with: (node at: 3) ]
+	)
+	
+	abstraction = (
+		^ '\' asParser trim , variable , '.' asParser trim , expression 
+			==> [ :node | Array with: (node at: 2) with: (node at: 4) ]
+	)
+	
+	----------------------------------
+	
+	
+	and = (
+		^ self parse: '\p.\q.((p q) p)'
+	)
+	
+	false = (
+		^ self parse: '\x.\y.y'
+	)
+	
+	or = (
+		^ self parse: '\p.\q.((p p) q)'
+	)
+	
+	not = (
+		^ self parse: '\p.\a.\b.((p b) a)'
+	)
+	
+	ifthenelse = (
+		^ self parse: '\p.p'
+	)
+	
+	true = (
+		^ self parse: '\x.\y.x'
+	)
+)

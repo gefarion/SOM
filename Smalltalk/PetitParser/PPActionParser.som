@@ -1,0 +1,36 @@
+PPActionParser = PPDelegateParser (
+	"A parser that performs an action block with the successful parse result of the delegate.Instance Variables:	block	<BlockClosure>	The action block to be executed."
+	| block |
+	
+	block = (
+		"Answer the action block of the receiver."
+	
+		^ block
+	)
+	
+	visualizationGraphType = (
+		^ '[]'
+	)
+	
+	setBlock: aBlock = (
+		block := aBlock
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self block = aParser block ]
+	)
+	
+	parseOn: aPPContext = (
+		| element |
+		^ (element := parser parseOn: aPPContext) isPetitFailure
+			ifFalse: [ block value: element ]
+			ifTrue: [ element ]
+	)
+	
+	----------------------------------
+	
+	
+	on: aParser block: aBlock = (
+		^ (self on: aParser) setBlock: aBlock
+	)
+)

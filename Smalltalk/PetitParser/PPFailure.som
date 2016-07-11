@@ -1,0 +1,81 @@
+PPFailure = Object (
+	"The failure object in PetitParser. It is the only class that responds to #isPetitFailure with true. It contains an error message and a position of the occurrence of the failure.Instance Variables:	message	<String>	The error message of this failure.	position	<Integer>	The position of this failure in the input stream."
+	| message context position |
+	
+	initializeMessage: aString context: aPPContext position: anInteger = (
+		message := aString.
+		context := aPPContext.
+		position := anInteger.
+		
+		"record the furthest failure encountered while parsing the input stream "
+		aPPContext noteFailure: self.
+		
+			
+	)
+	
+	isPetitFailure = (
+		"I am the only class that should implement this method to return true."
+	
+		^ true
+	)
+	
+	debugResult = (
+		context ifNil: [ ^ nil ].
+		context root ifNil: [ ^ nil ].
+		
+		^ context root enableDebug parse: context stream reset
+	)
+	
+	initializeMessage: aString = (	
+		message := aString.
+	
+	)
+	
+	initializeMessage: aString at: anInteger = (
+		"One should not use this method if the furthest failure is supposed to be reported correctly"
+		message := aString.
+		position := anInteger.
+	)
+	
+	printOn: aStream = (
+		aStream nextPutAll: self message.
+		aStream nextPutAll: ' at '.
+		aStream print: self position.
+	)
+	
+	position = (
+		"Answer the position in the source string that caused this parse failure."
+	
+		^ position
+	)
+	
+	message = (
+		"Answer a human readable error message of this parse failure."
+		
+		^ message
+	)
+	
+	initializeMessage: aString context: aPPContext = (
+		self initializeMessage: aString context:  aPPContext position: aPPContext position
+	)
+	
+	----------------------------------
+	
+	
+	message: aString = (
+		^ self basicNew initializeMessage: aString 
+	)
+	
+	message: aString context: aPPContext at: position = (
+		^ self basicNew initializeMessage: aString context: aPPContext position: position
+	)
+	
+	message: aString context: aPPContext = (
+		^ self basicNew initializeMessage: aString context: aPPContext
+	)
+	
+	message: aString at: anInteger = (
+		"One should not use this method if the furthest failure is supposed to be reported correctly"
+		^ self basicNew initializeMessage: aString at: anInteger
+	)
+)

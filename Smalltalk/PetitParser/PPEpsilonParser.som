@@ -1,0 +1,27 @@
+PPEpsilonParser = PPParser (
+	"A parser that consumes nothing and always succeeds."
+	
+	displayName = (
+		^ 'epsilon'
+	)
+	
+	isNullable = (
+		^ true
+	)
+	
+	isIslandBorder = (
+		^ false
+	)
+	
+	nonEmpty = (
+		^ PPFailingParser message: 'epsilon is always empty'
+	)
+	
+	parseOn: aStream = (
+		^ nil
+	)
+	
+	acceptsEpsilon = (
+		^ true
+	)
+)

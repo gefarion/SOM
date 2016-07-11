@@ -1,0 +1,34 @@
+PPOptionalParser = PPDelegateParser (
+	"A parser that optionally parsers its delegate, or answers nil."
+	
+	
+	isNullable = (
+		^ true
+	)
+	
+	isIslandBorder = (
+		^ false
+	)
+	
+	visualizationGraphType = (
+		^ '?'
+	)
+	
+	acceptsEpsilonOpenSet: set = (
+		^ true
+	)
+	
+	isIslandBorderOpenSet: set = (
+		^ false
+	)
+	
+	parseOn: aPPContext = (
+		| element |
+		element := parser parseOn: aPPContext.
+		^ element isPetitFailure ifFalse: [ element ]
+	)
+	
+	acceptsEpsilon = (
+		^ true
+	)
+)

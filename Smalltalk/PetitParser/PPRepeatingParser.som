@@ -1,0 +1,109 @@
+PPRepeatingParser = PPDelegateParser (
+	"An abstract parser that repeatedly parses between 'min' and 'max' instances of its delegate. The default configuration parses an infinite number of elements, as 'min' is set to 0 and 'max' to infinity (SmallInteger maxVal).Instance Variables:	min	<Integer>	The minimum number of repetitions.	max	<Integer>	The maximum number of repetitions."
+	| min max |
+	
+	nextSets: aNextDictionary into: aSet = (
+		| tally childSet change |
+	
+		change := super nextSets: aNextDictionary  into: aSet.
+	
+		childSet := aNextDictionary at: parser.
+		tally := aSet size.
+		childSet add: parser.
+		^ change or: [ tally ~= aSet size ].
+	)
+	
+	followSets: aFollowDictionary firstSets: aFirstDictionary into: aSet = (
+		| firstSet |
+		super followSets: aFollowDictionary firstSets:  aFirstDictionary into: aSet.
+		
+		firstSet := aFirstDictionary at: self.
+		self children do: [:p | (aFollowDictionary at: p) addAll: (firstSet reject: [:each | each isNullable]) ]
+	)
+	
+	max = (
+		"Answer the maximum number of repetitions."
+	
+		^ max
+	)
+	
+	min = (
+		"Answer the minimum number of repetitions."
+		
+		^ min
+	)
+	
+	exampleOn: aStream = (
+		"Perform the minimal repeatitions required, and a random amount of more if possible and if not that much output has been produced yet."
+		
+		min timesRepeat: [ 
+			super exampleOn: aStream ].
+		(max - min min: 5) atRandom timesRepeat: [
+			aStream position > 512
+				ifTrue: [ ^ self ].
+			super exampleOn: aStream ]
+	)
+	
+	initialize = (
+		super initialize.
+		self setMin: 0.
+		self setMax: Integer maxVal
+	)
+	
+	isNullable = (
+		^ min = 0
+	)
+	
+	isIslandBorder = (
+		^ min > 0
+	)
+	
+	printOn: aStream = (
+		super printOn: aStream.
+		aStream nextPutAll: ' ['.
+		aStream	print: min.
+		aStream nextPutAll: ', '.
+		aStream
+			nextPutAll:
+					(max = SmallInteger maxVal
+							ifTrue: [ '*' ]
+							ifFalse: [ max printString ]).
+		aStream	nextPut: ']'.
+	)
+	
+	setMax: anInteger = (
+		max := anInteger
+	)
+	
+	visualizationGraphType = (
+		^ '*'
+	)
+	
+	setMin: anInteger = (
+		min := anInteger
+	)
+	
+	isIslandBorderOpenSet: set = (
+		^ min > 0
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self min = aParser min and: [ self max = aParser max ] ]
+	)
+	
+	displayDescription = (
+		^ String
+			streamContents: [ :stream | 
+				min = 0
+					ifFalse: [ 
+						stream print: min.
+						stream nextPutAll: '..' ].
+				max = SmallInteger maxVal
+					ifTrue: [ stream nextPut: '*' ]
+					ifFalse: [ stream print: max ] ]
+	)
+	
+	acceptsEpsilon = (
+		^ min == 0
+	)
+)

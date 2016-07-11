@@ -1,0 +1,1347 @@
+PPParser = Object (
+	"An abstract parser for all parsers in PetitParser. Subclasses implement #parseOn: to perform the actual recursive-descent parsing. All parsers support a variety of methods to perform an actual parse, see the methods in the #parsing protocol. Parsers are combined with a series of operators that can be found in the #operations protocol.Instance Variables:	properties	<Dictionary>	Stores additional state in the parser object."
+	| properties |
+	
+	cycleSet: aDictionary = (
+		"PRIVATE: Answer the children that could be part of a cycle-set with the receiver, subclasses might restrict the number of children returned. aDictionary is pre-calcualted first-sets."
+	
+		^ self children
+	)
+	
+	children = (
+		"Answer a set of child parsers that could follow the receiver."
+	
+		^ #()
+	)
+	
+	not = (
+		"Answer a new parser (logical not-predicate) that succeeds whenever the receiver fails, but never consumes input."
+	
+		^ PPNotParser on: self
+	)
+	
+	isFirstSetTerminal = (
+		"Answer true if the receiver is a terminal or leaf parser, that means it does not delegate to any other parser."
+	
+		^ self children isEmpty
+	)
+	
+	removeProperty: aKey = (
+		"Remove the property with aKey. Answer the property or raise an error if aKey isn't found."
+		
+		^ self removeProperty: aKey ifAbsent: [ self error: 'Property not found' ]
+	)
+	
+	allNamedParsers = (
+		"Answer all the named parse nodes of the receiver."
+	
+		| result |
+		result := OrderedCollection new.
+		self allNamedParsersDo: [ :parser | result addLast: parser ].
+		^ result
+	)
+	
+	smalltalkToken = (
+		| ws receiver token |
+		ws := PPSmalltalkWhitespaceParser new.
+		receiver := PPTokenParser on: self.
+		receiver tokenClass: PPSmalltalkToken.
+		token := ((ws , receiver yourself , ws) ==> #second). 
+		token propertyAt: #trimmingToken put: true.
+		^token.
+	)
+	
+	initialize = ()
+	
+	// aParser = ( 
+		"
+			Answer a new parser that parses the receiver, if the receiver fails try with aParser (ordered-choice).
+			If the receiver passes, limit must pass as well.
+		"
+		
+		^ PPLimitedChoiceParser with: self with: aParser
+	)
+	
+	wrapped = (
+		"Answer a new parser that is simply wrapped."
+		
+		^ PPDelegateParser on: self
+	)
+	
+	copyInContext: aDictionary seen: aSeenDictionary = (
+		| copy |
+		aSeenDictionary 
+			at: self 
+			ifPresent: [ :value | ^ value ].
+		copy := aSeenDictionary
+			at: self
+			put: self copy.
+		copy children do: [ :each |
+			copy
+				replace: each
+				with: (each copyInContext: aDictionary seen: aSeenDictionary) ].
+		^ copy
+	)
+	
+	times: anInteger = (
+		"Answer a new parser that parses the receiver exactly anInteger times."
+		
+		^ self min: anInteger max: anInteger
+	)
+	
+	allParsers = (
+		"Answer all the parse nodes of the receiver."
+	
+		| result |
+		result := OrderedCollection new.
+		self allParsersDo: [ :parser | result addLast: parser ].
+		^ result
+	)
+	
+	foldLeft: aBlock = (
+		"Answer a new parser that that folds the result of the receiver from left-to-right into aBlock. The argument aBlock must take two or more arguments."
+	
+		| size args |
+		size := aBlock numArgs.
+		args := Array new: size.
+		^ self
+			==> [ :nodes | 
+				args at: 1 put: nodes first.
+				2 to: nodes length by: size - 1 do: [ :index | 
+					args
+						replaceFrom: 2
+						to: size
+						with: nodes
+						startingAt: index.
+					args at: 1 put: (aBlock valueWithArguments: args)].
+				args first ]
+	)
+	
+	namedChildrenDo: aBlock seen: aSet = (
+		"Iterate over the named children of the receiver."
+		
+		self children do: [ :each |
+			(aSet includes: each)
+				ifTrue: [ ^ self ].
+			aSet add: each.
+			each name isNil
+				ifTrue: [ each namedChildrenDo: aBlock seen: aSet ]
+				ifFalse: [ aBlock value: each ] ]
+	)
+	
+	innerChildrenDo: aBlock = (
+		"Iterate over the inner children of the receiver."
+	
+		self innerChildrenDo: aBlock seen: IdentitySet new
+	)
+	
+	YAMLM = (
+		^ self >=> [:context :cc |
+			| retval |
+			context YAMLN: (context YAMLM).
+	
+			retval := cc value.
+		
+			context YAMLRestoreN.
+			retval.
+		]
+	)
+	
+	firstSet = (
+		"Answer the first-set of the receiver. Note, this implementation is inefficient when called on different receivers of the same grammar, instead use #firstSets to calculate the first-sets at once."
+		
+		^ self firstSets at: self
+	)
+	
+	namedChildren = (
+		"Answer the named children of the receiver."
+	
+		| result |
+		result := OrderedCollection new.
+		self namedChildrenDo: [ :parser | result addLast: parser ].
+		^ result
+	)
+	
+	matchingSkipRangesIn: anObject do: aBlock = (
+		"Search anObject repeatedly for the matches of the receiver. Skip over matches. Evaluate aBlock with the range of each match (index of first character to: index of last character)."
+		
+		self token
+			matchesSkipIn: anObject
+			do: [ :token | aBlock value: (token start to: token stop) ]
+	)
+	
+	followSets = (
+		"Answer a dictionary with all the parsers reachable from the receiver as key and their follow-set as value. The follow-set of a parser is the list of terminal parsers that can appear immediately to the right of that parser."
+		
+		| current previous continue firstSets followSets |
+		current := previous := 0.
+		firstSets := self firstSets.
+		followSets := IdentityDictionary new.
+		self allParsersDo: [ :each | followSets at: each put: IdentitySet new ].
+		(followSets at: self) add: PPSentinel instance.
+		[	followSets keysAndValuesDo: [ :parser :follow |
+				parser 
+					followSets: followSets
+					firstSets: firstSets
+					into: follow ].
+			current := followSets
+				inject: 0
+				into: [ :result :each | 'b' entre. result + each size ].
+			continue := previous < current.
+			previous := current.
+			continue ] whileTrue.
+		^ followSets
+	)
+	
+	==> aBlock = (
+		"Answer a new parser that performs aBlock as action handler on success."
+	
+		^ PPActionParser on: self block: aBlock
+	)
+	
+	next: context = (
+		^ PPChoiceParser withAll: (self nextSet: context)
+	)
+	
+	token = (
+		"Answer a new parser that transforms the input to a token."
+		
+		^ PPTokenParser on: self
+	)
+	
+	name: aString = (
+		self propertyAt: #name put: aString
+	)
+	
+	isNullable = (
+		"Answer true if the receiver is a nullable parser, e.g. it can successfully parse nothing."
+		
+		^ false
+	)
+	
+	visualizationGraphType = (
+		^ nil
+	)
+	
+	match: aParser inContext: aDictionary = (
+		^ self match: aParser inContext: aDictionary seen: IdentitySet new
+	)
+	
+	flatten = (
+		"Answer a new parser that flattens the underlying collection."
+		
+		^ PPFlattenParser on: self
+	)
+	
+	matches: anObject = (
+		"Answer if anObject can be parsed by the receiver."
+		
+		^ (self parse: anObject) isPetitFailure not
+	)
+	
+	withoutSeparators = (
+		"Filters out the separators from a parse result produced by one of the productions #delimitedBy: or #separatedBy:."
+		
+		^ self ==> [ :items |
+			| result |
+			'c' entre.
+			result := Array new: items size + 1 // 2.
+			1 to: result size do: [ :index | result at: index put: (items at: 2 * index - 1) ].
+			result ]
+	)
+	
+	trim: aParser = (
+		"Answer a new parser that consumes and ignores aParser repeatedly before and after the receiving parser."
+		
+		^ PPTrimmingParser on: self trimmer: aParser
+	)
+	
+	min: anInteger greedy: aParser = (
+		"Answer a new parser that parses the receiver at least anInteger times until it reaches aParser. This is a greedy non-blind implementation. aParser is not consumed."
+		
+		^ (self starGreedy: aParser) setMin: anInteger
+	)
+	
+	asParser = (
+		"Answer the receiving parser."
+		
+		^ self
+	)
+	
+	starLazy: aParser = (
+		"Answer a new parser that parses the receiver zero or more times until it reaches aParser. This is a lazy non-blind implementation of the star operator. aParser is not consumed."
+		
+		^ PPLazyRepeatingParser on: self limit: aParser
+	)
+	
+	trimAlign = (
+		"
+			trim blanks and check if I am aligned
+		"
+		^ (#align asParser, #blank asParser not, self ==> #last)
+	
+		
+	)
+	
+	trimRight = (
+		"Answer a new parser that consumes spaces after the receiving parser."
+		
+		^ self trimSpacesRight
+	)
+	
+	exampleOn: aStream = ()
+	
+	namedParsersDo: aBlock seen: aSet = (
+	    self children do: [ :each | 
+	        (aSet includes: each)
+	            ifFalse: [
+			        aSet add: each.
+			        each name isEmptyOrNil
+			            ifFalse: [ aBlock value: each ]
+			            ifTrue: [ each namedParsersDo: aBlock seen: aSet ] ] ]
+	)
+	
+	YAMLPlusM = (
+		^ self >=> [:context :cc |
+			| retval lastIndent |
+			lastIndent := context YAMLN.
+			context YAMLN: (lastIndent + context YAMLM).
+	
+			retval := cc value.
+		
+			context YAMLRestoreN.
+			retval.
+		]
+	)
+	
+	viewAllParsers = (
+	
+		"
+		PPSmalltalkParser new viewAllParsers
+		"
+		| view |
+		view := RTMondrianViewBuilder new.
+		self viewAllParsersOn: view.
+		view openWithToolbarEntitled: 'All parsers'.
+		^ view
+	)
+	
+	namedParsersDo: aBlock = (
+	    self namedParsersDo: aBlock seen: IdentitySet new
+	)
+	
+	propertyAt: aKey put: anObject = (
+		"Set the property at aKey to be anObject. If aKey is not found, create a new entry for aKey and set is value to anObject. Answer anObject."
+	
+		^ (properties ifNil: [ properties := Dictionary new ])
+			at: aKey put: anObject
+	)
+	
+	min: aMinInteger max: aMaxInteger = (
+		"Answer a new parser that parses the receiver at least aMinInteger and at most aMaxInteger times."
+	
+		| receiver |
+		receiver := self star.
+		receiver setMin: aMinInteger.
+		^ receiver setMax: aMaxInteger
+	)
+	
+	trimSpacesLeft = (
+		"Answer a new parser that consumes spaces before the receiving parser."
+		
+		^ (#space asParser star, self) ==> #second
+	)
+	
+	isIslandBorder = (
+		^ self subclassResponsibility
+	)
+	
+	printOn: aStream = (
+		super printOn: aStream.
+		aStream nextPut: '('.
+		self printNameOn: aStream.
+		aStream nextPut: ')'
+	)
+	
+	disableDebuggerOutput = ( 
+		self debuggerOutput: false.	
+	)
+	
+	separatedBy: aParser = (
+		"Answer a new parser that parses the receiver one or more times, separated by aParser."
+		
+		^ (PPSequenceParser with: self with: (PPSequenceParser with: aParser with: self) star) ==> [ :nodes |
+			| result |
+			result := Array new: 2 * nodes second length + 1.
+			result at: 1 put: nodes first.
+			nodes second 
+				keysAndValuesDo: [ :index :pair | result replaceFrom: 2 * index to: 2 * index + 1 with: pair startingAt: 1 ].
+			result ]
+	)
+	
+	transform: aBlock = (
+		"Answer a copy of all parsers reachable from the receiver transformed using aBlock."
+	
+		| mapping root |
+		mapping := IdentityDictionary new.
+		self allParsersDo: [ :each |
+			mapping
+				at: each
+				put: (aBlock value: each copy) ].
+		root := mapping at: self.
+		[	| changed |
+			changed := false.
+			root allParsersDo: [ :each |
+				each children do: [ :old |
+					mapping at: old ifPresent: [ :new |
+						each replace: old with: new.
+						changed := true ] ] ].
+			changed ] whileTrue.
+		^ root
+	)
+	
+	trimOnside = (
+		"
+			trim blanks and check if I am in onside position
+		"
+		^
+		(#onside asParser, self ==> #last)" /
+		(#startOfLine asParser not, #blank asParser star, self ==> #last)"
+	
+		
+	)
+	
+	nextSets = (
+		| nextSets |
+		
+		nextSets := IdentityDictionary new.
+		self allParsersDo: [ :each | nextSets at: each put: IdentitySet new ].
+		
+		(nextSets at: self) add: PPSentinel instance.
+		
+		[ 	| changed |
+			changed := false.
+		
+			nextSets keysAndValuesDo: [:parser :next |
+				changed := (parser 
+					nextSets: nextSets
+					into: next) or: [ changed ].
+			].
+			changed ] whileTrue.
+		
+		^ nextSets
+	)
+	
+	trimLeft = (
+		"Answer a new parser that consumes spaces before the receiving parser."
+		
+		^ self trimSpacesLeft
+	)
+	
+	YAMLSeqSpaces = (
+		^ self >=> [:context :cc |
+			| retval lastIndent |
+			lastIndent := context YAMLN.
+			(context YAMLContext = #'block-out') ifTrue: [ 
+				context YAMLN: (lastIndent - 1).
+			] ifFalse: [ 
+				(context YAMLContext = #'block-in') ifFalse: [ self error: 'OOUPSLA' ].
+				context YAMLN: lastIndent.
+			].
+	
+			retval := cc value.
+			
+			context YAMLRestoreN.
+			retval.
+		]
+	)
+	
+	matchesSkipIn: anObject do: aBlock = (
+		"Search anObject repeatedly for the matches of the receiver. Evaluate aBlock for each match with the matched parse-tree as the argument. Skip over matches."
+	
+		(self ==> aBlock / #any asParser) star parse: anObject
+	)
+	
+	followSet = (
+		"Answer the follow-set of the receiver starting at the receiver. Note, this implementation is inefficient when called on different receivers of the same grammar, instead use #followSets to calculate the follow-sets at once."
+	
+		^ self followSets at: self
+	)
+	
+	delimitedBy: aParser = (
+		"Answer a new parser that parses the receiver one or more times, separated and possibly ended by aParser."
+		
+		^ (self separatedBy: aParser) , (aParser optional) ==> [ :node |
+			node second isNil
+				ifTrue: [ node first ]
+				ifFalse: [ node first copyWith: node second ] ]
+	)
+	
+	min: aMinInteger max: aMaxInteger lazy: aParser = (
+		"Answer a new parser that parses the receiver at least aMinInteger and at most aMaxInteger times until it reaches aParser. This is a greedy non-blind implementation. aParser is not consumed."
+	
+		| receiver |
+		receiver := self starLazy: aParser.
+		receiver setMin: aMinInteger.
+		^ receiver setMax: aMaxInteger
+	)
+	
+	| aParser = (
+		"Answer a new parser that either parses the receiver or aParser. Fail if both pass or fail (exclusive choice, unordered choice)."
+	
+		^ (self not , aParser) / (aParser not , self) ==> #second
+	)
+	
+	debuggerOutput = (
+		^ self propertyAt: #debuggerOutput ifAbsentPut: true.
+	)
+	
+	displayName = (
+		^ self name isNil
+			ifFalse: [ self name asString ]
+			ifTrue: [ self class name asString ]
+	)
+	
+	min: anInteger = (
+		"Answer a new parser that parses the receiver at least anInteger times."
+		
+		^ self star setMin: anInteger
+	)
+	
+	YAMLNPlus = (
+		^ self >=> [:context :cc |
+			| retval lastIndent |
+			lastIndent := context YAMLN.
+			context YAMLN: (lastIndent + 1).
+	
+			retval := cc value.
+		
+			context YAMLRestoreN.
+			retval.
+		]
+	)
+	
+	plus = (
+		"Answer a new parser that parses the receiver one or more times."
+	
+		^ self star setMin: 1
+	)
+	
+	island: water = (
+		| island receiver |
+		receiver := PPIsland new.
+		receiver island: self.
+		island := receiver
+		island water: water.	
+		"
+			TODO JK: Hack alert!
+			Not nice, but usefull for debugging
+		"
+		Sensor shiftPressed
+			ifFalse: [ island := island memoized ].
+		^ island
+	)
+	
+	def: aParser = (
+		"Redefine the receiver as the argument aParser. This method is useful when defining recursive parsers: instantiate a PPUnresolvedParser and later redefine it with another one."
+	
+		^ self becomeForward: (aParser name: self name)
+	)
+	
+	hasProperty: aKey = (
+		"Test if the property aKey is present."
+		
+		^ properties notNil and: [ properties includesKey: aKey ]
+	)
+	
+	>=> aBlock = (
+		"Answer a new parser that wraps the receiving parser with a two argument block. The first argument is the parsed stream, the second argument a continuation block on the delegate parser."
+	
+		^ PPWrappingParser on: self block: aBlock
+	)
+	
+	matchesIn: anObject do: aBlock = (
+		"Search anObject repeatedly for the matches of the receiver. Evaluate aBlock for each match with the matched parse-tree as the argument. Make sure to always consume exactly one character with each step, to not miss any match."
+	
+		((self and ==> aBlock , #any asParser) / #any asParser) star parse: anObject
+	)
+	
+	trimOffside = (
+		"
+			trim blanks and check if I am in offside position
+		"
+		^ 
+		(#offside asParser, self ==> #last)" /
+		(#startOfLine asParser not, #blank asParser star, self ==> #last)"
+	
+		
+	)
+	
+	trimBlanks = (
+		"Answer a new parser that consumes blanks before and after the receiving parser."
+		
+		^ self trim: #blank asParser
+	)
+	
+	firstSets = (
+		"Answer a dictionary with all the parsers reachable from the receiver as key and their first-set as value. The first-set of a parser is the list of terminal parsers that begin the parser derivable from that parser."
+		
+		| firstSets |
+		firstSets := IdentityDictionary new.
+		self allParsersDo: [ :each |
+			firstSets at: each put: (each isFirstSetTerminal
+				ifTrue: [ IdentitySet with: each ]
+				ifFalse: [ IdentitySet new ]).
+			each isNullable
+				ifTrue: [ (firstSets at: each) add: PPSentinel instance ] ].
+		[	| changed tally |
+			changed := false.
+			firstSets keysAndValuesDo: [ :parser :first |
+				'e entre' println.
+				tally := first size.
+				parser firstSets: firstSets into: first.
+				changed := changed or: [ tally ~= first size ] ].
+			changed ] whileTrue.
+		^ firstSets
+	)
+	
+	optional = (
+		"Answer a new parser that parses the receiver, if possible."
+	
+		^ PPOptionalParser on: self
+	)
+	
+	backgroundForDepth: anInteger = (
+		^ Color gray: 1.0 - (anInteger / 20.0)
+	)
+	
+	innerChildrenDo: aBlock seen: aSet = (
+		"Iterate over the inner children of the receiver."
+		
+		self children do: [ :each |
+			(aSet includes: each)
+				ifTrue: [ ^ self ].
+			aSet add: each.
+			each name isNil ifTrue: [
+				aBlock value: each.
+				each innerChildrenDo: aBlock seen: aSet ] ]
+	)
+	
+	example = (
+		^ String streamContents: [ :stream | self exampleOn: stream ] limitedTo: 1024
+	)
+	
+	nonEmpty = (
+		^ PPNonEmptyParser on: self
+	)
+	
+	matchingRangesIn: anObject do: aBlock = (
+		"Search anObject repeatedly for the matches of the receiver. Evaluate aBlock with the range of each match (index of first character to: index of last character)."
+	
+		self token
+			matchesIn: anObject
+			do: [ :token | aBlock value: (token start to: token stop) ]
+	)
+	
+	trimSpacesRight = (
+		"Answer a new parser that consumes spaces after the receiving parser."
+		
+		^ (self, #space asParser star) ==> #first
+	)
+	
+	allParsersDo: aBlock = (
+		"Iterate over all the parse nodes of the receiver."
+	
+		self allParsersDo: aBlock seen: IdentitySet new
+	)
+	
+	enableDebug = (
+		| root newParser |
+		root := PPParserDebuggerResult new.
+		newParser := self
+			transform: [ :each | 
+				each
+					>=> [ :stream :continuation | 
+						| result child receiver |
+						receiver := PPParserDebuggerResult new.
+						receiver parser: each.
+						child := receiver parent: root.
+						root := root children add: child.
+						child start: stream position + 1.
+						child showChildren: each debuggerOutput.
+						result := continuation value.
+						child end: stream position.
+						root result: result.
+						root := root parent.
+						result ] ].
+		^ PPDebugParser on: newParser root: root
+	)
+	
+	isUnresolved = (
+		^ false
+	)
+	
+	YAMLFlowIn = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			context YAMLContext: #'flow-in'.
+	
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	cycleSet = (
+		"Answer a set of all nodes that are within one or more cycles of left-recursion. This is generally not a problem if at least one of the nodes is memoized, but it might make the grammar very inefficient and should be avoided if possible."
+		
+		| cycles |
+		cycles := IdentitySet new.
+		self cycleSet: OrderedCollection new firstSets: self firstSets into: cycles.
+		^ cycles
+	)
+	
+	propertyAt: aKey = (
+		"Answer the property value associated with aKey."
+		
+		^ self propertyAt: aKey ifAbsent: [ self error: 'Property not found' ]
+	)
+	
+	starGreedy: aParser = (
+		"Answer a new parser that parses the receiver zero or more times until it reaches aParser. This is a greedy non-blind implementation of the star operator. aParser is not consumed."
+		
+		^ PPGreedyRepeatingParser on: self limit: aParser
+	)
+	
+	debuggerOutput: aBoolean = (
+		self propertyAt: #debuggerOutput put: aBoolean
+	)
+	
+	allNamedParsersDo: aBlock = (
+		"Iterate over all the named parse nodes of the receiver."
+	
+		self allParsersDo: [ :each | 
+			each name notNil
+				ifTrue: [ aBlock value: each ] ]
+	)
+	
+	YAMLBlockOut = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			context YAMLContext: #'block-out'.
+	
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	push = (
+		"evaluate myself and if I dont' fail, push the result on the indent stack"
+		^ self >=> [ :context :cc | 
+			| result |
+			result := cc value.
+			result isPetitFailure ifFalse: [ 
+				context indentStack push: result asParser.
+			].
+			result
+		]
+	)
+	
+	allParsersDo: aBlock seen: aSet = (
+		"Iterate over all the parse nodes of the receiver, do not visit and follow the ones contained in aSet."
+	
+		(aSet includes: self)
+			ifTrue: [ ^ self ].
+		aSet add: self.
+		aBlock value: self.
+		self children
+			do: [ :each | each allParsersDo: aBlock seen: aSet ]
+	)
+	
+	pop = (
+		"pop myself from the indent stack, fail if I am not on top of the stack"
+		^ [:context | 
+				| retval |
+				retval := context indentStack pop.
+				(retval = self) ifFalse: [ 
+					PPFailure message: self asString, 'is not on top of the stack, cannot pop!'
+				] ifTrue: [  
+					retval
+				] 
+		] asParser
+	)
+	
+	isPetitParser = (
+		^ true
+	)
+	
+	YAMLinFlow = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			(context YAMLContext = #'flow-out')	ifTrue: [ context YAMLContext: #'flow-in' ].
+			(context YAMLContext = #'flow-in') 	ifTrue: [ context YAMLContext: #'flow-in' ].
+			(context YAMLContext = #'block-key') ifTrue: [ context YAMLContext: #'flow-key' ].
+			(context YAMLContext = #'flow-key') 	ifTrue: [ context YAMLContext: #'flow-key' ].
+			
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	min: anInteger lazy: aParser = (
+		"Answer a new parser that parses the receiver at least anInteger times until it reaches aParser. This is a lazy non-blind implementation. aParser is not consumed."
+		
+		^ (self starLazy: aParser) setMin: anInteger
+	)
+	
+	answer: anObject = (
+		"Answer a new parser that always returns anObject from a successful parse."
+	
+		^ self ==> [ :nodes | anObject ]
+	)
+	
+	memoized = (
+		"Answer a new memoized parser, for refraining redundant computations. This ensures polynomial time O(n^4) for left-recursive grammars and O(n^3) for non left-recursive grammars in the worst case. Not necessary for most grammars that are carefully written and in O(n) anyway."
+		
+		^ PPMemoizedParser on: self
+	)
+	
+	printNameOn: aStream = (
+		self name isNil
+			ifTrue: [ aStream print: self hash ]
+			ifFalse: [ aStream nextPutAll: self name ]
+	)
+	
+	debug: anObject = (
+		"Parse anObject with the receiving parser and answer the parse-result or an instance of PPFailure."
+		
+		^ self enableDebug parse: anObject asPetitStream
+	)
+	
+	innerChildren = (
+		"Answer the inner children of the receiver."
+	
+		| result |
+		result := OrderedCollection new.
+		self innerChildrenDo: [ :parser | result addLast: parser ].
+		^ result
+	)
+	
+	matchesIn: anObject = (
+		"Search anObject repeatedly for the matches of the receiver. Answered an OrderedCollection of the matched parse-trees."
+	
+		| result |
+		result := OrderedCollection new.
+		self 
+			matchesIn: anObject
+			do: [ :each | result addLast: each ].
+		^ result
+	)
+	
+	island = (
+		| island receiver |
+		receiver := PPIsland new.
+		receiver island: self.
+		island := receiver yourself.	"
+			TODO JK: Hack alert!
+			Not nice, but usefull for debugging
+		"
+		Sensor shiftPressed
+			ifFalse: [ island := island memoized ].
+		^ island
+	)
+	
+	parse: anObject onError: aBlock = (
+		"Parse anObject with the receiving parser and answer the parse-result or answer the result of evaluating aBlock. Depending on the number of arguments of the block it is simply evaluated, evaluated with the failure object, or evaluated with the error message and position."
+		
+		| result |
+		result := self parse: anObject.
+		result isPetitFailure
+			ifFalse: [ ^ result ].
+		aBlock numArgs = 0
+			ifTrue: [ ^ aBlock value ].
+		aBlock numArgs = 1
+			ifTrue: [ ^ aBlock value: result ].
+		^ aBlock value: result message value: result position
+	)
+	
+	end = (
+		"Answer a new parser that succeeds at the end of the input and return the result of the receiver."
+	
+		^ PPEndOfInputParser on: self
+	)
+	
+	propertyAt: aKey ifAbsent: aBlock = (
+		"Answer the property value associated with aKey or, if aKey isn't found, answer the result of evaluating aBlock."
+		
+		^ properties isNil
+			ifTrue: [ aBlock value ]
+			ifFalse: [ properties at: aKey ifAbsent: aBlock ]
+	)
+	
+	, aParser = ( 
+		"Answer a new parser that parses the receiver followed by aParser."
+	
+		^ PPSequenceParser with: self with: aParser
+	)
+	
+	YAMLBlockKey = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			context YAMLContext: #'block-key'.
+	
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	max: anInteger greedy: aParser = (
+		"Answer a new parser that parses the receiver at most anInteger times until it reaches aParser. This is a greedy non-blind implementation. aParser is not consumed."
+		
+		^ (self starGreedy: aParser) setMax: anInteger
+	)
+	
+	map: aBlock = (
+		"Answer a new parser that works on the receiving sequence an passes in each element as a block argument."
+		
+		^ aBlock numArgs = 1
+			ifTrue: [ self ==> aBlock ]
+			ifFalse: [ self error: aBlock numArgs asString , ' arguments expected.' ]
+	
+	)
+	
+	negate = (
+		"Answer a new parser consumes any input token but the receiver."
+		
+		^ self not , #any asParser ==> #second
+	)
+	
+	firstSets: aFirstDictionary into: aSet = (
+		"PRIVATE: Try to add additional elements to the first-set aSet of the receiver, use the incomplete aFirstDictionary."
+	
+		self children do: [ :parser | aSet addAll: (aFirstDictionary at: parser) ]
+	)
+	
+	parse: anObject = (
+		"Parse anObject with the receiving parser and answer the parse-result or an instance of PPFailure."
+	
+		^ self parse: anObject withContext: PPContext new
+	)
+	
+	plusLazy: aParser = (
+		"Answer a new parser that parses the receiver one or more times until it reaches aParser. This is a lazy non-blind implementation of the star operator. aParser is not consumed."
+		
+		^ (self starLazy: aParser) setMin: 1
+	)
+	
+	postCopy = (
+		super postCopy.
+		properties := properties copy
+	)
+	
+	acceptsEpsilonOpenSet: set = (
+		"private helper for acceptsEmpsilon that makes sure to avoid cycles (using open set)"
+		self children isEmpty ifTrue: [ ^ self acceptsEpsilon ].
+		
+		self shouldBeImplemented .
+	)
+	
+	foldRight: aBlock = (
+		"Answer a new parser that that folds the result of the receiver from right-to-left into aBlock. The argument aBlock must take two or more arguments."
+	
+		| size args |
+		size := aBlock numArgs.
+		args := Array new: size.
+		^ self
+			==> [ :nodes | 
+				args at: size put: nodes last.
+				nodes length - size + 1 to: 1 by: 1 - size do: [ :index | 
+					args
+						replaceFrom: 1
+						to: size - 1
+						with: nodes
+						startingAt: index.
+					args at: size put: (aBlock valueWithArguments: args) ].
+				args at: size ]
+	)
+	
+	YAMLBlockIn = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			context YAMLContext: #'block-in'.
+	
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	isIslandBorderOpenSet: set = (
+		"private helper for acceptsEmpsilon that makes sure to avoid cycles (using open set)"
+		self children isEmpty ifTrue: [ ^ self isIslandBorder ].
+		
+		self shouldBeImplemented .
+	)
+	
+	name = (
+		"Answer the production name of the receiver."
+		
+		^ self propertyAt: #name ifAbsent: [ nil ]
+	)
+	
+	/ aParser = ( 
+		"Answer a new parser that parses the receiver, if the receiver fails try with aParser (ordered-choice)."
+		
+		^ PPChoiceParser with: self with: aParser
+	)
+	
+	parseWithContext: context = (
+		| result |
+		context initializeFor: self.
+		result := self parseOn: context.
+		
+		"Return the furthest failure, it gives better results than the last failure"
+		(result isPetitFailure and: [ context furthestFailure notNil]) 
+			ifTrue: [ ^ context furthestFailure ].
+		^ result
+		
+	)
+	
+	matchingSkipRangesIn: anObject = (
+		"Search anObject repeatedly for the matches of the receiver. Skip over matches. Answer an OrderedCollection of ranges of each match (index of first character to: index of last character)."
+		
+		| result |
+		result := OrderedCollection new.
+		self
+			matchingSkipRangesIn: anObject
+			do: [ :value | result addLast: value ].
+		^ result
+	)
+	
+	replace: aParser with: anotherParser = (
+		"Replace the references of the receiver pointing to aParser with anotherParser."
+	)
+	
+	star = (
+		"Answer a new parser that parses the receiver zero or more times. This is a greedy and blind implementation that tries to consume as much input as possible and it does not consider what comes afterwards."
+	
+		^ PPPossessiveRepeatingParser on: self
+	)
+	
+	cycleSet: aStack firstSets: aDictionary into: aSet = (
+		"PRIVATE: Try to find a cycle, where aStack contains the previously visited parsers. The method returns quickly when the receiver is a terminal, terminals cannot be part of a cycle. If aStack already contains the receiver, then we are in a cycle. In this case we don't process the children further and add the nodes to aSet."
+	
+		| index |
+		self isTerminal
+			ifTrue: [ ^ self ].	
+		(index := aStack indexOf: self) > 0
+			ifTrue: [ 'g entre' println. ^ aSet addAll: (aStack copyFrom: index to: aStack size) ].
+		aStack addLast: self.
+		(self cycleSet: aDictionary)
+			do: [ :each | each cycleSet: aStack firstSets: aDictionary into: aSet ].
+		aStack removeLast
+	)
+	
+	and = (
+		"Answer a new parser (logical and-predicate) that succeeds whenever the receiver does, but never consumes input."
+	
+		^ PPAndParser on: self
+	)
+	
+	min: aMinInteger max: aMaxInteger greedy: aParser = (
+		"Answer a new parser that parses the receiver at least aMinInteger and at most aMaxInteger times until it reaches aParser. This is a greedy non-blind implementation. aParser is not consumed."
+	
+		| receiver |
+		receiver := self starGreedy: aParser.
+		receiver setMin: aMinInteger.
+		^ receiver setMax: aMaxInteger
+	)
+	
+	followSets: aFollowDictionary firstSets: aFirstDictionary into: aSet = (
+		"PRIVATE: Try to add additional elements to the follow-set aSet of the receiver, use the incomplete aFollowDictionary and the complete aFirstDictionary."
+		
+		self children do: [ :parser | (aFollowDictionary at: parser) addAll: aSet ]
+	)
+	
+	nextSets: aNextDictionary into: aSet = (
+		"return true/false, if something has changed or not...."
+		| childSet change tally |
+		
+		change := false.
+	
+		self children do: [:each | 
+			childSet := aNextDictionary at: each.
+			tally := childSet size.
+			childSet addAll: aSet.
+			change := change or: [ tally ~= childSet size ].
+		].
+	
+		^ change
+		
+	)
+	
+	token: aTokenClass = (
+		"Answer a new parser that transforms the input to a token of class aTokenClass."
+		
+		^ self token tokenClass: aTokenClass
+	)
+	
+	matchingRangesIn: anObject = (
+		"Search anObject repeatedly for the matches of the receiver. Answer an OrderedCollection of ranges of each match (index of first character to: index of last character)."
+		
+		| result |
+		result := OrderedCollection new.
+		self
+			matchingRangesIn: anObject
+			do: [ :value | result addLast: value ].
+		^ result
+	)
+	
+	parse: anObject withContext: aPPContext = (
+		"Parse anObject with the receiving parser and answer the parse-result or an instance of PPFailure."
+	
+		aPPContext stream: anObject asPetitStream.
+		^ self parseWithContext: aPPContext.
+	
+	)
+	
+	trim = (
+		"Answer a new parser that consumes spaces before and after the receiving parser."
+		
+		^ self trimSpaces
+	)
+	
+	enableDebuggerOutput = ( 
+		self debuggerOutput: true.
+	)
+	
+	morphicShapeSeen: aSet depth: anInteger do: aBlock = (
+		" avoid recursion "
+		(aSet includes: self)
+			ifTrue: [ ^ self morphicShapeDefault ].
+		" display nice name when possible "
+		(anInteger > 0 and: [ self name notNil ]) 
+			ifTrue: [ ^ self morphicShapeDefault ].
+		" don't do it too deep "
+		(anInteger > 10)
+			ifTrue: [ ^ self morphicShapeDefault ].
+		aSet add: self. 
+		^ aBlock value: [ :parser |
+			parser 
+				morphicShapeSeen: aSet 
+				depth: anInteger + 1 ]
+	)
+	
+	namedParsers = (
+	    | result |
+	    result := OrderedCollection new.
+	    self namedParsersDo: [ :parser | result addLast: parser ].
+	    ^ result
+	)
+	
+	matchesSkipIn: anObject = (
+		"Search anObject repeatedly for the matches of the receiver. Answer an OrderedCollection of the matched parse-trees. Skip over matches."
+	
+		| result |
+		result := OrderedCollection new.
+		self 
+			matchesSkipIn: anObject
+			do: [ :each | result addLast: each ].
+		^ result
+	)
+	
+	YAMLFlowKey = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			context YAMLContext: #'flow-key'.
+	
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		"This is the default implementation to match two parsers. This code can properly handle recursion. This is code is supposed to be overridden in subclasses that add new state."
+	
+		(self == aParser or: [ anIdentitySet includes: self ])
+			ifTrue: [ ^ true ].
+		anIdentitySet add: self.
+		^ self class = aParser class and: [ self matchList: self children against: aParser children inContext: aDictionary seen: anIdentitySet ]
+	)
+	
+	max: anInteger lazy: aParser = (
+		"Answer a new parser that parses the receiver at most anInteger times until it reaches aParser. This is a lazy non-blind implementation. aParser is not consumed."
+		
+		^ (self starLazy: aParser) setMax: anInteger
+	)
+	
+	parseOn: aPPContext = (
+		"Parse aStream with the receiving parser and answer the parse-result or an instance of PPFailure. Override this method in subclasses to specify custom parse behavior. Do not call this method from outside, instead use #parse:."
+		
+		self subclassResponsibility
+	)
+	
+	acceptsEpsilon = (
+		"return true, if parser can accept epsilon without failure"
+		^ self subclassResponsibility
+	)
+	
+	removeProperty: aKey ifAbsent: aBlock = (
+		"Remove the property with aKey. Answer the value or, if aKey isn't found, answer the result of evaluating aBlock."
+		
+		| answer |
+		properties isNil ifTrue: [ ^ aBlock value ].
+		answer := properties removeKey: aKey ifAbsent: aBlock.
+		properties isEmpty ifTrue: [ properties := nil ].
+		^ answer
+	)
+	
+	YAMLFlowOut = (
+		^ self >=> [:context :cc |
+			| retval aYAMLContext |
+			aYAMLContext := context YAMLContext.
+			context YAMLContext: #'flow-out'.
+	
+			retval := cc value.
+	
+			context YAMLContext: aYAMLContext.
+			retval.
+		]
+	)
+	
+	copyInContext: aDictionary = (
+		^ self copyInContext: aDictionary seen: IdentityDictionary new
+	)
+	
+	nextSet: aPPContext = (
+		^ aPPContext root nextSets at: self.
+	)
+	
+	isWater = (
+		^ false
+	)
+	
+	preceeds = (
+		self >=> [ :context :cc |
+			| memento result |
+			(context position = 0) ifTrue: [ 
+				PPFailure message: 'nothing preceeds start of stream' context: context 
+			].
+			memento := context remember.
+			
+			context back	.
+			result := cc value.
+			
+			context restore: memento.
+			result
+		]
+	)
+	
+	max: anInteger = (
+		"Answer a new parser that parses the receiver at most anInteger times."
+		
+		^ self star setMax: anInteger
+	)
+	
+	matchList: matchList against: parserList inContext: aDictionary seen: aSet = (
+		^ self matchList: matchList index: 1 against: parserList index: 1 inContext: aDictionary seen: aSet
+	)
+	
+	matchList: matchList index: matchIndex against: parserList index: parserIndex inContext: aDictionary seen: aSet = (
+		| parser currentIndex currentDictionary currentSeen parsers |
+		matchList size < matchIndex
+			ifTrue: [ ^ parserList size < parserIndex ].
+		parser := matchList at: matchIndex.
+		parser class = PPListPattern ifTrue: [
+			currentIndex := parserIndex - 1.
+			[ currentDictionary := aDictionary copy.
+			currentSeen := aSet copy.
+			parserList size < currentIndex or: [ 
+				parsers := parserList copyFrom: parserIndex to: currentIndex.
+				(currentDictionary at: parser ifAbsentPut: [ parsers ]) = parsers and: [ 
+					(self
+						matchList: matchList
+						index: matchIndex + 1
+						against: parserList
+						index: currentIndex + 1
+						inContext: currentDictionary
+						seen: currentSeen)
+						ifTrue: [ 
+							currentDictionary keysAndValuesDo: [ :key :value | aDictionary at: key put: value ].
+							^ true ].
+					false ] ] ] whileFalse: [ currentIndex := currentIndex + 1 ].
+			^ false ].
+		parserList size < parserIndex
+			ifTrue: [ ^ false ].
+		(parser match: (parserList at: parserIndex) inContext: aDictionary seen: aSet)
+			ifFalse: [ ^ false ].
+		^ self
+			matchList: matchList
+			index: matchIndex + 1
+			against: parserList
+			index: parserIndex + 1
+			inContext: aDictionary
+			seen: aSet
+	)
+	
+	namedChildrenDo: aBlock = (
+		"Iterate over the named children of the receiver."
+	
+		self namedChildrenDo: aBlock seen: IdentitySet new
+	)
+	
+	propertyAt: aKey ifAbsentPut: aBlock = (
+		"Answer the property associated with aKey or, if aKey isn't found store the result of evaluating aBlock as new value."
+		
+		^ self propertyAt: aKey ifAbsent: [ self propertyAt: aKey put: aBlock value ]
+	)
+	
+	if: aBlock = (
+		^ PPConditionalParser on: self block: aBlock
+	)
+	
+	isTerminal = (
+		"Answer true if the receiver is a terminal or leaf parser, that means it does not delegate to any other parser."
+	
+		^ self children isEmpty
+	)
+	
+	trimSpaces = (
+		"Answer a new parser that consumes spaces before and after the receiving parser."
+		
+		^ self trim: #space asParser
+	)
+	
+	plusGreedy: aParser = (
+		"Answer a new parser that parses the receiver one or more times until it reaches aParser. This is a greedy non-blind implementation of the star operator. aParser is not consumed."
+		
+		^ (self starGreedy: aParser) setMin: 1
+	)
+	
+	----------------------------------
+	
+	
+	named: aString = (
+		^ self new name: aString
+	)
+	
+	new = (
+		^ self basicNew initialize
+	)
+)

@@ -1,0 +1,132 @@
+PPSequenceParser = PPListParser (
+	"A parser that parses a sequence of parsers."
+	
+	
+	nextSets: aNextDictionary into: aSet = (
+		| change tally tmp childSet |
+		
+		change := false.
+	
+		self children keysAndValuesDo: [ :index :child |
+			childSet := (aNextDictionary at: child). 
+			tally :=  childSet size.
+	
+			index = parsers size ifTrue: [ 
+				childSet addAll: aSet.
+			] ifFalse: [  
+				tmp := self subsequenceFrom: index + 1 to: parsers size.
+				childSet add: tmp.
+				tmp isIslandBorder ifFalse: [ 
+					childSet addAll: aSet.
+				]
+			].
+			change := change or: [ (aNextDictionary at: child) size ~= tally ]
+	 	].
+	
+		^ change
+	)
+	
+	followSets: aFollowDictionary firstSets: aFirstDictionary into: aSet = (
+		parsers keysAndValuesDo: [ :index :parser |
+			| followSet firstSet |
+			followSet := aFollowDictionary at: parser.
+			index = parsers size
+				ifTrue: [ followSet addAll: aSet ]
+				ifFalse: [
+					(self class withAll: (parsers 
+						copyFrom: index + 1 to: parsers size))
+							firstSets: aFirstDictionary
+							into: (firstSet := IdentitySet new).
+					(firstSet anySatisfy: [ :each | each isNullable ])
+						ifTrue: [ followSet addAll: aSet ].
+					followSet addAll: (firstSet 
+						reject: [ :each | each isNullable ]) ] ]
+	)
+	
+	cycleSet: aDictionary = (
+		| firstSet |
+		1 to: parsers size do: [ :index |
+			firstSet := aDictionary at: (parsers at: index).
+			(firstSet anySatisfy: [ :each | each isNullable ])
+				ifFalse: [ ^ parsers copyFrom: 1 to: index ] ].
+		^ parsers
+	)
+	
+	exampleOn: aStream = (
+		parsers do: [ :each | each exampleOn: aStream ]
+	)
+	
+	, aRule = (
+		^ self copyWith: aRule
+	)
+	
+	subsequenceFrom: from to: to = (
+		| interval dict |
+		
+		interval := from to: to.
+		dict := self propertyAt: #subsequenceCache ifAbsentPut: [ Dictionary new ].
+		^ dict at: interval ifAbsentPut: [
+			(from = to) 
+				ifTrue: [ parsers at: from ] 
+				ifFalse: [ self class withAll: (parsers copyFrom: from to: to) ]
+		].
+	)
+	
+	map: aBlock = (
+		^ aBlock numArgs = self children size
+			ifTrue: [ self ==> [ :nodes | aBlock valueWithArguments: nodes ] ]
+			ifFalse: [ self error: aBlock numArgs asString , ' arguments expected.' ]
+	)
+	
+	firstSets: aFirstDictionary into: aSet = (
+		| nullable |
+		parsers do: [ :parser |
+			nullable := false.
+			(aFirstDictionary at: parser) do: [ :each |
+				each isNullable
+					ifTrue: [ nullable := true ]
+					ifFalse: [ aSet add: each ] ].
+			nullable
+				ifFalse: [ ^ self ] ].
+		aSet add: PPSentinel instance
+	)
+	
+	visualizationGraphType = (
+		^ ','
+	)
+	
+	acceptsEpsilonOpenSet: set = (
+		set add: self.
+		^ self children allSatisfy: [:e | e acceptsEpsilonOpenSet: set ]
+	)
+	
+	isIslandBorderOpenSet: set = (
+		set add: self.
+		^ self children anySatisfy: [:e | e isIslandBorderOpenSet: set ]
+	)
+	
+	parseOn: aPPContext = (
+		"This is optimized code that avoids unnecessary block activations, do not change."
+		
+		| memento elements element |
+		memento := aPPContext remember.
+		elements := Array new: parsers length.
+		1 to: parsers length do: [ :index |
+			element := (parsers at: index) 
+				parseOn: aPPContext.
+			element isPetitFailure ifTrue: [
+				aPPContext restore: memento.
+				^ element ].
+			elements at: index put: element ].
+		^ elements
+	)
+	
+	permutation: anArrayOfIntegers = (
+		"Answer a permutation of the receivers sequence."
+		
+		anArrayOfIntegers do: [ :index |
+			(index isInteger and: [ index between: 1 and: parsers size ])
+				ifFalse: [ self error: 'Invalid permutation index: ' , index printString ] ].
+		^ self ==> [ :nodes | anArrayOfIntegers collect: [ :index | nodes at: index ] ]
+	)
+)

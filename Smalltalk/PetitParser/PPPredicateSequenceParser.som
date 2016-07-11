@@ -1,0 +1,52 @@
+PPPredicateSequenceParser = PPPredicateParser (
+	"A parser that accepts if a given predicate on an arbitrary number of elements of the input sequence holds.Instance Variables:	size	<Integer>	The number of elements to consume."
+	| size |
+	
+	size = (
+		"Answer the sequence size of the receiver."
+	
+		^ size
+	)
+	
+	initializeOn: aBlock message: aString negated: aNegatedBlock message: aNegatedString size: anInteger = (
+		predicate := aBlock.
+		predicateMessage := aString.
+		negated := aNegatedBlock.
+		negatedMessage := aNegatedString.
+		size := anInteger 
+	)
+	
+	negate = (
+		"Answer a parser that is the negation of the receiving predicate parser."
+		
+		^ self class 
+			on: negated message: negatedMessage
+			negated: predicate message: predicateMessage
+			size: size
+	)
+	
+	match: aParser inContext: aDictionary seen: anIdentitySet = (
+		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self size = aParser size ]
+	)
+	
+	parseOn: aPPContext = (
+		| memento result |
+		memento := aPPContext remember.
+		result := aPPContext stream next: size.
+		(result size = size and: [ predicate value: result ])
+			ifTrue: [ ^ result ].
+		aPPContext restore: memento.
+		^ PPFailure message: predicateMessage context: aPPContext
+	)
+	
+	----------------------------------
+	
+	
+	on: aBlock message: aString size: anInteger = (
+		^ self on: aBlock message: aString negated: [ :each | (aBlock value: each) not ] message: 'no ' , aString size: anInteger 
+	)
+	
+	on: aBlock message: aString negated: aNegatedBlock message: aNegatedString size: anInteger = ( 
+		^ self new initializeOn: aBlock message: aString negated: aNegatedBlock message: aNegatedString size: anInteger
+	)
+)
