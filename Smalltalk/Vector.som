@@ -143,6 +143,22 @@ Vector = (
         ^arr
     )
     
+    "Comparing"
+    = otherCollection = (
+	    self == otherCollection ifTrue: [^ true].
+		self species == otherCollection species ifFalse: [^ false].
+		^ self hasEqualElements: otherCollection
+	)
+	
+	hasEqualElements: otherCollection = (	
+		| size |
+		(size := self size) = otherCollection size ifFalse: [^ false].
+		1 to: size do:
+			[:index |
+			(self at: index) = (otherCollection at: index) ifFalse: [^ false]].
+		^ true
+	)
+		
     "Private"
     initialize: size = (
         storage := Array new: size.
@@ -345,6 +361,7 @@ Vector = (
 	
 	"Pharo Compatibility"
 	species = (^self class)
+	postCopy = (storage := storage copy)
 	
     ----------------------------
     

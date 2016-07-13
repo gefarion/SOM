@@ -34,9 +34,23 @@ Array = (
     first  = ( ^ self at: 1 )
     second = ( ^ self at: 2 )
     last   = ( ^ self at: self length )
-    
     asArray = (^ self)
     
+    "Comparing"
+    = otherCollection = (
+	    self == otherCollection ifTrue: [^ true].
+		self species == otherCollection species ifFalse: [^ false].
+		^ self hasEqualElements: otherCollection
+	)
+	
+	hasEqualElements: otherCollection = (	
+		| size |
+		(size := self length) = otherCollection length ifFalse: [^ false].
+		1 to: size do: [:index |
+			(self at: index) = (otherCollection at: index) ifFalse: [^ false]].
+		^ true
+	)
+	
     "Iterating"
     do: block            = ( self doIndexes: [ :i |
                                 block value: (self at: i) ] )

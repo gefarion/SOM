@@ -252,7 +252,7 @@ PPContext = Object (
 	hasGlobal: aKey = (
 		"Test if the global property aKey is present."
 		
-		^ globals notNil and: [ globals includesKey: aKey ]
+		^ globals notNil and: [ globals containsKey: aKey ]
 	)
 	
 	YAMLN: whatever = (
@@ -337,7 +337,7 @@ PPContext = Object (
 	hasProperty: aKey = (
 		"Test if the property aKey is present."
 		
-		^ properties notNil and: [ properties includesKey: aKey ]
+		^ properties notNil and: [ properties containsKey: aKey ]
 	)
 	
 	propertyAt: aKey ifAbsentPut: aBlock = (

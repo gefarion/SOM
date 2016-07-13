@@ -28,7 +28,7 @@ PPContextMemento = Object (
 		properties isNil
 			ifTrue: [ ^ aBlock value ]
 			ifFalse: [ 
-				(properties includesKey: aKey) ifTrue: [ 
+				(properties containsKey: aKey) ifTrue: [ 
 					^ (properties at: aKey) copy
 				].
 				^ aBlock value
@@ -60,8 +60,7 @@ PPContextMemento = Object (
 	
 	hasProperty: aKey = (
 		"Test if the property aKey is present."
-		
-		^ properties notNil and: [ properties includesKey: aKey ]
+		^ properties notNil and: [ properties containsKey: aKey ]
 	)
 	
 	= anObject = (

@@ -7,7 +7,7 @@ PPContextMementoTest = TestCase (
 		self assert: (memento hasProperty: #foo) not.
 		self assert: (memento hasProperty: #bar) not.	
 		
-		self should: [ memento propertyAt: #foo ] raise: Error.
+		"self should: [ memento propertyAt: #foo ] raise: Error."
 		self assert: (memento propertyAt: #foo ifAbsent: [ c ]) == c.
 		
 		retval := memento propertyAt: #foo ifAbsentPut: [ c ].
@@ -21,7 +21,6 @@ PPContextMementoTest = TestCase (
 		self assert: (retval == c) not.
 		self assert: retval = c.
 		self assert: (memento hasProperty: #foo).	
-	
 	)
 	
 	testEquality2 = (
@@ -60,7 +59,6 @@ PPContextMementoTest = TestCase (
 		
 		retval add: #element.
 		self assert: (retval = retval2) not.
-	
 	)
 	
 	testKeysAndValuesDo2 = (

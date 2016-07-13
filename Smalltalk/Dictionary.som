@@ -26,6 +26,7 @@ THE SOFTWARE.
 Dictionary = (
 
     | pairs |
+    size = (^pairs size)
     
     at: aKey put: aValue = (
         (self containsKey: aKey)
@@ -54,7 +55,18 @@ Dictionary = (
         ^false
     )
     
+    removeKey: aKey = (self removeKey: aKey ifAbsent: [])
+    removeKey: aKey ifAbsent: aBlock = (
+    	| pair |
+    	pair := self pairAt: aKey. 
+    	pair isNil 
+    		ifTrue: [aBlock value] 
+    		ifFalse: [pairs remove: pair. 
+    					^pair value]
+    )
+    
     keys   = ( ^pairs collect: [ :p | p key ] )
+    keysDo: aBlock = (self keys do: aBlock)
     values = ( ^pairs collect: [ :p | p value ] )
     
     "Iteration"
@@ -74,6 +86,8 @@ Dictionary = (
     keysAndValuesDo: aBlock = (
 		^self do:[:pair| aBlock value: pair key value: pair value]
   	)
+  	
+  	isEmpty = (^self size = 0)
  
  	----
     new = (

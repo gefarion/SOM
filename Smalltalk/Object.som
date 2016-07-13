@@ -26,7 +26,9 @@ THE SOFTWARE.
 Object = nil (
     class      = primitive
     objectSize = primitive  "size in bytes"
-    
+    copy = (^self shallowCopy postCopy)
+    shallowCopy = primitive
+    postCopy = (^ self) 
     "Comparing"
 
     " If you override =, you MUST override hashcode as well.  The rule
@@ -122,7 +124,7 @@ Object = nil (
 	shape = primitive
 	target = (^self)
 	
-	"debugging stuff"
+	"Debugging Stuff"
 	printLastMethods: aNumber = (
 		| ctx |
 		ctx := thisContext.
