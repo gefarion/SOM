@@ -25,8 +25,15 @@ THE SOFTWARE.
 
 Character = (
     "Characters are immutable"
-    asInteger = primitive
-    isDigit = primitive
+    asInteger 	   = primitive
+    isDigit	  	   = primitive
+    isLetter  	   = primitive
+    isAlphaNumeric = primitive
+    asUppercase	   = primitive
+    
+    isVowel = (
+		^'AEIOU' includes: self asUppercase
+	)
     
     isSeparator = (
 		| value |
