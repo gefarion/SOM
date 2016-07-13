@@ -28,8 +28,7 @@ THE SOFTWARE.
 Vector = (
 
     | first last storage |
-    
-    initialize: size = (
+ 	initialize: size = (
 	    first := 1.
 	    last  := 1.
 	    storage := Array new: size.
@@ -57,6 +56,8 @@ Vector = (
   	)
     
     first = ( ^ (self size > 0) ifTrue: [storage at: 1] ifFalse: [nil] )
+    second = (^ self at: 2)
+    last = (^ self at: self size)
     
     "Iterating"
     do: block = (
@@ -134,6 +135,7 @@ Vector = (
     "Sizing"
     isEmpty  = ( ^last = first   )
     size     = ( ^last - first   )
+    length	 = (^self size)
     capacity = ( ^storage length )
     
     "Conversion"
@@ -289,6 +291,13 @@ Vector = (
         self do: [:each | (aBlock value: each)  
                             ifTrue: [newCollection append: each]].
         ^ newCollection
+    )
+    
+    collect: aBlock = (
+        | newCollection |
+        newCollection := self species new: self size.
+        self do: [ :each | newCollection append: (aBlock value: each) ].
+        ^newCollection
     )
 	
 	errorNotFound: anObject = (

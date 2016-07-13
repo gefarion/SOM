@@ -42,9 +42,11 @@ Object = nil (
     notNil      = ( ^true )
     
     "Accessing"
-    species = (
-    	^self class
-    )
+    species = (^self class)
+    isKindOf: aClass = (
+		self class == aClass
+			ifTrue: [^true]
+			ifFalse: [^self class inheritsFrom: aClass])
     
     "Converting"
     asString  = ( ^'instance of ' + (self class) )
@@ -62,9 +64,16 @@ Object = nil (
     
     "Printing"
     print     = ( self asString print )
-    printString = (^self asString)
+    printString = (^String streamContents: [:s | self printOn: s])
     println   = ( self print. system printNewline )
-
+	
+	printOn: aStream = (
+		| title |
+		title := self class name.
+		aStream nextPutAll: (title first isVowel ifTrue: ['an '] ifFalse: ['a ']).
+		aStream	nextPutAll: title.
+	)
+		
     "Debugging"
     inspect   = primitive
     halt      = primitive

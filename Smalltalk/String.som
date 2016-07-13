@@ -26,8 +26,6 @@ THE SOFTWARE.
 String = (
     "Strings are immutable"
 
-    size = (self printLastMethods: 5)
-    
     "Concatenate: returns a new string object"
     concatenate: argument = primitive
     + argument            = ( ^self concatenate: argument asString )
@@ -38,11 +36,13 @@ String = (
     asNumber = primitive
     hashcode = primitive
     
+    size = (self printLastMethods: 5. ^self length)
+    
     "Info"
     length = primitive
     isEmpty = (^self length = 0)
     isEmptyOrNil = (^self isEmpty)
-    first = (^self charAt: 1)
+    first = (^self at: 1)
     
     "Comparing"   
     = argument = primitive
@@ -83,14 +83,6 @@ String = (
         ^ Integer fromString: self
     )
     
-    "Deprecated and change for at: and the return of a char instead of a one char string"
-    "charAt: argument = (
-        self printLastMethods: 3.
-        self error: 'deprecated method charAt: use at: instead'.
-        ^self at: argument."
-        "^self substringFrom: argument to: argument"
-    ")"
-    
     at = primitive
     
     "Printing"
@@ -129,7 +121,7 @@ String = (
 		^self indexOf: anElement startingAt: start ifAbsent: 0
 	)
 	
-	includes: aChar = ((self indexOf: aChar startingAt: 1) > 0)
+	includes: aChar = (^(self indexOf: aChar startingAt: 1) > 0)
 	
 	indexOf: anElement startingAt: start ifAbsent: exceptionBlock = (
 		start to: self length do: [:index |
@@ -149,7 +141,7 @@ String = (
 		self length = 0 ifTrue: [^ 0].
 		start to: self length - key length + 1 do: [:startIndex | | index |
 			index := 1.
-			[(self charAt: startIndex+index-1) = (key charAt: index)] whileTrue: [
+			[(self at: startIndex+index-1) = (key at: index)] whileTrue: [
 					index = key length ifTrue: [^ startIndex].
 					index := index+1
 			]
@@ -166,7 +158,7 @@ String = (
 	do: aBlock = (
 		"Refer to the comment in Collection|do:."
 		1 to: self length do:
-			[:index | aBlock value: (self charAt: index)]
+			[:index | aBlock value: (self at: index)]
 	)
 	
 		

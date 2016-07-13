@@ -81,4 +81,14 @@ Class = (
 	)
 	
 	customHash = (^self name hashcode)
+	
+	inheritsFrom: aClass = (
+		| aSuperclass |
+		aSuperclass := self superclass.
+		[aSuperclass == nil]
+			whileFalse: 
+				[aSuperclass == aClass ifTrue: [^true].
+				aSuperclass := aSuperclass superclass].
+		^false
+	)
 )
