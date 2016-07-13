@@ -12,11 +12,11 @@ PPLambdaParserTest = PPCompositeParserTest (
 		result := self parserClass parse: 'x' startingAt: #variable onError: [ self fail ].
 		self assert: result equals: 'x'.
 		beenHere := false.
-		result := self parserClass parse: '\' startingAt: #variable onError: [ beenHere := true ].
+		result := self parserClass parse: '\\' startingAt: #variable onError: [ beenHere := true ].
 		self assert: beenHere.
 		beenHere := false.
 		result := self parserClass
-			parse: '\'
+			parse: '\\'
 			startingAt: #variable
 			onError: [ :fail | 
 				beenHere := true.
@@ -26,7 +26,7 @@ PPLambdaParserTest = PPCompositeParserTest (
 		self assert: result position equals: 0.
 		beenHere := false.
 		result := self parserClass
-			parse: '\'
+			parse: '\\'
 			startingAt: #variable
 			onError: [ :msg :pos | 
 				self assert: msg equals: 'separator expected'.
@@ -42,6 +42,8 @@ PPLambdaParserTest = PPCompositeParserTest (
 	)
 	
 	testApplication = (
+		| a |
+		a := '(x (y z))'.
 		self assert: '(x x)' is: #('x' 'x').
 		self assert: '(x y)' is: #('x' 'y').
 		self assert: '((x y) z)' is: #(('x' 'y') 'z').

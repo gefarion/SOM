@@ -67,16 +67,14 @@ PPToken = Object (
 	
 	printOn: aStream = (
 		super printOn: aStream.
-		aStream
-			nextPut: '[';
-			print: self start;
-			nextPut: ',';
-			print: self stop;
-			nextPut: ']'.
+		aStream nextPut: '['.
+		aStream	print: self start.
+		aStream	nextPut: ','.
+		aStream	print: self stop.
+		aStream	nextPut: ']'.
 		aStream nextPut: '('.
-		aStream
-			print: self inputValue;
-			nextPut: ')'
+		aStream print: self inputValue.
+		aStream	nextPut: ')'.
 	)
 	
 	start = (
@@ -105,7 +103,7 @@ PPToken = Object (
 	)
 	
 	----------------------------------
-	
+	| NewLineParser |
 	
 	initialize = (
 		"Platform independent newline sequence. LF: Unix, CR+LF: Windows, and CR: Apple."

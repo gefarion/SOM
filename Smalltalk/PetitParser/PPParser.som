@@ -816,7 +816,7 @@ PPParser = Object (
 	
 	printNameOn: aStream = (
 		self name isNil
-			ifTrue: [ aStream print: self hash ]
+			ifTrue: [ "aStream print: self hash" aStream nextPutAll: 'PPParse...'   ]
 			ifFalse: [ aStream nextPutAll: self name ]
 	)
 	

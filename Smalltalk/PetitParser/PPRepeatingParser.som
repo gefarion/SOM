@@ -65,7 +65,7 @@ PPRepeatingParser = PPDelegateParser (
 		aStream nextPutAll: ', '.
 		aStream
 			nextPutAll:
-					(max = SmallInteger maxVal
+					(max = Integer maxVal
 							ifTrue: [ '*' ]
 							ifFalse: [ max printString ]).
 		aStream	nextPut: ']'.

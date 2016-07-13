@@ -1,13 +1,10 @@
 PPAbstractParserTest = TestCase (
-	
-	
 	assert: aParser fail: aCollection = (
 		^ self assert: aParser fail: aCollection end: 0
 	)
 	
 	assert: aParser parse: aCollection to: aTargetObject end: anInteger = (
 		| stream result context |
-	
 		self assert: aParser isPetitParser description: 'Parser invalid'.
 		stream := aCollection asPetitStream.
 		context := self context.
