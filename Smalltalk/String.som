@@ -29,6 +29,7 @@ String = (
     "Concatenate: returns a new string object"
     concatenate: argument = primitive
     + argument            = ( ^self concatenate: argument asString )
+    , argument            = ( ^self concatenate: argument asString )
     
     "Converting"
     asString = ( ^self )
@@ -36,12 +37,12 @@ String = (
     asNumber = primitive
     hashcode = primitive
     
-    size = (self printLastMethods: 5. ^self length)
-    
     "Info"
     length = primitive
     isEmpty = (^self length = 0)
+    notEmpty = (^self isEmpty not)
     isEmptyOrNil = (^self isEmpty)
+    isString = (^true)
     first = (^self at: 1)
     
     "Comparing"   
@@ -87,6 +88,16 @@ String = (
     
     "Printing"
     print    = ( system printString: self )
+    printOn: aStream = (self storeOn: aStream)
+    storeOn: aStream = (
+		| x |
+		aStream nextPut: $'.
+		1 to: self length do:
+			[:i |
+				aStream nextPut: (x := self at: i).
+				x = $' ifTrue: [aStream nextPut: x]].
+		aStream nextPut: $'
+	)
     
     "Printing"
     split: aSequenceableCollection = (
@@ -164,16 +175,24 @@ String = (
 		
 	"FileSystem"
 	asVmPathName = (^self)
+	readStream = (^ ReadStream on: self)
 	
 	"Petit Parser"
-	asParser = (
-		^ PPLiteralSequenceParser on: self
-	)
-		
+	asParser = (^ PPLiteralSequenceParser on: self)
 	asPetitStream = (^ PPStream on: self)
-	
-	
-	
+	asUppercase = (
+		| output |
+		output := Vector new: self length.
+		self do: [:char | output append: char asUppercase].
+		^output
+	)
+	asLowercase = (
+		| output |
+		output := Vector new: self length.
+		self do: [:char | output append: char asLowercase].
+		^output
+	)
+	sameAs: anotherString = (^self = anotherString)
 	-------------------------------------------------------------
 	
 	streamContents: blockWithArg = (
@@ -185,5 +204,17 @@ String = (
 		stream := WriteStream on: (Vector new: newSize).
 		blockWithArg value: stream.
 		^ stream contents
+	)
+	
+	with: firstObject = (
+		^firstObject asString
+	)
+	
+	with: firstObject with: secondObject = (
+		^firstObject asString + secondObject asString.
+	)
+	
+	with: firstObject with: secondObject with: thirdObject = (
+		^firstObject asString + secondObject asString + thirdObject asString.
 	)
 )

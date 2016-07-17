@@ -26,14 +26,23 @@ THE SOFTWARE.
 Character = (
     "Characters are immutable"
     asInteger 	   = primitive
+    asString 	   = primitive
+    isCharacter	   = (^true)
     isDigit	  	   = primitive
     isLetter  	   = primitive
     isAlphaNumeric = primitive
     asUppercase	   = primitive
+    asLowercase	   = primitive
+    isUppercase	   = primitive
+    isLowercase	   = primitive
+    compareWith: anotherChar	   = primitive
+    asSymbol = (^self asString asSymbol)
     
     isVowel = (
 		^'AEIOU' includes: self asUppercase
 	)
+	
+	between: min and: max = (^self >= min and: [self <= max])
     
     isSeparator = (
 		| value |
@@ -51,12 +60,25 @@ Character = (
 	"Petit Parser"
 	asParser = (^ PPLiteralObjectParser on: self)
 	
+	> anotherChar = (^(self compareWith: anotherChar) > 0)
+	>= anotherChar = (^(self compareWith: anotherChar) >= 0)
+	<= anotherChar = (^(self compareWith: anotherChar) <= 0)
+	< anotherChar = (^(self compareWith: anotherChar) < 0)
+	sameAs: anotherChar = (^(self compareWith: anotherChar) = 0)
+	to: other = (
+		"Answer with a collection in ascii order -- $a to: $z"
+		^ (self asInteger to: other asInteger) collect:
+					[:ascii | Character value: ascii]
+	)
 	------------------------
     
-    codePoint: anInteger = (
-		^self value: anInteger
-	)
+    codePoint: anInteger = (^self value: anInteger)
 	
 	value: aNumber = (^self new: aNumber)
 	new: aValue = primitive
+	
+	space = (^self value: 32)
+	cr    = (^self value: 13)
+	tab   = (^self value: 9)
+	lf    = (^self value: 10)
 )

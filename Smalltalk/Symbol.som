@@ -24,13 +24,10 @@ THE SOFTWARE.
 "
 
 Symbol = String (
-
     "Converting"
     asString = primitive
     asSymbol = ( ^self )
-    
     selector = (^self)
-    
     isPrimitive = (^false)
     
     "Printing"

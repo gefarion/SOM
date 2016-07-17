@@ -40,6 +40,8 @@ Object = nil (
     ~= other    = (^ (self == other) not )
     isNil       = ( ^false )
     notNil      = ( ^true )
+    hash 		= (^self identityHash)
+    identityHash = primitive
     
     "Accessing"
     species = (^self class)
@@ -116,6 +118,9 @@ Object = nil (
     
     perform: aSymbol = primitive
     perform: aSymbol withArguments: args = primitive
+    perform: aSymbol with: firstObject with: secondObject = ( 
+		^ self perform: aSymbol withArguments: (Array with: firstObject with: secondObject)
+	)
     perform: aSymbol inSuperclass: cls = primitive
     perform: aSymbol withArguments: args inSuperclass: cls = primitive
     
@@ -145,5 +150,6 @@ Object = nil (
 	
 	"Petit Parser"
 	isPetitFailure = (^false)
+	isPetitParser = (^false)
 	asParser = (^ PPPredicateObjectParser expect: self)
 )

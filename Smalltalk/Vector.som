@@ -133,10 +133,11 @@ Vector = (
     )
     
     "Sizing"
-    isEmpty  = ( ^last = first   )
-    size     = ( ^last - first   )
+    isEmpty  = ( ^last = first)
+    notEmpty  = ( ^self isEmpty not)
+    size     = ( ^last - first)
     length	 = (^self size)
-    capacity = ( ^storage length )
+    capacity = ( ^storage length)
     
     "Conversion"
     asArray = ( | arr |
@@ -299,10 +300,15 @@ Vector = (
         self do: [ :each | newCollection append: (aBlock value: each) ].
         ^newCollection
     )
-	
-	errorNotFound: anObject = (
-		^nil
+    
+    inject: thisValue into: binaryBlock = (	
+	    | nextValue |
+		nextValue := thisValue.
+		self do: [:each | nextValue := binaryBlock value: nextValue value: each].
+		^nextValue
 	)
+	
+	errorNotFound: anObject = (^nil)
 	
 	appendAll: aCollection = ( 
 		aCollection do: [:each | self append: each].
@@ -371,6 +377,9 @@ Vector = (
 	"Pharo Compatibility"
 	species = (^self class)
 	postCopy = (storage := storage copy)
+	
+	"Petit Parser"
+	asPetitStream = (^ PPStream on: self)
 	
     ----------------------------
     

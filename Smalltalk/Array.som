@@ -29,6 +29,7 @@ Array = (
     at: index            = primitive
     at: index put: value = primitive
     length               = primitive
+    isEmpty				 = (^self length = 0)
     putAll: block        = ( self doIndexes: [ :i |
                                 self at: i put: block value ] )
     first  = ( ^ self at: 1 )
@@ -112,15 +113,20 @@ Array = (
     "Containment check"
     contains: element = ( self do: [ :e | e = element ifTrue: [ ^true ] ].
                           ^false )
-    indexOf: element = (
+    
+    indexOf: element = (^self indexOf: element ifAbsent: [nil])
+    
+    indexOf: element ifAbsent: aBlock = (
       self doIndexes: [ :i | (self at: i) = element ifTrue: [ ^ i ]].
-      ^ nil
+      ^ aBlock value
     )
   
     lastIndexOf: element = (
       self length downTo: 1 do: [: i | (self at: i) = element ifTrue: [ ^ i ]].
       ^ nil
     )
+    
+    
     
     "Collection"
     collect: aBlock = (
@@ -157,6 +163,15 @@ Array = (
         ^ new
     )
     
+    with: otherCollection do: twoArgBlock = (
+		"Evaluate twoArgBlock with corresponding elements from this collection and otherCollection."
+		otherCollection length = self length ifFalse: [self errorSizeMismatch].
+		1 to: self length do:
+			[:index |
+			twoArgBlock value: (self at: index)
+					value: (otherCollection at: index)]
+	)
+    
     "Files / Pharo Compatibility"
     asString = primitive
     
@@ -169,18 +184,21 @@ Array = (
 	)
 	
 	"Accessing"
-    species = (
-    	^self class
-    )
+    species = (^self class)
     
     "PetitParser"
     asParser = (    
 		(self allSatisfy: [ :e | e isCharacter ]) ifTrue: [ 
 			| charSet |
-			charSet := PPCharSetPredicate on: [ :char | self includes: char ] .
+			charSet := PPCharSetPredicate on: [ :char | self contains: char ] .
 	     	^ PPPredicateObjectParser on: charSet message: 'One of these charactes expected: ', self printString.
 		].
 		^ super asParser
+	)
+	
+	allSatisfy: aBlock = (
+		self do: [:each | (aBlock value: each) ifFalse: [^ false]].
+		^ true
 	)
     
     asChoiceParser = (

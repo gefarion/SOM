@@ -60,7 +60,8 @@ Integer = (
     >= argument = ( ^(self < argument) not )
     <= argument = ( ^(self < argument) or: [ self = argument ] )
     negative    = ( ^self < 0 )
-    between: a and: b = ( ^(self > a) and: [ self < b ] )
+    between: a and: b = ( ^(self >= a) and: [ self <= b ] )
+    isInteger = (^true)
     
     "Converting"
     asString    = primitive
