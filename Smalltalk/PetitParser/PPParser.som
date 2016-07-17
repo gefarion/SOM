@@ -100,7 +100,6 @@ PPParser = Object (
 	
 	foldLeft: aBlock = (
 		"Answer a new parser that that folds the result of the receiver from left-to-right into aBlock. The argument aBlock must take two or more arguments."
-	
 		| size args |
 		size := aBlock numArgs.
 		args := Array new: size.
@@ -244,9 +243,8 @@ PPParser = Object (
 		
 		^ self ==> [ :items |
 			| result |
-			'c' entre.
-			result := Array new: items size + 1 // 2.
-			1 to: result size do: [ :index | result at: index put: (items at: 2 * index - 1) ].
+			result := Array new: items length + 1 / 2.
+			1 to: result length do: [ :index | result at: index put: (items at: 2 * index - 1) ].
 			result ]
 	)
 	
@@ -551,7 +549,7 @@ PPParser = Object (
 	hasProperty: aKey = (
 		"Test if the property aKey is present."
 		
-		^ properties notNil and: [ properties includesKey: aKey ]
+		^ properties notNil and: [ properties containsKey: aKey ]
 	)
 	
 	>=> aBlock = (
@@ -597,7 +595,6 @@ PPParser = Object (
 		[	| changed tally |
 			changed := false.
 			firstSets keysAndValuesDo: [ :parser :first |
-				'e entre' println.
 				tally := first size.
 				parser firstSets: firstSets into: first.
 				changed := changed or: [ tally ~= first size ] ].
@@ -1048,7 +1045,7 @@ PPParser = Object (
 		self isTerminal
 			ifTrue: [ ^ self ].	
 		(index := aStack indexOf: self) > 0
-			ifTrue: [ 'g entre' println. ^ aSet addAll: (aStack copyFrom: index to: aStack size) ].
+			ifTrue: [^ aSet addAll: (aStack copyFrom: index to: aStack size) ].
 		aStack addLast: self.
 		(self cycleSet: aDictionary)
 			do: [ :each | each cycleSet: aStack firstSets: aDictionary into: aSet ].

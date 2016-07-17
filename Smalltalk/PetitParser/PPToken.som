@@ -11,7 +11,7 @@ PPToken = Object (
 		
 		| position |
 		position := 0.
-		(NewLineParser , [ :stream |
+		(PPToken NewLineParser , [ :stream |
 			start <= stream position
 				ifTrue: [ ^ start - position ].
 			position := stream position ] asParser
@@ -47,7 +47,7 @@ PPToken = Object (
 		
 		| line |
 		line := 1.
-		(NewLineParser , [ :stream |
+		(PPToken NewLineParser , [ :stream |
 			start <= stream position
 				ifTrue: [ ^ line ].
 			line := line + 1 ] asParser
@@ -113,6 +113,8 @@ PPToken = Object (
 		NewLineParser := lf asParser / (cr asParser , lf asParser optional)
 	)
 	
+	NewLineParser = (^NewLineParser)
+	
 	new = (
 		self error: 'Token can only be created using a dedicated constructor.'
 	)
@@ -125,6 +127,6 @@ PPToken = Object (
 	)
 	
 	on: aSequenceableCollection = (
-		^ self on: aSequenceableCollection start: 1 stop: aSequenceableCollection size value: nil
+		^ self on: aSequenceableCollection start: 1 stop: aSequenceableCollection length value: nil
 	)
 )

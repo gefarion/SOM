@@ -61,9 +61,9 @@ PPPredicateObjectParser = PPPredicateParser (
 			cacheAt: #'hex'
 			ifAbsentPut: [ self
 			on: (PPCharSetPredicate on: [ :char | 
-				(char between: '0' and: '9') 
-					or: [ (char between: 'a' and: 'f') 
-					or: [ (char between: 'A' and: 'F') ] ] ])
+				(char between: $0 and: $9) 
+					or: [ (char between: $a and: $f) 
+					or: [ (char between: $A and: $F) ] ] ])
 			message: 'hex digit expected' ]
 	)
 	
@@ -114,8 +114,8 @@ PPPredicateObjectParser = PPPredicateParser (
 	
 	anyOf: aCollection = (
 		^ self
-			on: [ :each | aCollection includes: each ] message: 'any of ' , aCollection printString , ' expected'
-			negated: [ :each | (aCollection includes: each) not ] message: 'none of ' , aCollection printString ,  'expected'
+			on: [ :each | aCollection contains: each ] message: 'any of ' , aCollection printString , ' expected'
+			negated: [ :each | (aCollection contains: each) not ] message: 'none of ' , aCollection printString ,  'expected'
 	)
 	
 	aligns = (
@@ -125,8 +125,8 @@ PPPredicateObjectParser = PPPredicateParser (
 	
 	anyExceptAnyOf: aCollection = (
 		^ self
-			on: [ :each | (aCollection includes: each) not ] message: 'any except ' , aCollection printString , ' expected'
-			negated: [ :each | aCollection includes: each ] message: aCollection printString ,  ' not expected'
+			on: [ :each | (aCollection contains: each) not ] message: 'any except ' , aCollection printString , ' expected'
+			negated: [ :each | aCollection contains: each ] message: aCollection printString ,  ' not expected'
 	)
 	
 	between: min and: max = (
@@ -165,7 +165,7 @@ PPPredicateObjectParser = PPPredicateParser (
 	punctuation = (
 		^self
 			cacheAt: #'punctuation'
-			ifAbsentPut: [ self chars: '.,"''?!;:#'%'&()*+-/<>=@[]\^_{}|~' message: 'punctuation expected' ]
+			ifAbsentPut: [ self chars: '.,"\'?!;:#$%&()*+-/<>=@[]\^_{}|~' message: 'punctuation expected' ]
 	)
 	
 	expect: anObject message: aString = (

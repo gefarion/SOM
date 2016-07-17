@@ -1,7 +1,6 @@
 PPSequenceParser = PPListParser (
 	"A parser that parses a sequence of parsers."
-	
-	
+
 	nextSets: aNextDictionary into: aSet = (
 		| change tally tmp childSet |
 		
@@ -56,9 +55,7 @@ PPSequenceParser = PPListParser (
 		parsers do: [ :each | each exampleOn: aStream ]
 	)
 	
-	, aRule = (
-		^ self copyWith: aRule
-	)
+	, aRule = (^ self copyWith: aRule)
 	
 	subsequenceFrom: from to: to = (
 		| interval dict |
@@ -73,7 +70,7 @@ PPSequenceParser = PPListParser (
 	)
 	
 	map: aBlock = (
-		^ aBlock numArgs = self children size
+		^ aBlock numArgs = self children length
 			ifTrue: [ self ==> [ :nodes | aBlock valueWithArguments: nodes ] ]
 			ifFalse: [ self error: aBlock numArgs asString , ' arguments expected.' ]
 	)
@@ -91,9 +88,7 @@ PPSequenceParser = PPListParser (
 		aSet add: PPSentinel instance
 	)
 	
-	visualizationGraphType = (
-		^ ','
-	)
+	visualizationGraphType = (^ ',')
 	
 	acceptsEpsilonOpenSet: set = (
 		set add: self.
@@ -123,9 +118,8 @@ PPSequenceParser = PPListParser (
 	
 	permutation: anArrayOfIntegers = (
 		"Answer a permutation of the receivers sequence."
-		
 		anArrayOfIntegers do: [ :index |
-			(index isInteger and: [ index between: 1 and: parsers size ])
+		(index isInteger and: [ index between: 1 and: parsers length ])
 				ifFalse: [ self error: 'Invalid permutation index: ' , index printString ] ].
 		^ self ==> [ :nodes | anArrayOfIntegers collect: [ :index | nodes at: index ] ]
 	)

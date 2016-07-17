@@ -1,10 +1,6 @@
 PPEndOfInputParser = PPDelegateParser (
 	"A parser that succeeds only at the end of the input stream."
-	
-	
-	end = (
-		^ self
-	)
+	end = (^ self)
 	
 	parseOn: aPPContext = (
 		| memento result |

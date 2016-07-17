@@ -2,9 +2,7 @@ PPStream = ReadStream (
 	"A positional stream implementation used for parsing. It overrides some methods for optimization reasons."
 	| newlines |
 	
-	column = (
-		^ self column: position.
-	)
+	column = (^ self column: position.)
 	
 	fillNewlines = (
 		| tmp line |
@@ -102,13 +100,10 @@ PPStream = ReadStream (
 		aStream	nextPutAll: (collection copyFrom: position + 1 to: readLimit).
 	)
 	
-	asPetitStream = (
-		^ self
-	)
+	asPetitStream = (^ self)
 	
 	collection = (
 		"Answer the underlying collection."
-		
 		^ collection
 	)
 	
