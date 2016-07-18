@@ -1,8 +1,22 @@
 PPPredicateTest = PPAbstractParserTest (
-	
-	
 	charactersDo: aBlock = (
 		1 to: 256 do: [ :index | aBlock value: (Character codePoint: index) ]
+	)
+	
+	assertCharacterSets: aParser = (
+		"Assert the character set of aParser does not overlap with the character set with the negated parser, and that they both cover the complete character space."
+	
+		| positives negatives |
+		positives := self parsedCharacterSet: aParser.
+		negatives := self parsedCharacterSet: aParser negate.
+		self charactersDo: [ :char | 
+			| positive negative |
+			positive := positives includes: char.
+			negative := negatives includes: char.
+			self 
+				assert: ((positive and: [ negative not ])
+					or: [ positive not and: [ negative ] ])
+				description: char printString , ' should be in exactly one set' ]
 	)
 	
 	testStartOfLogicalLine = (
@@ -21,7 +35,7 @@ PPPredicateTest = PPAbstractParserTest (
 	
 	parsedCharacterSet: aParser = (
 		| result |
-		result := WriteStream on: String new.
+		result := WriteStream on: Vector new.
 		self charactersDo: [ :char |
 			(aParser matches: (char asString))
 				ifTrue: [ result nextPut: char ] ].
@@ -32,8 +46,8 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #punctuation asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: '.' to: '.'.
-		self assert: parser parse: ',' to: ','.
+		self assert: parser parse: '.' to: $..
+		self assert: parser parse: ',' to: $,.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'.
 		self assert: parser fail: '1'
@@ -43,17 +57,17 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #letter asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'Z' to: 'Z'.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'Z' to: $Z.
 		self assert: parser fail: ''.
 		self assert: parser fail: '0'
 	)
 	
 	testExpect = (
 		| parser |
-		parser := PPPredicateObjectParser expect: 'a'.
+		parser := PPPredicateObjectParser expect: $a.
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'a' to: 'a'.
+		self assert: parser parse: 'a' to: $a.
 		self assert: parser fail: 'b'.
 		self assert: parser fail: ''
 	)
@@ -89,7 +103,7 @@ PPPredicateTest = PPAbstractParserTest (
 		self assert: parser fail: '.'.
 	)
 	
-	testEndOfLine = (
+	"testEndOfLine = (
 		| cr crlf lf parser |
 		cr := Character cr asString.
 		crlf := Character cr asString , Character lf asString.
@@ -115,17 +129,16 @@ PPPredicateTest = PPAbstractParserTest (
 		parser := #endOfLine asParser negate star, #endOfLine asParser, #any asParser star.
 		self assert: parser parse: crlf, 'lorem ipsum'.
 		self assert: parser parse: crlf.
-	
-	)
+	)"
 	
 	testBetweenAnd = (
 		| parser |
-		parser := PPPredicateObjectParser between: 'b' and: 'd'.
+		parser := PPPredicateObjectParser between: $b and: $d.
 		self assertCharacterSets: parser.
 		self assert: parser fail: 'a'.
-		self assert: parser parse: 'b' to: 'b'.
-		self assert: parser parse: 'c' to: 'c'.
-		self assert: parser parse: 'd' to: 'd'.
+		self assert: parser parse: 'b' to: $b.
+		self assert: parser parse: 'c' to: $c.
+		self assert: parser parse: 'd' to: $d.
 		self assert: parser fail: 'e'
 	)
 	
@@ -151,8 +164,8 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #lowercase asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'z' to: 'z'.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'z' to: $z.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'A'.
 		self assert: parser fail: '0'
@@ -162,8 +175,8 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #digit asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: '0' to: '0'.
-		self assert: parser parse: '9' to: '9'.
+		self assert: parser parse: '0' to: $0.
+		self assert: parser parse: '9' to: $9.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'
 	)
@@ -178,7 +191,6 @@ PPPredicateTest = PPAbstractParserTest (
 		self assert: parser fail: 'a', Character cr asString, 'b'.
 		self assert: parser fail: Character cr asString , Character lf asString.
 		self assert: parser parse: 'a'.
-	
 	)
 	
 	testNewline = (
@@ -190,34 +202,18 @@ PPPredicateTest = PPAbstractParserTest (
 		self assert: parser fail: ' '
 	)
 	
-	assertCharacterSets: aParser = (
-		"Assert the character set of aParser does not overlap with the character set with the negated parser, and that they both cover the complete character space."
-	
-		| positives negatives |
-		positives := self parsedCharacterSet: aParser.
-		negatives := self parsedCharacterSet: aParser negate.
-		self charactersDo: [ :char | 
-			| positive negative |
-			positive := positives includes: char.
-			negative := negatives includes: char.
-			self 
-				assert: ((positive and: [ negative not ])
-					or: [ positive not and: [ negative ] ])
-				description: char printString , ' should be in exactly one set' ]
-	)
-	
 	testUppercase = (
 		| parser |
 		parser := #uppercase asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'A' to: 'A'.
-		self assert: parser parse: 'Z' to: 'Z'.
+		self assert: parser parse: 'A' to: $A.
+		self assert: parser parse: 'Z' to: $Z.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'.
 		self assert: parser fail: '0'
 	)
 	
-	testStartOfLine = (
+	"testStartOfLine = (
 		| cr crlf lf parser |
 		cr := Character cr asString.
 		crlf := Character cr asString , Character lf asString.
@@ -241,9 +237,7 @@ PPPredicateTest = PPAbstractParserTest (
 		parser := #startOfLine asParser, #any asParser, #any asParser, #startOfLine asParser, #any asParser star.
 		self assert: parser parse: crlf, 'lorem ipsum'.
 		self assert: parser parse: crlf.
-	
-	
-	)
+	)"
 	
 	testTab = (
 		| parser |
@@ -284,10 +278,10 @@ PPPredicateTest = PPAbstractParserTest (
 	
 	testAnyExceptAnyOf = (
 		| parser |
-		parser := PPPredicateObjectParser anyExceptAnyOf: #(':' ',').
+		parser := PPPredicateObjectParser anyExceptAnyOf: #($: $,).
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'z' to: 'z'.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'z' to: $z.
 		self assert: parser fail: ':'.
 		self assert: parser fail: ','
 	)
@@ -296,24 +290,24 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #any asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: ' ' to: ' '.
-		self assert: parser parse: '1' to: '1'.
-		self assert: parser parse: 'a' to: 'a'.
+		self assert: parser parse: ' ' to: $ .
+		self assert: parser parse: '1' to: $1.
+		self assert: parser parse: 'a' to: $a.
 		self assert: parser fail: ''
 	)
 	
 	testOnMessage = (
 		| block parser |
-		block := [ :char | char = '*' ].
+		block := [ :char | char = $* ].
 		parser := PPPredicateObjectParser on: block message: 'starlet'.
 		self assert: parser block equals: block.
 		self assert: parser message equals: 'starlet'.
 		self assertCharacterSets: parser.
-		self assert: parser parse: '*' to: '*'.
+		self assert: parser parse: '*' to: $*.
 		self
 			assert: parser
 			parse: '**'
-			to: '*'
+			to: $*
 			end: 1.
 		self assert: parser fail: ''.
 		self assert: parser fail: '1'.
@@ -322,10 +316,10 @@ PPPredicateTest = PPAbstractParserTest (
 	
 	testChar = (
 		| parser |
-		parser := '*' asParser.
+		parser := $* asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: '*' to: '*'.
-		self assert: parser parse: '**' to: '*' end: 1.
+		self assert: parser parse: '*' to: $*.
+		self assert: parser parse: '**' to: $* end: 1.
 		self assert: parser fail: ''.
 		self assert: parser fail: '1'.
 		self assert: parser fail: 'a'
@@ -335,19 +329,19 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #word asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'A' to: 'A'.
-		self assert: parser parse: '0' to: '0'.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'A' to: $A.
+		self assert: parser parse: '0' to: $0.
 		self assert: parser fail: ''.
 		self assert: parser fail: '-'
 	)
 	
 	testAnyOf = (
 		| parser |
-		parser := PPPredicateObjectParser anyOf: #('a' 'z').
+		parser := PPPredicateObjectParser anyOf: #($a $z).
 		self assertCharacterSets: parser.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'z' to: 'z'.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'z' to: $z.
 		self assert: parser fail: 'x'
 	)
 	
@@ -355,15 +349,15 @@ PPPredicateTest = PPAbstractParserTest (
 		| parser |
 		parser := #hex asParser.
 		self assertCharacterSets: parser.
-		self assert: parser parse: '0' to: '0'.
-		self assert: parser parse: '5' to: '5'.
-		self assert: parser parse: '9' to: '9'.
-		self assert: parser parse: 'A' to: 'A'.
-		self assert: parser parse: 'D' to: 'D'.
-		self assert: parser parse: 'F' to: 'F'.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'e' to: 'e'.
-		self assert: parser parse: 'f' to: 'f'.
+		self assert: parser parse: '0' to: $0.
+		self assert: parser parse: '5' to: $5.
+		self assert: parser parse: '9' to: $9.
+		self assert: parser parse: 'A' to: $A.
+		self assert: parser parse: 'D' to: $D.
+		self assert: parser parse: 'F' to: $F.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'e' to: $e.
+		self assert: parser parse: 'f' to: $f.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'g'
 	)

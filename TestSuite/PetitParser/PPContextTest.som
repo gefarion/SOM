@@ -6,9 +6,7 @@ PPContextTest = TestCase (
 		context := self context.
 	)
 	
-	context = (
-		^ PPContext new
-	)
+	context = (^ PPContext new)
 	
 	testPutProperties = (
 		self assert: (context hasProperty: #foo) not.
@@ -90,7 +88,6 @@ PPContextTest = TestCase (
 		
 		context restore: memento.
 		self assert: context position = 0.
-	
 	)
 	
 	testPutGlobals = (
@@ -141,7 +138,6 @@ PPContextTest = TestCase (
 		
 		"self should: [context removeGlobal: #foo] raise: Error."
 		self assert: (context removeGlobal: #bar ifAbsent: [ #foobar ]) = #foobar.
-	
 	)
 	
 	testMemoization3 = (
@@ -161,26 +157,25 @@ PPContextTest = TestCase (
 		self assert: (context hasProperty: #foo).
 	)
 	
-	"testStreamProtocol = (
+	testStreamProtocol = (
 		context stream: 'hi there' asPetitStream.
 		
-		self assert: context position = 0."
-		"Check in petit parser if this should all be Characters instead of strings"
-		"self assert: context peek = 'h'.
-		self assert: context uncheckedPeek = 'h'.
+		self assert: context position = 0.
+		self assert: context peek = $h.
+		self assert: context uncheckedPeek = $h.
 	
-		self assert: context next = 'h'.
-		self assert: context peek = 'i'.
-		self assert: context uncheckedPeek = 'i'.
+		self assert: context next = $h.
+		self assert: context peek = $i.
+		self assert: context uncheckedPeek = $i.
 		self assert: context position = 1.
 		
 		context skip: 2.
 		self assert: context position = 3.
-		self assert: context peek = 't'.
+		self assert: context peek = $t.
 		self assert: context atEnd not.
 		
 		self assert: (context next: 5) = 'there'.
 		self assert: context position = 8.
-		self assert: context atEnd."
-	)"
+		self assert: context atEnd.
+	)
 )

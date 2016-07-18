@@ -51,14 +51,14 @@ PPExtensionTest = PPAbstractParserTest (
 		self assert: parser fail: ''
 	)
 	
-	"testRange = (
+	testRange = (
 		| parser |
-		parser := ('a' to: 'c') asParser.
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'b' to: 'b'.
-		self assert: parser parse: 'c' to: 'c'.
+		parser := ($a to: $c) asParser.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'b' to: $b.
+		self assert: parser parse: 'c' to: $c.
 		self assert: parser fail: 'd'
-	)"
+	)
 	
 	testEpsilon = (
 		| parser |
@@ -66,28 +66,28 @@ PPExtensionTest = PPAbstractParserTest (
 		self assert: parser asParser equals: parser
 	)
 	
-	"testStream = (
+	testStream = (
 		| dot stream |
 		dot := (Character codePoint: 183) asString.
 		stream := 'abc' readStream asPetitStream.
 		self assert: stream class equals: PPStream.
 		self assert: stream printString equals: dot , 'abc'.
-		self assert: stream peek equals: 'a'.
-		self assert: stream uncheckedPeek equals: 'a'.
-		self assert: stream next equals: 'a'.
+		self assert: stream peek equals: $a.
+		self assert: stream uncheckedPeek equals: $a.
+		self assert: stream next equals: $a.
 		self assert: stream printString equals: 'a' , dot , 'bc'.
 		self assert: stream asPetitStream equals: stream
-	)"
+	)
 	
 	testParser = (
 		| parser |
-		parser := 'a' asParser.
+		parser := $a asParser.
 		self assert: parser asParser equals: parser
 	)
 	
-	"testClosure = (
+	testClosure = (
 		| parser |
-		parser := [ :stream | stream upTo: 's' ] asParser.
+		parser := [ :stream | stream upTo: $s ] asParser.
 		self assert: parser parse: '' to: ''.
 		self assert: parser parse: 'a' to: 'a'.
 		self assert: parser parse: 'aa' to: 'aa'.
@@ -101,6 +101,5 @@ PPExtensionTest = PPAbstractParserTest (
 		self assert: parser fail: ''.
 		self assert: parser fail: 's'.
 		self assert: parser fail: 'as'
-		
-	)"
+	)
 )

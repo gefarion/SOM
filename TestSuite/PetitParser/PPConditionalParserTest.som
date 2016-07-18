@@ -1,6 +1,13 @@
 PPConditionalParserTest = PPAbstractParserTest (
 	| context |
 	
+	setUp = (
+		super setUp.
+		context := PPContext new
+	)
+	
+	context = (^ context)
+	
 	testConditionCtxAccess = (
 		| parser |
 	
@@ -11,12 +18,6 @@ PPConditionalParserTest = PPAbstractParserTest (
 		
 		context propertyAt: #foo put: #zorg.
 		self assert: parser fail: 'a' . 
-	
-	)
-	
-	setUp = (
-		super setUp.
-		context := PPContext new
 	)
 	
 	testConditionTrue = (
@@ -34,8 +35,4 @@ PPConditionalParserTest = PPAbstractParserTest (
 		self assert: parser fail: 'a'.
 		self assert: parser fail: 'b'.
 	) 
-	
-	context = (
-		^ context
-	)
 )

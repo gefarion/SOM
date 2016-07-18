@@ -1,4 +1,8 @@
 PPArithmeticParserTest = PPCompositeParserTest (
+	parserClass = (
+		^ PPArithmeticParser
+	)
+	
 	testBrackets = (
 		| result | 
 		self assert: '(1)' is: 1.
@@ -71,10 +75,6 @@ PPArithmeticParserTest = PPCompositeParserTest (
 		self assert: '1 - 2 - 3' is: -4.
 		self assert: '1 - 2 - 3 - 4' is: -8.
 		self assert: '1 - 2 - 3 - 4 - 5' is: -13
-	)
-	
-	parserClass = (
-		^ PPArithmeticParser
 	)
 	
 	testPriority = (

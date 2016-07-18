@@ -1,13 +1,19 @@
 PPObjectTest = PPAbstractParserTest (
-	testString = (
-		self assert: self string parse: #('abc') to: 'abc'.
-		self assert: self string fail: #(123)
-	)
-	
 	integer = (
 		^ PPPredicateObjectParser
 			on: [ :each | each isKindOf: Integer ]
 			message: 'integer expected'
+	)
+	
+	string = (
+		^ PPPredicateObjectParser
+			on: [ :each | each isKindOf: String ]
+			message: 'string expected'
+	)
+	
+	testString = (
+		self assert: self string parse: #('abc') to: 'abc'.
+		self assert: self string fail: #(123)
 	)
 	
 	testChoice = (
@@ -20,12 +26,6 @@ PPObjectTest = PPAbstractParserTest (
 	testInteger = (
 		self assert: self integer parse: #(123) to: 123.
 		self assert: self integer fail: #('abc')
-	)
-	
-	string = (
-		^ PPPredicateObjectParser
-			on: [ :each | each isKindOf: String ]
-			message: 'string expected'
 	)
 	
 	testSequence = (

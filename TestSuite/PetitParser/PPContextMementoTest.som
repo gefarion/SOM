@@ -1,6 +1,13 @@
 PPContextMementoTest = TestCase (
 	| memento |
 	
+	setUp = (
+		super setUp.
+		memento := self memento.
+	)
+	
+	memento = (^ PPContextMemento new)
+	
 	testPutProperty = (
 		| c retval  |
 		c := OrderedCollection new.
@@ -35,11 +42,9 @@ PPContextMementoTest = TestCase (
 		
 		m2 propertyAt: #bar put: #foo.
 		self assert: (m1 = m2) not.
-	
 	)
 	
 	testGetProperty = (
-		
 		| c retval retval2 |
 		c := OrderedCollection new.
 		
@@ -75,15 +80,6 @@ PPContextMementoTest = TestCase (
 		].
 	)
 	
-	setUp = (
-		super setUp.
-		memento := self memento.
-	)
-	
-	memento = (
-		^ PPContextMemento new
-	)
-	
 	testEquality = (
 		| m1 m2  |
 		m1 := self memento.
@@ -96,11 +92,9 @@ PPContextMementoTest = TestCase (
 		
 		m2 propertyAt: #foo put: #bar.
 		self assert: m1 = m2.
-	
 	)
 	
 	testKeysAndValuesDo = (
-		|   |
 		memento keysAndValuesDo: [ :key :value |
 			self signalFailure: 'Should not be called'
 		].

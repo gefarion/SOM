@@ -27,26 +27,26 @@ PPLambdaParser = PPCompositeParser (
 	
 	
 	and = (
-		^ self parse: '\p.\q.((p q) p)'
+		^ self parse: '\\p.\\q.((p q) p)'
 	)
 	
 	false = (
-		^ self parse: '\x.\y.y'
+		^ self parse: '\\x.\\y.y'
 	)
 	
 	or = (
-		^ self parse: '\p.\q.((p p) q)'
+		^ self parse: '\\p.\\q.((p p) q)'
 	)
 	
 	not = (
-		^ self parse: '\p.\a.\b.((p b) a)'
+		^ self parse: '\\p.\\a.\\b.((p b) a)'
 	)
 	
 	ifthenelse = (
-		^ self parse: '\p.p'
+		^ self parse: '\\p.p'
 	)
 	
 	true = (
-		^ self parse: '\x.\y.x'
+		^ self parse: '\\x.\\y.x'
 	)
 )

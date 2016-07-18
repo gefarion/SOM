@@ -1,4 +1,6 @@
 PPLambdaParserTest = PPCompositeParserTest (
+	parserClass = (^ PPLambdaParser)
+	
 	testOr = (
 		self assert: self parserClass or equals: #('p' #('q' #(#('p' 'p') 'q')))
 	)
@@ -7,7 +9,7 @@ PPLambdaParserTest = PPCompositeParserTest (
 		self assert: self parserClass ifthenelse equals: #('p' 'p')
 	)
 	
-	testParseStartingAtOnError = (
+	"testParseStartingAtOnError = (
 		| beenHere |
 		result := self parserClass parse: 'x' startingAt: #variable onError: [ self fail ].
 		self assert: result equals: 'x'.
@@ -33,7 +35,7 @@ PPLambdaParserTest = PPCompositeParserTest (
 				self assert: pos equals: 0.
 				beenHere := true ].
 		self assert: beenHere
-	)
+	)"
 	
 	testVariable = (
 		self assert: 'x' is: 'x'.
@@ -73,25 +75,21 @@ PPLambdaParserTest = PPCompositeParserTest (
 		self assert: (parser productionAt: #variable ifAbsent: [ true ]) notNil
 	)
 	
-	parserClass = (
-		^ PPLambdaParser
-	)
-	
 	testAbstraction = (
-		self assert: '\x.y' is: #('x' 'y').
-		self assert: '\x.\y.z' is: #('x' ('y' 'z'))
+		self assert: '\\x.y' is: #('x' 'y').
+		self assert: '\\x.\\y.z' is: #('x' ('y' 'z'))
 	)
 	
-	testParseOnError = (
+	"testParseOnError = (
 		| beenHere |
 		result := self parserClass parse: '\x.y' onError: [ self fail ].
 		self assert: result equals: #('x' 'y').
 		beenHere := false.
-		result := self parserClass parse: '\x.' onError: [ beenHere := true ].
+		result := self parserClass parse: '\\x.' onError: [ beenHere := true ].
 		self assert: beenHere.
 		beenHere := false.
 		result := self parserClass
-			parse: '\x.'
+			parse: '\\x.'
 			onError: [ :fail | 
 				beenHere := true.
 				fail ].
@@ -101,7 +99,7 @@ PPLambdaParserTest = PPCompositeParserTest (
 		self assert: result position equals: 3.
 		beenHere := false.
 		result := self parserClass
-			parse: '\x.'
+			parse: '\\x.'
 			onError: [ :msg :pos | 
 				self assert: msg includesSubstring: 'separator'.
 				self assert: msg includesSubstring: 'expected'.
@@ -109,7 +107,7 @@ PPLambdaParserTest = PPCompositeParserTest (
 				beenHere := true ].
 		self assert: result.
 		self assert: beenHere
-	)
+	)"
 	
 	testTrue = (
 		self assert: self parserClass true equals: #('x' #('y' 'x'))

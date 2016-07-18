@@ -2,12 +2,12 @@ PPArithmeticParser = PPCompositeParser (
 	| terms addition factors multiplication power primary parentheses number |
 	
 	parentheses = (
-		^ '(' asParser trim , terms , ')' asParser trim
+		^ $( asParser trim , terms , $) asParser trim
 			==> [ :nodes | nodes at: 2 ]
 	)
 	
 	addition = (
-		^ (factors separatedBy: ('+' asParser / '-' asParser) trim) 
+		^ (factors separatedBy: ($+ asParser / $- asParser) trim) 
 			foldLeft: [ :a :op :b | a perform: op asSymbol withArguments: b ]
 	)
 	
@@ -20,17 +20,17 @@ PPArithmeticParser = PPCompositeParser (
 	)
 	
 	multiplication = (
-		^ (power separatedBy: ('*' asParser / '/' asParser) trim)
+		^ (power separatedBy: ($* asParser / $/ asParser) trim)
 			foldLeft: [ :a :op :b | a perform: op asSymbol withArguments: b ]
 	)
 	
 	number = (
-		^ ('-' asParser optional , #digit asParser plus , ('.' asParser , #digit asParser plus) optional) flatten trim 
+		^ ('-' asParser optional , #digit asParser plus , ($. asParser , #digit asParser plus) optional) flatten trim 
 			==> [ :value | value asNumber ]
 	)
 	
 	power = (
-		^ (primary separatedBy: '^' asParser trim)
+		^ (primary separatedBy: $^ asParser trim)
 			foldRight: [ :a :op :b | a exp: b ]
 	)
 	

@@ -109,7 +109,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: result printString equals: 'Plonk at 0'
 	)
 	
-	"testFoldRight3 = (
+	testFoldRight3 = (
 		| parser |
 		parser := #any asParser star 
 			foldRight: [ :a :b :c | Array with: a with: b with: c ].
@@ -117,7 +117,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser parse: #(a) to: #a.
 		self assert: parser parse: #(a b c) to: #(a b c).
 		self assert: parser parse: #(a b c d e) to: #(a b (c d e))
-	)"
+	)
 	
 	testSeparatedBy = (
 		| parser |
@@ -288,48 +288,47 @@ PPParserTest = PPAbstractParserTest (
 	
 	testMax = (
 		| parser printString suffix |
-		parser := 'a' asParser max: 2.
+		parser := $a asParser max: 2.
 		self assert: parser min equals: 0.
 		self assert: parser max equals: 2.
 		self assert: parser parse: '' to: #().
-		self assert: parser parse: 'a' to: #('a').
-		self assert: parser parse: 'aa' to: #('a' 'a').
+		self assert: parser parse: 'a' to: #($a).
+		self assert: parser parse: 'aa' to: #($a $a).
 		self
 			assert: parser
 			parse: 'aaa'
-			to: #('a' 'a')
+			to: #($a $a)
 			end: 2.
 		self
 			assert: parser
 			parse: 'aaaa'
-			to: #('a' 'a')
+			to: #($a $a)
 			end: 2.
 		printString := parser printString.
-		suffix := printString copyFrom: printString size - 5 to: printString size.
+		suffix := printString copyFrom: printString length - 5 to: printString length.
 		self assert: suffix = '[0, 2]'
-	
 	)
 	
 	testMaxLazy = (
 		| parser |
 		parser := #word asParser max: 2 lazy: #digit asParser.
-		
+	
 		self assert: parser fail: ''.
 		self assert: parser fail: 'abc'.
 		
 		self assert: parser parse: '1' to: #() end: 0.
-		self assert: parser parse: 'a1' to: #('a') end: 1.
-		self assert: parser parse: 'ab1' to: #('a' 'b') end: 2.
+		self assert: parser parse: 'a1' to: #($a) end: 1.
+		self assert: parser parse: 'ab1' to: #($a $b) end: 2.
 		self assert: parser fail: 'abc1'.
 		
 		self assert: parser parse: '12' to: #() end: 0.
-		self assert: parser parse: 'a12' to: #('a') end: 1.
-		self assert: parser parse: 'ab12' to: #('a' 'b') end: 2.
+		self assert: parser parse: 'a12' to: #($a) end: 1.
+		self assert: parser parse: 'ab12' to: #($a $b) end: 2.
 		self assert: parser fail: 'abc12'.
 		
 		self assert: parser parse: '123' to: #() end: 0.
-		self assert: parser parse: 'a123' to: #('a') end: 1.
-		self assert: parser parse: 'ab123' to: #('a' 'b') end: 2.
+		self assert: parser parse: 'a123' to: #($a) end: 1.
+		self assert: parser parse: 'ab123' to: #($a $b) end: 2.
 		self assert: parser fail: 'abc123'
 	)
 	
@@ -338,10 +337,11 @@ PPParserTest = PPAbstractParserTest (
 		p1 := #lowercase asParser.
 		p2 := p1 ==> #asUppercase.
 		p3 := PPUnresolvedParser new.
-		p3 def: p2 / p3.
+		"The following is commented become it requires becomesForward:"
+		"p3 def: p2 / p3."
 		self assert: p1 children isEmpty.
-		self assert: p2 children size equals: 1.
-		self assert: p3 children size equals: 2
+		self assert: p2 children length equals: 1.
+		"self assert: p3 children length equals: 2"
 	)
 	
 	testLiteralSequence = (
@@ -363,15 +363,14 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser parse: #(a b) to: #(b a)
 	)
 	
-	testMapFail2 = (
+	"testMapFail2 = (
 		self
 			should: [ (#any asParser , #any asParser) map: [ :a | ] ]
 			raise: Error.
 		self
 			should: [ (#any asParser , #any asParser) map: [ :a :b :c | ] ]
 			raise: Error
-	
-	)
+	)"
 	
 	testStarLazy = (
 		| limit parser |
@@ -380,7 +379,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser min equals: 0.
 		self assert: parser max > parser min.
 		self assert: parser limit equals: limit.
-		self assert: parser children size equals: 2.
+		self assert: parser children length equals: 2.
 		self assert: parser children last equals: limit.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'.
@@ -393,17 +392,17 @@ PPParserTest = PPAbstractParserTest (
 		self
 			assert: parser
 			parse: 'a1'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'ab1'
-			to: #('a' 'b')
+			to: #($a $b)
 			end: 2.
 		self
 			assert: parser
 			parse: 'abc1'
-			to: #('a' 'b' 'c')
+			to: #($a $b $c)
 			end: 3.
 		self
 			assert: parser
@@ -413,17 +412,17 @@ PPParserTest = PPAbstractParserTest (
 		self
 			assert: parser
 			parse: 'a12'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'ab12'
-			to: #('a' 'b')
+			to: #($a $b)
 			end: 2.
 		self
 			assert: parser
 			parse: 'abc12'
-			to: #('a' 'b' 'c')
+			to: #($a $b $c)
 			end: 3.
 		self
 			assert: parser
@@ -433,52 +432,52 @@ PPParserTest = PPAbstractParserTest (
 		self
 			assert: parser
 			parse: 'a123'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'ab123'
-			to: #('a' 'b')
+			to: #($a $b)
 			end: 2.
 		self
 			assert: parser
 			parse: 'abc123'
-			to: #('a' 'b' 'c')
+			to: #($a $b $c)
 			end: 3
 	)
 	
 	testParseOnError0 = (
 		| parser result seen |
-		parser := 'a' asParser.
+		parser := $a asParser.
 		result := parser parse: 'a' onError: [ self signalFailure: 'Not supposed to report an error' ].
-		self assert: result equals: 'a'.
+		self assert: result equals: $a.
 		result := parser parse: 'b' onError: [ seen := true ].
 		self assert: result.
 		self assert: seen
 	)
 	
-	testNegate = (
+	"testNegate = (
 		| parser |
 		parser := 'foo' asParser negate.
-		
-		self assert: parser parse: 'f' to: 'f' end: 1.
-		self assert: parser parse: 'fo' to: 'f' end: 1.
-		self assert: parser parse: 'fob' to: 'f' end: 1.
-		self assert: parser parse: 'ffoo' to: 'f' end: 1.
+	
+		self assert: parser parse: 'f' to: $f end: 1.
+		self assert: parser parse: 'fo' to: $f end: 1.
+		self assert: parser parse: 'fob' to: $f end: 1.
+		self assert: parser parse: 'ffoo' to: $f end: 1.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'foo'
-	)
+	)"
 	
 	testOptional = (
 		| parser |
-		parser := 'a' asParser optional.
-		
+		parser := $a asParser optional.
+	
 		self assert: parser parse: '' to: nil.
-		self assert: parser parse: 'a' to: 'a'.
+		self assert: parser parse: 'a' to: $a.
 		
-		self assert: parser parse: 'aa' to: 'a' end: 1.
-		self assert: parser parse: 'ab' to: 'a' end: 1.
+		self assert: parser parse: 'aa' to: $a end: 1.
+		self assert: parser parse: 'ab' to: $a end: 1.
 		self assert: parser parse: 'b' to: nil end: 0.
 		self assert: parser parse: 'bb' to: nil end: 0.
 		self assert: parser parse: 'ba' to: nil end: 0
@@ -486,15 +485,15 @@ PPParserTest = PPAbstractParserTest (
 	
 	testMatchesSkipIn = (
 		| parser result |
-		parser := 'a' asParser.
+		parser := $a asParser.
 		result := parser matchesSkipIn: 'abba'.
 		self assert: result size equals: 2.
-		self assert: result first equals: 'a'.
-		self assert: result last equals: 'a'.
+		self assert: result first equals: $a.
+		self assert: result last equals: $a.
 		result := parser matchesSkipIn: 'baaah'.
 		self assert: result size equals: 3.
-		self assert: result first equals: 'a'.
-		self assert: result last equals: 'a'
+		self assert: result first equals: $a.
+		self assert: result last equals: $a
 	)
 	
 	testMatchesInOverlapping = (
@@ -504,21 +503,20 @@ PPParserTest = PPAbstractParserTest (
 		parser := #digit asParser , #digit asParser.
 		result := parser matchesIn: 'a123b'.
 		self assert: result size equals: 2.
-		self assert: result first equals: #('1' '2').
-		self assert: result last equals: #('2' '3')
+		self assert: result first equals: #($1 $2).
+		self assert: result last equals: #($2 $3)
 	)
 	
 	testLiteralObjectCaseInsensitive = (
 		| parser |
-		parser := 'a' asParser caseInsensitive.
-		
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'A' to: 'A'.
+		parser := $a asParser caseInsensitive.
+	
+		self assert: parser parse: 'a' to: $a.
+		"self assert: parser parse: 'A' to: $A."
 	
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
 		self assert: parser fail: 'B'
-		
 	)
 	
 	testPlusLazy = (
@@ -528,7 +526,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser min equals: 1.
 		self assert: parser max > parser min.
 		self assert: parser limit equals: limit.
-		self assert: parser children size equals: 2.
+		self assert: parser children length equals: 2.
 		self assert: parser children last equals: limit.
 		self assert: parser fail: ''.
 		self assert: parser fail: '1'.
@@ -537,59 +535,59 @@ PPParserTest = PPAbstractParserTest (
 		self
 			assert: parser
 			parse: 'a1'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'ab1'
-			to: #('a' 'b')
+			to: #($a $b)
 			end: 2.
 		self
 			assert: parser
 			parse: 'abc1'
-			to: #('a' 'b' 'c')
+			to: #($a $b $c)
 			end: 3.
 		self
 			assert: parser
 			parse: 'a12'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'ab12'
-			to: #('a' 'b')
+			to: #($a $b)
 			end: 2.
 		self
 			assert: parser
 			parse: 'abc12'
-			to: #('a' 'b' 'c')
+			to: #($a $b $c)
 			end: 3.
 		self
 			assert: parser
 			parse: 'a123'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'ab123'
-			to: #('a' 'b')
+			to: #($a $b)
 			end: 2.
 		self
 			assert: parser
 			parse: 'abc123'
-			to: #('a' 'b' 'c')
+			to: #($a $b $c)
 			end: 3
 	)
 	
 	testChoice = (
 		| parser |
-		parser := 'a' asParser / 'b' asParser.
-		
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'b' to: 'b'.
+		parser := $a asParser / $b asParser.
 	
-		self assert: parser parse: 'ab' to: 'a' end: 1.
-		self assert: parser parse: 'ba' to: 'b' end: 1.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'b' to: $b.
+	
+		self assert: parser parse: 'ab' to: $a end: 1.
+		self assert: parser parse: 'ba' to: $b end: 1.
 	
 		self assert: parser fail: ''.
 		self assert: parser fail: 'c'.
@@ -606,17 +604,17 @@ PPParserTest = PPAbstractParserTest (
 	
 	testSeparatedByWithoutSeparators = (
 		| parser |
-		parser := ('a' asParser separatedBy: 'b' asParser)
+		parser := ($a asParser separatedBy: $b asParser)
 			withoutSeparators.
 		
-		self assert: parser parse: 'a' to: #('a').
-		self assert: parser parse: 'aba' to: #('a' 'a').
-		self assert: parser parse: 'ababa' to: #('a' 'a' 'a').
+		self assert: parser parse: 'a' to: #($a).
+		self assert: parser parse: 'aba' to: #($a $a).
+		self assert: parser parse: 'ababa' to: #($a $a $a).
 		
-		self assert: parser parse: 'ab' to: #('a') end: 1.
-		self assert: parser parse: 'abab' to: #('a' 'a') end: 3.
-		self assert: parser parse: 'ac' to: #('a') end: 1.
-		self assert: parser parse: 'abac' to: #('a' 'a') end: 3.
+		self assert: parser parse: 'ab' to: #($a) end: 1.
+		self assert: parser parse: 'abab' to: #($a $a) end: 3.
+		self assert: parser parse: 'ac' to: #($a) end: 1.
+		self assert: parser parse: 'abac' to: #($a $a) end: 3.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'c'
@@ -648,7 +646,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser fail: 'b'
 	)
 	
-	testLiteralSequenceCaseInsensitive = (
+	"testLiteralSequenceCaseInsensitive = (
 		| parser |
 		parser := 'abc' asParser caseInsensitive.
 		
@@ -659,7 +657,7 @@ PPParserTest = PPAbstractParserTest (
 		
 		self assert: parser fail: 'ab'.
 		self assert: parser fail: 'abd'
-	)
+	)"
 	
 	testMatchesInEmpty = (
 		"Empty matches should properly advance and match at each position and at the end."
@@ -683,7 +681,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser and equals: parser
 	)
 	
-	testMapFail1 = (
+	"testMapFail1 = (
 		self
 			should: [ #any asParser map: [  ] ]
 			raise: Error.
@@ -691,36 +689,36 @@ PPParserTest = PPAbstractParserTest (
 			should: [ #any asParser map: [ :a :b | ] ]
 			raise: Error
 	
-	)
+	)"
 	
 	testRemoveProperty = (
 		| parser |
 		parser := PPParser new.
-		self should: [ parser removeProperty: #foo ] raise: Error.
+		"self should: [ parser removeProperty: #foo ] raise: Error."
 		parser propertyAt: #foo put: true.
 		self assert: (parser removeProperty: #foo)
 	)
 	
-	testNot = (
+	"testNot = (
 		| parser |
 		parser := 'foo' asParser flatten , 'bar' asParser flatten not.
 		
 		self assert: parser parse: 'foobaz' to: #('foo' nil) end: 3.
 		self assert: parser fail: 'foobar'
-	)
+	)"
 	
 	testWrapped = (
 		| parser |
-		parser := 'a' asParser wrapped.
-		
-		self assert: parser parse: 'a' to: 'a'.
+		parser := $a asParser wrapped.
+	
+		self assert: parser parse: 'a' to: $a.
 		self assert: parser fail: 'b'.
 		
-		parser := (('a' asParser , 'b' asParser ) wrapped , 'c' asParser).
-		self assert: parser parse: 'abc' to: #(#('a' 'b') 'c')
+		parser := (($a asParser , $b asParser ) wrapped , $c asParser).
+		self assert: parser parse: 'abc' to: #(#($a $b) $c)
 	)
 	
-	testParseOnError2 = (
+	"testParseOnError2 = (
 		| parser result seen |
 		parser := 'a' asParser.
 		result := parser parse: 'a' onError: [ self signalFailure: 'Not supposed to report an error' ].
@@ -734,66 +732,66 @@ PPParserTest = PPAbstractParserTest (
 				seen := true ].
 		self assert: result.
 		self assert: seen
-	)
+	)"
 	
 	testMinMaxLazy = (
 		| parser |
 		parser := #word asParser min: 2 max: 4 lazy: #digit asParser.
-		
+	
 		self assert: parser fail: ''.
 		self assert: parser fail: 'abcde'.
 		
 		self assert: parser fail: '1'.
 		self assert: parser fail: 'a1'.
-		self assert: parser parse: 'ab1' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc1' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd1' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: 'ab1' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc1' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd1' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde1'.
 		
 		self assert: parser fail: '12'.
-		self assert: parser parse: 'a12' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab12' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc12' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd12' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: 'a12' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab12' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc12' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd12' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde12'.
 		
-		self assert: parser parse: '123' to: #('1' '2') end: 2.
-		self assert: parser parse: 'a123' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab123' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc123' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd123' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: '123' to: #($1 $2) end: 2.
+		self assert: parser parse: 'a123' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab123' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc123' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd123' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde123'.
 		
-		self assert: parser parse: '1234' to: #('1' '2') end: 2.
-		self assert: parser parse: 'a1234' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab1234' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc1234' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd1234' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: '1234' to: #($1 $2) end: 2.
+		self assert: parser parse: 'a1234' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab1234' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc1234' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd1234' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde1234'
 	)
 	
 	testPlus = (
 		| parser |
-		parser := 'a' asParser plus.
+		parser := $a asParser plus.
 		self assert: parser min equals: 1.
 		self assert: parser max > parser min.
-		self assert: parser parse: 'a' to: #('a').
-		self assert: parser parse: 'aa' to: #('a' 'a').
-		self assert: parser parse: 'aaa' to: #('a' 'a' 'a').
+		self assert: parser parse: 'a' to: #($a).
+		self assert: parser parse: 'aa' to: #($a $a).
+		self assert: parser parse: 'aaa' to: #($a $a $a).
 		self
 			assert: parser
 			parse: 'ab'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'aab'
-			to: #('a' 'a')
+			to: #($a $a)
 			end: 2.
 		self
 			assert: parser
 			parse: 'aaab'
-			to: #('a' 'a' 'a')
+			to: #($a $a $a)
 			end: 3.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
@@ -802,7 +800,7 @@ PPParserTest = PPAbstractParserTest (
 	
 	testToken = (
 		| parser |
-		parser := 'a' asParser token.
+		parser := $a asParser token.
 		self assert: parser tokenClass equals: PPToken.
 		self
 			assert: parser
@@ -811,7 +809,7 @@ PPParserTest = PPAbstractParserTest (
 			stop: 1.
 		self assert: parser fail: 'b'.
 		self assert: parser fail: ''.
-		parser := 'a' asParser token: PPToken.
+		parser := $a asParser token: PPToken.
 		self assert: parser tokenClass equals: PPToken.
 		self
 			assert: parser
@@ -850,54 +848,54 @@ PPParserTest = PPAbstractParserTest (
 	
 	testDelimitedBy = (
 		| parser |
-		parser := 'a' asParser delimitedBy: 'b' asParser.
-		
-		self assert: parser parse: 'a' to: #('a').
-		self assert: parser parse: 'aba' to: #('a' 'b' 'a').
-		self assert: parser parse: 'ababa' to: #('a' 'b' 'a' 'b' 'a').
+		parser := $a asParser delimitedBy: $b asParser.
 	
-		self assert: parser parse: 'ab' to: #('a' 'b').
-		self assert: parser parse: 'abab' to: #('a' 'b' 'a' 'b').
-		self assert: parser parse: 'ababab' to: #('a' 'b' 'a' 'b' 'a' 'b').
+		self assert: parser parse: 'a' to: #($a).
+		self assert: parser parse: 'aba' to: #($a $b $a).
+		self assert: parser parse: 'ababa' to: #($a $b $a $b $a).
+	
+		self assert: parser parse: 'ab' to: #($a $b).
+		self assert: parser parse: 'abab' to: #($a $b $a $b).
+		self assert: parser parse: 'ababab' to: #($a $b $a $b $a $b).
 		
-		self assert: parser parse: 'ac' to: #('a') end: 1.
-		self assert: parser parse: 'abc' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abac' to: #('a' 'b' 'a') end: 3.
-		self assert: parser parse: 'ababc' to: #('a' 'b' 'a' 'b') end: 4.
+		self assert: parser parse: 'ac' to: #($a) end: 1.
+		self assert: parser parse: 'abc' to: #($a $b) end: 2.
+		self assert: parser parse: 'abac' to: #($a $b $a) end: 3.
+		self assert: parser parse: 'ababc' to: #($a $b $a $b) end: 4.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
 		self assert: parser fail: 'c'
 	)
 	
-	testXor = (
+	"testXor = (
 		| parser |
-		parser := ('a' asParser / 'b' asParser)
-				|  ('b' asParser / 'c' asParser).
-		
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'c' to: 'c'.
+		parser := ($a asParser / $b asParser)
+			|  ($b asParser / $c asParser).
+	
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'c' to: $c.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
-		self assert: parser fail: 'd'.
+		self assert: parser fail: 'd'."
 		
 		" truly symmetric "
-		parser := ('b' asParser / 'c' asParser)
-				|  ('a' asParser / 'b' asParser).
+		"parser := ($b asParser / $c asParser)
+				|  ($a asParser / $b asParser).
 		
-		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: 'c' to: 'c'.
+		self assert: parser parse: 'a' to: $a.
+		self assert: parser parse: 'c' to: $c.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
 		self assert: parser fail: 'd'
-	)
+	)"
 	
 	testPropertyAt = (
 		| parser |
 		parser := PPParser new.
-		self should: [ parser propertyAt: #foo ] raise: Error.
+		"self should: [ parser propertyAt: #foo ] raise: Error."
 		parser propertyAt: #foo put: true.
 		self assert: (parser propertyAt: #foo)
 	)
@@ -912,7 +910,7 @@ PPParserTest = PPAbstractParserTest (
 	
 	testTrimCustom = (
 		| parser |
-		parser := 'a' asParser token trim: 'b' asParser.
+		parser := $a asParser token trim: $b asParser.
 		
 		self assert: parser parse: 'a' toToken: 1 stop: 1.
 		self assert: parser parse: 'ab' toToken: 1 stop: 1.
@@ -932,15 +930,15 @@ PPParserTest = PPAbstractParserTest (
 	
 	testParse = (
 		| parser result |
-		parser := 'a' asParser.
-		self assert: (parser parse: 'a') equals: 'a'.
+		parser := $a asParser.
+		self assert: (parser parse: 'a') equals: $a.
 		self assert: (result := parser parse: 'b') isPetitFailure.
-		self assert: result message includesSubstring: 'a' printString.
+		self assert: result message includesSubstring: $a printString.
 		self assert: result message includesSubstring: 'expected'.
 		self assert: result position equals: 0.
-		self assert: (parser parse: 'a' readStream) equals: 'a'.
+		self assert: (parser parse: 'a' readStream) equals: $a.
 		self assert: (result := parser parse: 'b' readStream) isPetitFailure.
-		self assert: result message includesSubstring: 'a' printString.
+		self assert: result message includesSubstring: $a printString.
 		self assert: result message includesSubstring: 'expected'.
 		self assert: result position equals: 0
 	)
@@ -948,26 +946,26 @@ PPParserTest = PPAbstractParserTest (
 	testPermutation = (
 		| parser |
 		parser := #any asParser , #any asParser , #any asParser.
-	
+
 		self assert: (parser permutation: #()) parse: '123' to: #().
-		self assert: (parser permutation: #(1)) parse: '123' to: #('1').
-		self assert: (parser permutation: #(1 3)) parse: '123' to: #('1' '3').
-		self assert: (parser permutation: #(3 1)) parse: '123' to: #('3' '1').
-		self assert: (parser permutation: #(2 2)) parse: '123' to: #('2' '2').
-		self assert: (parser permutation: #(3 2 1)) parse: '123' to: #('3' '2' '1').
+		self assert: (parser permutation: #(1)) parse: '123' to: #($1).
+		self assert: (parser permutation: #(1 3)) parse: '123' to: #($1 $3).
+		self assert: (parser permutation: #(3 1)) parse: '123' to: #($3 $1).
+		self assert: (parser permutation: #(2 2)) parse: '123' to: #($2 $2).
+		self assert: (parser permutation: #(3 2 1)) parse: '123' to: #($3 $2 $1).
 		
-		self should: [ parser permutation: #(0) ] raise: Error.
+		"self should: [ parser permutation: #(0) ] raise: Error.
 		self should: [ parser permutation: #(4) ] raise: Error.
-		self should: [ parser permutation: #('2') ] raise: Error
+		self should: [ parser permutation: #($2) ] raise: Error"
 	)
 	
 	testSideEffectSequence = (
 		"Adding another element to a sequence should create a copy, otherwise we get unwanted side-effects."
 	
 		| p1 p2 p3 |
-		p1 := 'a' asParser.
-		p2 := p1 , 'b' asParser.
-		p3 := p1 , 'c' asParser.
+		p1 := $a asParser.
+		p2 := p1 , $b asParser.
+		p3 := p1 , $c asParser.
 		
 		self assert: p1 parse: 'a'.	
 		self assert: p1 parse: 'ab' end: 1.
@@ -991,22 +989,22 @@ PPParserTest = PPAbstractParserTest (
 	
 	testListConstructor = (
 		| p1 p2 p3 |
-		p1 := PPChoiceParser with: 'a' asParser.
-		p2 := PPChoiceParser with: 'a' asParser with: 'b' asParser.
-		p3 := PPChoiceParser withAll: (Array with: 'a' asParser with: 'b' asParser with: 'c' asParser).
-		self assert: p1 children size equals: 1.
-		self assert: p2 children size equals: 2.
-		self assert: p3 children size equals: 3
+		p1 := PPChoiceParser with: $a asParser.
+		p2 := PPChoiceParser with: $a asParser with: $b asParser.
+		p3 := PPChoiceParser withAll: (Array with: $a asParser with: $b asParser with: $c asParser).
+		self assert: p1 children length equals: 1.
+		self assert: p2 children length equals: 2.
+		self assert: p3 children length equals: 3
 	)
 	
 	testTimes = (
 		| parser |
-		parser := 'a' asParser times: 2.
-		
+		parser := $a asParser times: 2.
+	
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'.
-		self assert: parser parse: 'aa' to: #('a' 'a').
-		self assert: parser parse: 'aaa' to: #('a' 'a') end: 2
+		self assert: parser parse: 'aa' to: #($a $a).
+		self assert: parser parse: 'aaa' to: #($a $a) end: 2
 	)
 	
 	testMemoized = (
@@ -1017,14 +1015,14 @@ PPParserTest = PPAbstractParserTest (
 		s next ] asParser memoized.
 		twice := parser and , parser.
 		count := 0.
-		self assert: parser parse: 'a' to: 'a'.
+		self assert: parser parse: 'a' to: $a.
 		self assert: count equals: 1.
 		count := 0.
-		self assert: twice parse: 'a' to: #('a' 'a').
+		self assert: twice parse: 'a' to: #($a $a).
 		self assert: count equals: 1.
 		self assert: parser memoized equals: parser
 	)
-	
+	 
 	testFoldLeft2 = (
 		| parser |
 		parser := #any asParser star 
@@ -1039,21 +1037,21 @@ PPParserTest = PPAbstractParserTest (
 	
 	testDelimitedByWithoutSeparators = (
 		| parser |
-		parser := ('a' asParser delimitedBy: 'b' asParser)
-			withoutSeparators.
-		
-		self assert: parser parse: 'a' to: #('a').
-		self assert: parser parse: 'aba' to: #('a' 'a').
-		self assert: parser parse: 'ababa' to: #('a' 'a' 'a').
+		parser := ($a asParser delimitedBy: $b asParser)
+		withoutSeparators.
 	
-		self assert: parser parse: 'ab' to: #('a').
-		self assert: parser parse: 'abab' to: #('a' 'a').
-		self assert: parser parse: 'ababab' to: #('a' 'a' 'a').
+		self assert: parser parse: 'a' to: #($a).
+		self assert: parser parse: 'aba' to: #($a $a).
+		self assert: parser parse: 'ababa' to: #($a $a $a).
+	
+		self assert: parser parse: 'ab' to: #($a).
+		self assert: parser parse: 'abab' to: #($a $a).
+		self assert: parser parse: 'ababab' to: #($a $a $a).
 		
-		self assert: parser parse: 'ac' to: #('a') end: 1.
-		self assert: parser parse: 'abc' to: #('a') end: 2.
-		self assert: parser parse: 'abac' to: #('a' 'a') end: 3.
-		self assert: parser parse: 'ababc' to: #('a' 'a') end: 4.
+		self assert: parser parse: 'ac' to: #($a) end: 1.
+		self assert: parser parse: 'abc' to: #($a) end: 2.
+		self assert: parser parse: 'abac' to: #($a $a) end: 3.
+		self assert: parser parse: 'ababc' to: #($a $a) end: 4.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
@@ -1062,12 +1060,12 @@ PPParserTest = PPAbstractParserTest (
 	
 	testSequence = (
 		| parser |
-		parser := 'a' asParser , 'b' asParser.
+		parser := $a asParser , $b asParser.
+	
+		self assert: parser parse: 'ab' to: #($a $b).
 		
-		self assert: parser parse: 'ab' to: #('a' 'b').
-		
-		self assert: parser parse: 'aba' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abb' to: #('a' 'b') end: 2.
+		self assert: parser parse: 'aba' to: #($a $b) end: 2.
+		self assert: parser parse: 'abb' to: #($a $b) end: 2.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'.
@@ -1078,28 +1076,28 @@ PPParserTest = PPAbstractParserTest (
 	
 	testEndOfInput = (
 		| parser |
-		parser := PPEndOfInputParser on: 'a' asParser.
+		parser := PPEndOfInputParser on: $a asParser.
 		self assert: parser end equals: parser.
-		self assert: parser parse: 'a' to: 'a'.
+		self assert: parser parse: 'a' to: $a.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'aa'
 	)
 	
-	testFoldRight2 = (
+	"testFoldRight2 = (
 		| parser |
 		parser := #any asParser star 
 			foldRight: [ :a :b | Array with: a with: b ].
-	
+		
 		self assert: parser parse: #(a) to: #a.
 		self assert: parser parse: #(a b) to: #(a b).
 		self assert: parser parse: #(a b c) to: #(a (b c)).
 		self assert: parser parse: #(a b c d) to: #(a (b (c d))).
 		self assert: parser parse: #(a b c d e) to: #(a (b (c (d e))))
-	)
+	)"
 	
 	testTrimSpaces = (
 		| parser |
-		parser := 'a' asParser token trimSpaces.
+		parser := $a asParser token trimSpaces.
 		
 		self assert: parser parse: 'a' toToken: 1 stop: 1.
 		self assert: parser parse: 'a ' toToken: 1 stop: 1.
@@ -1125,26 +1123,26 @@ PPParserTest = PPAbstractParserTest (
 	
 	testMinMax = (
 		| parser printString suffix |
-		parser := 'a' asParser min: 2 max: 4.
+		parser := $a asParser min: 2 max: 4.
 		self assert: parser min equals: 2.
 		self assert: parser max equals: 4.
 		self assert: parser fail: ''.
 		self assert: parser fail: 'a'.
-		self assert: parser parse: 'aa' to: #('a' 'a').
-		self assert: parser parse: 'aaa' to: #('a' 'a' 'a').
-		self assert: parser parse: 'aaaa' to: #('a' 'a' 'a' 'a').
+		self assert: parser parse: 'aa' to: #($a $a).
+		self assert: parser parse: 'aaa' to: #($a $a $a).
+		self assert: parser parse: 'aaaa' to: #($a $a $a $a).
 		self
 			assert: parser
 			parse: 'aaaaa'
-			to: #('a' 'a' 'a' 'a')
+			to: #($a $a $a $a)
 			end: 4.
 		self
 			assert: parser
 			parse: 'aaaaaa'
-			to: #('a' 'a' 'a' 'a')
+			to: #($a $a $a $a)
 			end: 4.
 		printString := parser printString.
-		suffix := printString copyFrom: printString size - 5 to: printString size.
+		suffix := printString copyFrom: printString length - 5 to: printString length.
 		self assert: suffix = '[2, 4]'
 	)
 	
@@ -1160,9 +1158,9 @@ PPParserTest = PPAbstractParserTest (
 	
 	testAnswer = (
 		| parser |
-		parser := 'a' asParser answer: 'b'.
+		parser := $a asParser answer: $b.
 		
-		self assert: parser parse: 'a' to: 'b'.
+		self assert: parser parse: 'a' to: $b.
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'
@@ -1175,20 +1173,21 @@ PPParserTest = PPAbstractParserTest (
 		parser := #digit asParser , #digit asParser.
 		result := parser matchesSkipIn: 'a123b'.
 		self assert: result size equals: 1.
-		self assert: result first equals: #('1' '2')
+		self assert: result first equals: #($1 $2)
 	)
 	
 	testMatchesIn = (
 		| parser result |
 		parser := 'a' asParser.
+		parser := $a asParser.
 		result := parser matchesIn: 'abba'.
 		self assert: result size equals: 2.
-		self assert: result first equals: 'a'.
-		self assert: result last equals: 'a'.
+		self assert: result first equals: $a.
+		self assert: result last equals: $a.
 		result := parser matchesIn: 'baaah'.
 		self assert: result size equals: 3.
-		self assert: result first equals: 'a'.
-		self assert: result last equals: 'a'
+		self assert: result first equals: $a.
+		self assert: result last equals: $a
 	)
 	
 	testPostCopy = (
@@ -1210,45 +1209,45 @@ PPParserTest = PPAbstractParserTest (
 		
 		self assert: parser fail: '1'.
 		self assert: parser fail: 'a1'.
-		self assert: parser parse: 'ab1' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc1' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd1' to: #('a' 'b' 'c' 'd') end: 4.
-		self assert: parser parse: 'abcde1' to: #('a' 'b' 'c' 'd' 'e') end: 5.
+		self assert: parser parse: 'ab1' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc1' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd1' to: #($a $b $c $d) end: 4.
+		self assert: parser parse: 'abcde1' to: #($a $b $c $d $e) end: 5.
 		
 		self assert: parser fail: '12'.
-		self assert: parser parse: 'a12' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab12' to: #('a' 'b' '1') end: 3.
-		self assert: parser parse: 'abc12' to: #('a' 'b' 'c' '1') end: 4.
-		self assert: parser parse: 'abcd12' to: #('a' 'b' 'c' 'd' '1') end: 5.
-		self assert: parser parse: 'abcde12' to: #('a' 'b' 'c' 'd' 'e' '1') end: 6.
+		self assert: parser parse: 'a12' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab12' to: #($a $b $1) end: 3.
+		self assert: parser parse: 'abc12' to: #($a $b $c $1) end: 4.
+		self assert: parser parse: 'abcd12' to: #($a $b $c $d $1) end: 5.
+		self assert: parser parse: 'abcde12' to: #($a $b $c $d $e $1) end: 6.
 		
-		self assert: parser parse: '123' to: #('1' '2') end: 2.
-		self assert: parser parse: 'a123' to: #('a' '1' '2') end: 3.
-		self assert: parser parse: 'ab123' to: #('a' 'b' '1' '2') end: 4.
-		self assert: parser parse: 'abc123' to: #('a' 'b' 'c' '1' '2') end: 5.
-		self assert: parser parse: 'abcd123' to: #('a' 'b' 'c' 'd' '1' '2') end: 6.
-		self assert: parser parse: 'abcde123' to: #('a' 'b' 'c' 'd' 'e' '1' '2') end: 7.
+		self assert: parser parse: '123' to: #($1 $2) end: 2.
+		self assert: parser parse: 'a123' to: #($a $1 $2) end: 3.
+		self assert: parser parse: 'ab123' to: #($a $b $1 $2) end: 4.
+		self assert: parser parse: 'abc123' to: #($a $b $c $1 $2) end: 5.
+		self assert: parser parse: 'abcd123' to: #($a $b $c $d $1 $2) end: 6.
+		self assert: parser parse: 'abcde123' to: #($a $b $c $d $e $1 $2) end: 7.
 		
-		self assert: parser parse: '1234' to: #('1' '2' '3') end: 3.
-		self assert: parser parse: 'a1234' to: #('a' '1' '2' '3') end: 4.
-		self assert: parser parse: 'ab1234' to: #('a' 'b' '1' '2' '3') end: 5.
-		self assert: parser parse: 'abc1234' to: #('a' 'b' 'c' '1' '2' '3') end: 6.
-		self assert: parser parse: 'abcd1234' to: #('a' 'b' 'c' 'd' '1' '2' '3') end: 7.
-		self assert: parser parse: 'abcde1234' to: #('a' 'b' 'c' 'd' 'e' '1' '2' '3') end: 8
+		self assert: parser parse: '1234' to: #($1 $2 $3) end: 3.
+		self assert: parser parse: 'a1234' to: #($a $1 $2 $3) end: 4.
+		self assert: parser parse: 'ab1234' to: #($a $b $1 $2 $3) end: 5.
+		self assert: parser parse: 'abc1234' to: #($a $b $c $1 $2 $3) end: 6.
+		self assert: parser parse: 'abcd1234' to: #($a $b $c $d $1 $2 $3) end: 7.
+		self assert: parser parse: 'abcde1234' to: #($a $b $c $d $e $1 $2 $3) end: 8
 	)
 	
 	testFlatten = (
 		| parser |
-		parser := 'a' asParser flatten.
+		parser := $a asParser flatten.
 		
 		self assert: parser parse: 'a' to: 'a'.
-		self assert: parser parse: #('a') to: #('a').
+		self assert: parser parse: #($a) to: #($a).
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'
 	)
 	
-	testFoldLeft3 = (
+	"testFoldLeft3 = (
 		| parser |
 		parser := #any asParser star 
 			foldLeft: [ :a :b :c | Array with: a with: b with: c ].
@@ -1256,14 +1255,14 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser parse: #(a) to: #a.
 		self assert: parser parse: #(a b c) to: #(a b c).
 		self assert: parser parse: #(a b c d e) to: #((a b c) d e)
-	)
+	)"
 	
 	testBlock = (
 		| parser |
 		parser := [ :s | s next ] asParser.
 		
-		self assert: parser parse: 'ab' to: 'a' end: 1.
-		self assert: parser parse: 'b' to: 'b'.
+		self assert: parser parse: 'ab' to: $a end: 1.
+		self assert: parser parse: 'b' to: $b.
 		self assert: parser parse: '' to: nil
 	)
 	
@@ -1276,31 +1275,31 @@ PPParserTest = PPAbstractParserTest (
 		
 		self assert: parser fail: '1'.
 		self assert: parser fail: 'a1'.
-		self assert: parser parse: 'ab1' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc1' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd1' to: #('a' 'b' 'c' 'd') end: 4.
-		self assert: parser parse: 'abcde1' to: #('a' 'b' 'c' 'd' 'e') end: 5.
+		self assert: parser parse: 'ab1' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc1' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd1' to: #($a $b $c $d) end: 4.
+		self assert: parser parse: 'abcde1' to: #($a $b $c $d $e) end: 5.
 		
 		self assert: parser fail: '12'.
-		self assert: parser parse: 'a12' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab12' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc12' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd12' to: #('a' 'b' 'c' 'd') end: 4.
-		self assert: parser parse: 'abcde12' to: #('a' 'b' 'c' 'd' 'e') end: 5.
+		self assert: parser parse: 'a12' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab12' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc12' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd12' to: #($a $b $c $d) end: 4.
+		self assert: parser parse: 'abcde12' to: #($a $b $c $d $e) end: 5.
 		
-		self assert: parser parse: '123' to: #('1' '2') end: 2.
-		self assert: parser parse: 'a123' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab123' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc123' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd123' to: #('a' 'b' 'c' 'd') end: 4.
-		self assert: parser parse: 'abcde123' to: #('a' 'b' 'c' 'd' 'e') end: 5.
+		self assert: parser parse: '123' to: #($1 $2) end: 2.
+		self assert: parser parse: 'a123' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab123' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc123' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd123' to: #($a $b $c $d) end: 4.
+		self assert: parser parse: 'abcde123' to: #($a $b $c $d $e) end: 5.
 		
-		self assert: parser parse: '1234' to: #('1' '2') end: 2.
-		self assert: parser parse: 'a1234' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab1234' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc1234' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd1234' to: #('a' 'b' 'c' 'd') end: 4.
-		self assert: parser parse: 'abcde1234' to: #('a' 'b' 'c' 'd' 'e') end: 5
+		self assert: parser parse: '1234' to: #($1 $2) end: 2.
+		self assert: parser parse: 'a1234' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab1234' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc1234' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd1234' to: #($a $b $c $d) end: 4.
+		self assert: parser parse: 'abcde1234' to: #($a $b $c $d $e) end: 5
 	)
 	
 	testRemovePropertyIfAbsent = (
@@ -1313,13 +1312,13 @@ PPParserTest = PPAbstractParserTest (
 	
 	testStar = (
 		| parser |
-		parser := 'a' asParser star.
+		parser := $a asParser star.
 		self assert: parser min equals: 0.
 		self assert: parser max > parser min.
 		self assert: parser parse: '' to: #().
-		self assert: parser parse: 'a' to: #('a').
-		self assert: parser parse: 'aa' to: #('a' 'a').
-		self assert: parser parse: 'aaa' to: #('a' 'a' 'a').
+		self assert: parser parse: 'a' to: #($a).
+		self assert: parser parse: 'aa' to: #($a $a).
+		self assert: parser parse: 'aaa' to: #($a $a $a).
 		self
 			assert: parser
 			parse: 'b'
@@ -1328,17 +1327,17 @@ PPParserTest = PPAbstractParserTest (
 		self
 			assert: parser
 			parse: 'ab'
-			to: #('a')
+			to: #($a)
 			end: 1.
 		self
 			assert: parser
 			parse: 'aab'
-			to: #('a' 'a')
+			to: #($a $a)
 			end: 2.
 		self
 			assert: parser
 			parse: 'aaab'
-			to: #('a' 'a' 'a')
+			to: #($a $a $a)
 			end: 3
 	)
 	
@@ -1347,8 +1346,8 @@ PPParserTest = PPAbstractParserTest (
 		block := [ :char | char asUppercase ].
 		parser := #any asParser ==> block.
 		self assert: parser block equals: block.
-		self assert: parser parse: 'a' to: 'A'.
-		self assert: parser parse: 'b' to: 'B'
+		self assert: parser parse: 'a' to: $A.
+		self assert: parser parse: 'b' to: $B
 	)
 	
 	testPrint = (
@@ -1359,8 +1358,8 @@ PPParserTest = PPAbstractParserTest (
 		parser := PPParser named: 'choice'.
 		self assert: parser printString includesSubstring: 'PPParser(choice'.
 		
-		parser := PPLiteralObjectParser on: 'a'.
-		self assert: parser printString includesSubstring: 'a' printString.
+		parser := PPLiteralObjectParser on: $a.
+		self assert: parser printString includesSubstring: $a printString.
 		
 		parser := PPFailingParser message: 'error'.
 		self assert: parser printString includesSubstring: 'error'.
@@ -1397,58 +1396,58 @@ PPParserTest = PPAbstractParserTest (
 	testMinMaxGreedy = (
 		| parser |
 		parser := #word asParser min: 2 max: 4 greedy: #digit asParser.
-		
+	
 		self assert: parser fail: ''.
 		self assert: parser fail: 'abcde'.
 		
 		self assert: parser fail: '1'.
 		self assert: parser fail: 'a1'.
-		self assert: parser parse: 'ab1' to: #('a' 'b') end: 2.
-		self assert: parser parse: 'abc1' to: #('a' 'b' 'c') end: 3.
-		self assert: parser parse: 'abcd1' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: 'ab1' to: #($a $b) end: 2.
+		self assert: parser parse: 'abc1' to: #($a $b $c) end: 3.
+		self assert: parser parse: 'abcd1' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde1'.
 		
 		self assert: parser fail: '12'.
-		self assert: parser parse: 'a12' to: #('a' '1') end: 2.
-		self assert: parser parse: 'ab12' to: #('a' 'b' '1') end: 3.
-		self assert: parser parse: 'abc12' to: #('a' 'b' 'c' '1') end: 4.
-		self assert: parser parse: 'abcd12' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: 'a12' to: #($a $1) end: 2.
+		self assert: parser parse: 'ab12' to: #($a $b $1) end: 3.
+		self assert: parser parse: 'abc12' to: #($a $b $c $1) end: 4.
+		self assert: parser parse: 'abcd12' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde12'.
 		
-		self assert: parser parse: '123' to: #('1' '2') end: 2.
-		self assert: parser parse: 'a123' to: #('a' '1' '2') end: 3.
-		self assert: parser parse: 'ab123' to: #('a' 'b' '1' '2') end: 4.
-		self assert: parser parse: 'abc123' to: #('a' 'b' 'c' '1') end: 4.
-		self assert: parser parse: 'abcd123' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: '123' to: #($1 $2) end: 2.
+		self assert: parser parse: 'a123' to: #($a $1 $2) end: 3.
+		self assert: parser parse: 'ab123' to: #($a $b $1 $2) end: 4.
+		self assert: parser parse: 'abc123' to: #($a $b $c $1) end: 4.
+		self assert: parser parse: 'abcd123' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde123'.
 		
-		self assert: parser parse: '1234' to: #('1' '2' '3') end: 3.
-		self assert: parser parse: 'a1234' to: #('a' '1' '2' '3') end: 4.
-		self assert: parser parse: 'ab1234' to: #('a' 'b' '1' '2') end: 4.
-		self assert: parser parse: 'abc1234' to: #('a' 'b' 'c' '1') end: 4.
-		self assert: parser parse: 'abcd1234' to: #('a' 'b' 'c' 'd') end: 4.
+		self assert: parser parse: '1234' to: #($1 $2 $3) end: 3.
+		self assert: parser parse: 'a1234' to: #($a $1 $2 $3) end: 4.
+		self assert: parser parse: 'ab1234' to: #($a $b $1 $2) end: 4.
+		self assert: parser parse: 'abc1234' to: #($a $b $c $1) end: 4.
+		self assert: parser parse: 'abcd1234' to: #($a $b $c $d) end: 4.
 		self assert: parser fail: 'abcde1234'
 	)
 	
-	testParseOnError1 = (
+	"testParseOnError1 = (
 		| parser result seen |
-		parser := 'a' asParser.
+		parser := $a asParser.
 		result := parser parse: 'a' onError: [ self signalFailure: 'Not supposed to report an error' ].
-		self assert: result equals: 'a'.
+		self assert: result equals: $a.
 		result := parser
 			parse: 'b'
 			onError: [ :failure | 
 				self assert: failure position equals: 0.
-				self assert: failure message includesSubstring: 'a' printString.
+				self assert: failure message includesSubstring: $a printString.
 				self assert: failure message includesSubstring: 'expected'.
 				seen := true ].
 		self assert: result.
 		self assert: seen
-	)
+	)"
 	
 	testSideEffectListCopy = (
 		| old new |
-		old := 'a' asParser , 'b' asParser.
+		old := $a asParser , $b asParser.
 		new := old copy.
 		
 		self deny: old == new.
@@ -1467,20 +1466,20 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser name equals: 'star'
 	)
 	
-	testMap3 = (
+	"testMap3 = (
 		| parser |
 		parser := (#any asParser , #any asParser , #any asParser)
 			map: [ :a :b :c | Array with: c with: b with: a ].
 	
 		self assert: parser parse: #(a b c) to: #(c b a)
-	)
+	)"
 	
 	testWrapping = (
 		| parser result |
 		parser := #digit asParser plus >=> [ :stream :cc | Array with: stream position with: cc value with: stream position ].
-		self assert: parser parse: '1' to: #(0 #('1') 1).
-		self assert: parser parse: '12' to: #(0 #('1' '2') 2).
-		self assert: parser parse: '123' to: #(0 #('1' '2' '3') 3).
+		self assert: parser parse: '1' to: #(0 #($1) 1).
+		self assert: parser parse: '12' to: #(0 #($1 $2) 2).
+		self assert: parser parse: '123' to: #(0 #($1 $2 $3) 3).
 		result := parser parse: 'a'.
 		self assert: result first equals: 0.
 		self assert: result second isPetitFailure.
@@ -1489,10 +1488,10 @@ PPParserTest = PPAbstractParserTest (
 	
 	testLiteralObject = (
 		| parser |
-		parser := PPLiteralObjectParser on: 'a' message: 'letter "a" expected'.
-		self assert: parser literal equals: 'a'.
+		parser := PPLiteralObjectParser on: $a message: 'letter "a" expected'.
+		self assert: parser literal equals: $a.
 		self assert: parser message equals: 'letter "a" expected'.
-		self assert: parser parse: 'a' to: 'a'.
+		self assert: parser parse: 'a' to: $a.
 		self assert: parser fail: 'b'
 	)
 	

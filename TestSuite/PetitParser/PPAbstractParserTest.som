@@ -67,7 +67,7 @@ PPAbstractParserTest = TestCase (
 	)
 	
 	assert: aParser parse: aCollection toToken: aStartInteger stop: aStopInteger = (
-		^ self assert: aParser parse: aCollection toToken: aStartInteger stop: aStopInteger end: aCollection size
+		^ self assert: aParser parse: aCollection toToken: aStartInteger stop: aStopInteger end: aCollection length
 	)
 	
 	context = (

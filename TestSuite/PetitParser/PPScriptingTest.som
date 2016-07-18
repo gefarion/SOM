@@ -37,7 +37,6 @@ PPScriptingTest = PPAbstractParserTest (
 	)
 	
 	testSLassign = (
-		
 		self assert: self straightLineParser
 			parse: 'abc:=1'
 			to: #(#('a' #('b' 'c') ':=' #(#(#('1' #()) #()) #())) #())
@@ -86,7 +85,6 @@ PPScriptingTest = PPAbstractParserTest (
 			/ num
 			/ ( '(' asParser, stmList, ',' asParser, exp, ')' asParser ).
 		^ goal
-	
 	)
 	
 	testExpressionInterpreter = (

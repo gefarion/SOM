@@ -1,22 +1,20 @@
 PPTokenTest = PPAbstractParserTest (
+	identifier = (^ #word asParser plus token)
 	
-	
-	identifier = (
-		^ #word asParser plus token
-	)
+	parse: aString using: aParser = (^ aParser parse: aString)
 	
 	testParsedValue = (
 		| input result |
 		input := 'foo'.
 		result := self parse: input using: self identifier.
-		self assert: result parsedValue equals: #('f' 'o' 'o')
+		self assert: result parsedValue equals: #($f $o $o)
 	)
 	
-	testValue = (
+	"testValue = (
 		| result |
 		result := PPToken on: 'var'.
 		self should: [ result value ] raise: Notification
-	)
+	)"
 	
 	testCopyFromTo = (
 		| result other |
@@ -34,10 +32,9 @@ PPTokenTest = PPAbstractParserTest (
 		self assert: result size equals: 3
 	)
 	
-	testNew = (
+	"testNew = (
 		self should: [ PPToken new ] raise: Error.
-		
-	)
+	)"
 	
 	testStop = (
 		| result |
@@ -50,11 +47,8 @@ PPTokenTest = PPAbstractParserTest (
 		input := 'foo'.
 		result := self parse: input using: self identifier.
 		self assert: result inputValue equals: input.
-		self deny: result inputValue == input
-	)
-	
-	parse: aString using: aParser = (
-		^ aParser parse: aString
+		"The following is not true with TruffleMate immutable strings"
+		"self deny: result inputValue == input"
 	)
 	
 	testPrinting = (
@@ -71,18 +65,18 @@ PPTokenTest = PPAbstractParserTest (
 		self assert: result collection == input
 	)
 	
-	testColumn = (
+	testInitialize = (
+		PPToken initialize
+	)
+	
+	"testColumn = (
 		| input parser result |
 		input := '1' , (String with: (Character codePoint: 13)) , '12' , (String with: (Character codePoint: 13) with: (Character codePoint: 10)) , '123'
 			, (String with: (Character codePoint: 10)) , '1234'.
 		parser := #any asParser token star.
 		result := parser parse: input.
 		result with: #(1 2 1 2 3 4 1 2 3 4 1 2 3 4) do: [ :token :line | self assert: token column equals: line ]
-	)
-	
-	testInitialize = (
-		PPToken initialize
-	)
+	)"
 	
 	testEquality = (
 		| token1 token2 |
@@ -93,14 +87,14 @@ PPTokenTest = PPAbstractParserTest (
 		self assert: token1 hash equals: token2 hash
 	)
 	
-	testLine = (
+	"testLine = (
 		| input parser result |
 		input := '1' , (String with: (Character codePoint: 13)) , '12' , (String with: (Character codePoint: 13) with: (Character codePoint: 10)) , '123'
 			, (String with: (Character codePoint: 10)) , '1234'.
 		parser := #any asParser token star.
 		result := parser parse: input.
 		result with: #(1 1 2 2 2 2 3 3 3 3 4 4 4 4) do: [ :token :line | self assert: token line equals: line ]
-	)
+	)"
 	
 	testStart = (
 		| result |
