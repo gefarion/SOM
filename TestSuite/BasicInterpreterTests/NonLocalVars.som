@@ -30,7 +30,6 @@ NonLocalVars = (
 			self collection do: [:index | value := value + index].
 			value := value // 4.
 		].
-		value println.
 		^value.
     )
     
