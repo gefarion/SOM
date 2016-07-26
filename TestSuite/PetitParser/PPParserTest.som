@@ -456,7 +456,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: seen
 	)
 	
-	"testNegate = (
+	testNegate = (
 		| parser |
 		parser := 'foo' asParser negate.
 	
@@ -467,7 +467,7 @@ PPParserTest = PPAbstractParserTest (
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'foo'
-	)"
+	)
 	
 	testOptional = (
 		| parser |
@@ -646,7 +646,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser fail: 'b'
 	)
 	
-	"testLiteralSequenceCaseInsensitive = (
+	testLiteralSequenceCaseInsensitive = (
 		| parser |
 		parser := 'abc' asParser caseInsensitive.
 		
@@ -657,7 +657,7 @@ PPParserTest = PPAbstractParserTest (
 		
 		self assert: parser fail: 'ab'.
 		self assert: parser fail: 'abd'
-	)"
+	)
 	
 	testMatchesInEmpty = (
 		"Empty matches should properly advance and match at each position and at the end."
@@ -699,13 +699,13 @@ PPParserTest = PPAbstractParserTest (
 		self assert: (parser removeProperty: #foo)
 	)
 	
-	"testNot = (
+	testNot = (
 		| parser |
 		parser := 'foo' asParser flatten , 'bar' asParser flatten not.
 		
 		self assert: parser parse: 'foobaz' to: #('foo' nil) end: 3.
 		self assert: parser fail: 'foobar'
-	)"
+	)
 	
 	testWrapped = (
 		| parser |
@@ -868,7 +868,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser fail: 'c'
 	)
 	
-	"testXor = (
+	testXor = (
 		| parser |
 		parser := ($a asParser / $b asParser)
 			|  ($b asParser / $c asParser).
@@ -878,10 +878,10 @@ PPParserTest = PPAbstractParserTest (
 		
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
-		self assert: parser fail: 'd'."
+		self assert: parser fail: 'd'.
 		
 		" truly symmetric "
-		"parser := ($b asParser / $c asParser)
+		parser := ($b asParser / $c asParser)
 				|  ($a asParser / $b asParser).
 		
 		self assert: parser parse: 'a' to: $a.
@@ -890,7 +890,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser fail: ''.
 		self assert: parser fail: 'b'.
 		self assert: parser fail: 'd'
-	)"
+	)
 	
 	testPropertyAt = (
 		| parser |

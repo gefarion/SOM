@@ -11,7 +11,7 @@ PPExpressionParserTest = PPArithmeticParserTest (
 			group: [ :g | 
 						g postfix: '++' asParser trim do: [ :a :op | a + 1 ].
 						g postfix: '--' asParser trim do: [ :a :op | a - 1 ] ].
-		expression group: [ :g | g right: $^ asParser trim do: [ :a :op :b | a raisedTo: b ] ].
+		expression group: [ :g | g right: $^ asParser trim do: [ :a :op :b | a exp: b ] ].
 		expression
 			group: [ :g | 
 				g left: $* asParser trim do: [ :a :op :b | a * b ].
@@ -34,7 +34,6 @@ PPExpressionParserTest = PPArithmeticParserTest (
 		self assert: '0++' is: 1.
 		self assert: '0++++' is: 2.
 		self assert: '0++++++' is: 3.
-	
 		self assert: '0+++1' is: 2.
 		self assert: '0+++++1' is: 3.
 		self assert: '0+++++++1' is: 4
@@ -44,7 +43,6 @@ PPExpressionParserTest = PPArithmeticParserTest (
 		self assert: '1--' is: 0.
 		self assert: '2----' is: 0.
 		self assert: '3------' is: 0.
-	
 		self assert: '2---1' is: 0.
 		self assert: '3-----1' is: 0.
 		self assert: '4-------1' is: 0.
