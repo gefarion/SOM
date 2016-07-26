@@ -173,7 +173,9 @@ Array = (
 	)
     
     "Files / Pharo Compatibility"
-    asString = primitive
+    asString = (
+    	^self inject: '' into: [:res :elm | res + elm asString].
+    )
     
     indexOfAnyOf: aCollection = (^self indexOfAnyOf: aCollection startingAt: 1)
 	indexOfAnyOf: aCollection startingAt: start = (
