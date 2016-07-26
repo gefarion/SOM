@@ -126,8 +126,6 @@ Array = (
       ^ nil
     )
     
-    
-    
     "Collection"
     collect: aBlock = (
         | result |
@@ -212,6 +210,14 @@ Array = (
 	) 
 	
 	asPetitStream = (^ PPStream on: self)
+	
+	reversed = (
+		| size result |
+		size := self length.
+		result := self species new: size.
+		1 to: size do: [:i | result at: i put: (self at: size - (i - 1))].
+		^ result
+	)
     
     ----------------------------
     
