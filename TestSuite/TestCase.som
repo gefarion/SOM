@@ -16,7 +16,8 @@ TestCase = (
     assert: expected equals: actual = (
         "test value equality"
         self assert: (expected = actual)
-             description: [self comparingStringBetween: expected and: actual]
+             description: [
+             self comparingStringBetween: expected and: actual]
     )
     
     assert: expected is: actual = (
@@ -95,15 +96,28 @@ TestCase = (
         ^ case
     )
     
+    addTestFromClass: aClass to: aCollection = (
+    	aClass methods do: [:m |
+            (m signature beginsWith: #test) ifTrue: [
+                aCollection append: (self for: m signature).
+            ].
+        ].
+    )
+    
     tests = (
         | tests |
         tests := Vector new: self methods length.
-        self methods do: [:m |
-            (m signature beginsWith: #test) ifTrue: [
-                tests append: (self for: m signature).
-            ].
-        ].
-        
+        self addTestFromClass: self to: tests.
+        self shouldInheritSelectors ifTrue: [
+        	| pivotClass |
+        	pivotClass := self.
+				[pivotClass == TestCase] whileFalse: [
+					pivotClass := pivotClass superclass.
+					self addTestFromClass: pivotClass to: tests.
+				]
+			].
         ^ tests
     )
+    
+    shouldInheritSelectors = (^false)
 )
