@@ -64,7 +64,7 @@ Character = (
 	>= anotherChar = (^(self compareWith: anotherChar) >= 0)
 	<= anotherChar = (^(self compareWith: anotherChar) <= 0)
 	< anotherChar = (^(self compareWith: anotherChar) < 0)
-	sameAs: anotherChar = (^(self compareWith: anotherChar) = 0)
+	sameAs: anotherChar = (^(self asLowercase compareWith: anotherChar asLowercase) = 0)
 	to: other = (
 		"Answer with a collection in ascii order -- $a to: $z"
 		^ (self asInteger to: other asInteger) collect:
