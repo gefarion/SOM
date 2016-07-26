@@ -192,7 +192,7 @@ String = (
 		self do: [:char | output append: char asLowercase].
 		^output
 	)
-	sameAs: anotherString = (^self = anotherString)
+	sameAs: anotherString = (^self asLowercase = anotherString asLowercase)
 	-------------------------------------------------------------
 	
 	streamContents: blockWithArg = (
