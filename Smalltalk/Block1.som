@@ -31,8 +31,10 @@ Block1 = Block (
     value = primitive
     ensure: aBlock = (
     	"Implemented for FileSystem support. It still does not comply with ensure behavior when the block fails"
-    	self value. 
-    	aBlock value
+    	| returnValue |
+    	returnValue := self value. 
+    	aBlock value.
+    	^returnValue
     )
 	
 	numArgs = (^0)
