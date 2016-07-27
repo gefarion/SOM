@@ -1,0 +1,410 @@
+PPSmalltalkGrammar = PPCompositeParser (
+	"A parser for Smalltalk methods and expressions."
+	| array arrayItem arrayLiteral arrayLiteralArray assignment assignmentToken binary binaryExpression binaryMessage binaryMethod 
+	  binaryPragma binaryToken block blockArgument blockArguments blockArgumentsWith blockArgumentsWithout blockBody byteLiteral 
+	  byteLiteralArray cascadeExpression cascadeMessage char charLiteral charToken expression falseLiteral falseToken identifier 
+	  identifierToken keyword keywordExpression keywordMessage keywordMethod keywordPragma keywordToken literal message method 
+	  methodDeclaration methodSequence multiword nilLiteral nilToken number numberLiteral numberToken parens period periodToken 
+	  pragma pragmaMessage pragmas primary return sequence startExpression startMethod statements string stringLiteral stringToken 
+	  symbol symbolLiteral symbolLiteralArray temporaries trueLiteral trueToken unary unaryExpression unaryMessage unaryMethod 
+	  unaryPragma unaryToken variable |
+	
+	symbol = (
+		^ unary / binary / multiword / string
+	)
+	
+	blockBody = (
+		^ blockArguments , sequence
+	)
+	
+	binary = (
+		^ (PPPredicateObjectParser anyOf: '!%&*+,-/<=>?@\|~') plus
+	)
+	
+	period = (
+		^ $. asParser
+	)
+	
+	periodToken = (
+		^ period smalltalkToken
+	)
+	
+	parseMethod: aString = (
+	
+		^ self parseMethod: aString onError: [ :msg :pos | self error: msg ]
+	)
+	
+	falseToken = (
+		^ ('false' asParser , #word asParser not) smalltalkToken
+	)
+	
+	cascadeExpression = (
+		^ keywordExpression , cascadeMessage star
+	)
+	
+	keywordMethod = (
+		^ (keywordToken , variable) plus ==> [ :nodes | 
+			Array 
+				with: (nodes collect: [ :each | each first ])
+				with: (nodes collect: [ :each | each second ]) ]
+	)
+	
+	pragmaMessage = (
+		^ keywordPragma / unaryPragma / binaryPragma
+	)
+	
+	binaryMessage = (
+		^ (binaryToken , unaryExpression) ==> [ :nodes | 
+			Array 
+				with: (Array with: nodes first)
+				with: (Array with: nodes second) ]
+	)
+	
+	trueLiteral = (
+		^ trueToken
+	)
+	
+	binaryExpression = (
+		^ unaryExpression , binaryMessage star
+	)
+	
+	multiword = (
+		^ keyword plus
+	)
+	
+	unaryToken = (
+		^ unary smalltalkToken
+	)
+	
+	return = (
+		^ $^ asParser smalltalkToken , expression
+	)
+	
+	byteLiteral = (
+		^ '#[' asParser smalltalkToken , numberLiteral star , $] asParser smalltalkToken
+	)
+	
+	arrayLiteralArray = (
+		^ $( asParser smalltalkToken , arrayItem star , $) asParser smalltalkToken
+	)
+	
+	symbolLiteral = (
+		"This is totally fucked up: The Pharo compiler allows multiple #, arbitrary spaces between the # and the symbol, as well as comments inbetween. And yes, it is used."
+	
+		^ $# asParser smalltalkToken plus , symbol smalltalkToken ==> [ :tokens | tokens first copyWith: tokens last ]
+	)
+	
+	identifier = (
+		^ self class allowUnderscoreAssignment
+			ifTrue: [ #letter asParser , #word asParser star ]
+			ifFalse: [
+				(PPPredicateObjectParser
+					on: [ :each | each isLetter or: [ each = $_ ] ]
+					message: 'letter expected') ,
+				(PPPredicateObjectParser
+					on: [ :each | each isAlphaNumeric or: [ each = $_ ] ]
+					message: 'letter or digit expected') star ]
+	)
+	
+	unaryMessage = (
+		^ unaryToken ==> [ :node | 
+			Array 
+				with: (Array with: node)
+				with: Array new ]
+	)
+	
+	keywordMessage = (
+		^ (keywordToken , binaryExpression) plus ==> [ :nodes | 
+			Array 
+				with: (nodes collect: [ :each | each first ])
+				with: (nodes collect: [ :each | each second ]) ]
+	)
+	
+	block = (
+		^ $[ asParser smalltalkToken , blockBody , $] asParser smalltalkToken
+	)
+	
+	expression = (
+		^ assignment star , cascadeExpression
+	)
+	
+	identifierToken = (
+		^ identifier smalltalkToken
+	)
+	
+	byteLiteralArray = (
+		^ $[ asParser smalltalkToken , numberLiteral star , $] asParser smalltalkToken
+	)
+	
+	numberLiteral = (
+		^ numberToken
+	)
+	
+	primary = (
+		^ literal / variable / block / parens / array
+	)
+	
+	parseExpression: aString onError: aBlock = (
+		^ startExpression parse: aString onError: aBlock
+	)
+	
+	keywordToken = (
+		^ keyword smalltalkToken
+	)
+	
+	startMethod = (
+		"Start production for the method."
+	
+		^ method end
+	)
+	
+	blockArgumentsWithout = (
+		^ nil asParser ==> [ :nodes | Array with: #() with: nil ]
+	)
+	
+	keywordExpression = (
+		^ binaryExpression , keywordMessage optional
+	)
+	
+	charLiteral = (
+		^ charToken
+	)
+	
+	parens = (
+		^ $( asParser smalltalkToken , expression , $) asParser smalltalkToken
+	)
+	
+	numberToken = (
+		^ number smalltalkToken
+	)
+	
+	parseMethod: aString onError: aBlock = (
+		^ startMethod parse: aString onError: aBlock
+	)
+	
+	assignmentToken = (
+		^ self class allowUnderscoreAssignment
+			ifTrue: [ (':=' asParser / '_' asParser) smalltalkToken ]
+			ifFalse: [ ':=' asParser smalltalkToken ]
+	)
+	
+	binaryToken = (
+		^ binary smalltalkToken
+	)
+	
+	pragma = (
+		^ $< asParser smalltalkToken , pragmaMessage , $> asParser smalltalkToken
+	)
+	
+	temporaries = (
+		^ ($| asParser smalltalkToken , variable star , $| asParser smalltalkToken) optional ==> [ :nodes | nodes ifNil: [ #() ] ]
+	)
+	
+	variable = (
+		^ identifierToken
+	)
+	
+	literal = (
+		^ numberLiteral / stringLiteral / charLiteral / arrayLiteral / byteLiteral / symbolLiteral / nilLiteral / trueLiteral / falseLiteral
+	)
+	
+	blockArgumentsWith = (
+		^ blockArgument plus , ($| asParser smalltalkToken / ($] asParser smalltalkToken and ==> [ :node | nil ]))
+	)
+	
+	falseLiteral = (
+		^ falseToken
+	)
+	
+	arrayLiteral = (
+		^ '#(' asParser smalltalkToken , arrayItem star , $) asParser smalltalkToken
+	)
+	
+	charToken = (
+		^ char smalltalkToken
+	)
+	
+	pragmas = (
+		^ pragma star
+	)
+	
+	number = (
+		^ ($- asParser optional , #digit asParser) and , [ :context | 
+			[ (NumberParser on: context stream) nextNumber ] 
+				on: Error
+				do: [ :err | PPFailure message: err messageText at: context position ] ] 
+					asParser
+	)
+	
+	string = (
+		^ $' asParser , ('''''' asParser / $' asParser negate) star , $' asParser
+	)
+	
+	unaryExpression = (
+		^ primary , unaryMessage star
+	)
+	
+	assignment = (
+		^ variable , assignmentToken
+	)
+	
+	methodSequence = (
+		^ periodToken star , pragmas , periodToken star , temporaries , periodToken star , pragmas , periodToken star , statements
+	)
+	
+	char = (
+		^ $$ asParser , #any asParser
+	)
+	
+	nilToken = (
+		^ ('nil' asParser , #word asParser not) smalltalkToken
+	)
+	
+	methodDeclaration = (
+		^ keywordMethod / unaryMethod / binaryMethod
+	)
+	
+	binaryPragma = (
+		^ (binaryToken , arrayItem) ==> [ :nodes | 
+			Array 
+				with: (Array with: nodes first)
+				with: (Array with: nodes second) ]
+	)
+	
+	statements = (
+		^ 	(expression wrapped , ((periodToken plus , statements ==> [ :nodes | nodes first , nodes last ])
+									/ periodToken star)
+				==> [ :nodes | (Array with: nodes first) , (nodes last) ])
+		/	(return , periodToken star
+				==> [ :nodes | (Array with: nodes first) , (nodes last) ])
+		/	(periodToken star)
+	)
+	
+	array = (
+		^ ${ asParser smalltalkToken , (expression delimitedBy: periodToken) optional , $} asParser smalltalkToken
+	)
+	
+	binaryMethod = (
+		^ (binaryToken , variable) ==> [ :nodes | 
+			Array 
+				with: (Array with: nodes first)
+				with: (Array with: nodes second) ]
+	)
+	
+	start = (
+		"Default start production."
+	
+		^ startMethod
+	)
+	
+	message = (
+		^ keywordMessage / binaryMessage / unaryMessage
+	)
+	
+	sequence = (
+		^ temporaries , periodToken star , statements
+	)
+	
+	keywordPragma = (
+		^ (keywordToken , arrayItem) plus ==> [ :nodes | 
+			Array 
+				with: (nodes collect: [ :each | each first ])
+				with: (nodes collect: [ :each | each second ]) ]
+	)
+	
+	keyword = (
+		^ identifier , $: asParser
+	)
+	
+	method = (
+		^ methodDeclaration , methodSequence
+	)
+	
+	unaryMethod = (
+		^ identifierToken ==> [ :node | 
+			Array 
+				with: (Array with: node)
+				with: Array new ]
+	)
+	
+	nilLiteral = (
+		^ nilToken
+	)
+	
+	unaryPragma = (
+		^ identifierToken ==> [ :node | 
+			Array 
+				with: (Array with: node)
+				with: (Array new) ]
+	)
+	
+	unary = (
+		^ identifier , $: asParser not
+	)
+	
+	arrayItem = (
+		^ literal / symbolLiteralArray / arrayLiteralArray / byteLiteralArray
+	)
+	
+	stringToken = (
+		^ string smalltalkToken
+	)
+	
+	symbolLiteralArray = (
+		^ symbol smalltalkToken
+	)
+	
+	cascadeMessage = (
+		^ $; asParser smalltalkToken , message
+	)
+	
+	parseExpression: aString = (
+	
+		^ self parseExpression: aString onError: [ :msg :pos | self error: msg ]
+	)
+	
+	blockArgument = (
+		^ $: asParser smalltalkToken , variable
+	)
+	
+	blockArguments = (
+		^ blockArgumentsWith / blockArgumentsWithout
+	)
+	
+	trueToken = (
+		^ ('true' asParser , #word asParser not) smalltalkToken
+	)
+	
+	stringLiteral = (
+		^ stringToken
+	)
+	
+	startExpression = (
+		"Start production for the expression."
+	
+		^ sequence end
+	)
+	
+	----------------------------------
+	
+	
+	parseMethod: aString = (
+		^ self new parseMethod: aString
+	)
+	
+	parseExpression: aString onError: aBlock = (
+		^ self new parseExpression: aString onError: aBlock
+	)
+	
+	allowUnderscoreAssignment = (
+		^ (Scanner respondsTo: #allowUnderscoreAsAssignment) and: [ Scanner allowUnderscoreAsAssignment ]
+	)
+	
+	parseExpression: aString = (
+		^ self new parseExpression: aString
+	)
+	
+	parseMethod: aString onError: aBlock = (
+		^ self new parseMethod: aString onError: aBlock
+	)
+)

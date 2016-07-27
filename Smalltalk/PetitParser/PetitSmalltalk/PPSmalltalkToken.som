@@ -1,0 +1,15 @@
+PPSmalltalkToken = PPToken (
+	| comments |
+	
+	comments = (
+		^ comments ifNil: [ #() ]
+	)
+	
+	comments: anArray = (
+		comments := anArray
+	)
+	
+	length = (
+		^ self size
+	)
+)

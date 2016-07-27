@@ -1,0 +1,23 @@
+PPSmalltalkWhitespaceParser = PPParser (
+	initialize = (
+		super initialize.
+	)
+	
+	isNullable = (
+		^ true
+	)
+	
+	parseOn: aPPContext = (
+		[ [aPPContext atEnd not and: [ aPPContext uncheckedPeek isSeparator ] ]
+			whileTrue: [ aPPContext next ].
+			
+		 aPPContext atEnd not and: [ aPPContext uncheckedPeek = $" ] ] whileTrue: [
+			aPPContext next.
+			aPPContext upTo: $".
+		].
+	)
+	
+	name = (
+		^ 'smalltalk_ws'
+	)
+)
