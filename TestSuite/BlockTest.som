@@ -29,10 +29,26 @@ BlockTest = TestCase (
       ^[^42]
     )
     
+    blockWithoutArgs = (
+      ^[1]
+    )
+    
+    blockWithArg = (
+      ^[:arg | arg. 2]
+    )
+    
+    
     testSimpleBlocks = (
       self assert: 42 equals: self simpleBlock value.
       self assert: 4  equals: (self incBlock value: 3).
       self assert: 43 equals: ((self adderBlock: 13) value: 30).
+    )
+    
+    testMultiMorphicBlockSite = (
+       | blocks |
+       blocks := Array with: self blockWithoutArgs with: self blockWithArg.
+       blocks withIndexDo: [:i :block | self assert: block numArgs equals: (i - 1)].
+       "blocks do: [:block | self assert: block value equals: 1]."
     )
     
     testClosure = (
