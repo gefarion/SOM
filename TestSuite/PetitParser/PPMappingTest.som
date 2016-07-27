@@ -27,8 +27,7 @@ PPMappingTest = PPAbstractParserTest (
 		self assert: parser parse: #(a b c d e) to: #(a b (c d e))
 	)
 	
-	"The problem with the following two tests is some side-effect from running the previous one. If this runs first it pass"
-	"testFoldLeft2 = (
+	testFoldLeft2 = (
 		| parser |
 		parser := #any asParser star 
 			foldLeft: [ :a :b | Array with: a with: b ].
@@ -50,7 +49,7 @@ PPMappingTest = PPAbstractParserTest (
 		self assert: parser parse: #(a b c) to: #(a (b c)).
 		self assert: parser parse: #(a b c d) to: #(a (b (c d))).
 		self assert: parser parse: #(a b c d e) to: #(a (b (c (d e))))
-	)"
+	)
 	
 	testMap3 = (
 		| parser |
@@ -61,12 +60,11 @@ PPMappingTest = PPAbstractParserTest (
 	
 	)
 	
-	"The problem with this test is some side-effect from running the previous one. If this runs first it pass"
-	"testMap2 = (
+	testMap2 = (
 		| parser |
 		parser := (#any asParser , #any asParser) 
 			map: [ :a :b | Array with: b with: a ].
 	
 		self assert: parser parse: #(a b) to: #(b a)
-	)"
+	)
 )

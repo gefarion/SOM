@@ -1083,7 +1083,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser fail: 'aa'
 	)
 	
-	"testFoldRight2 = (
+	testFoldRight2 = (
 		| parser |
 		parser := #any asParser star 
 			foldRight: [ :a :b | Array with: a with: b ].
@@ -1093,7 +1093,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser parse: #(a b c) to: #(a (b c)).
 		self assert: parser parse: #(a b c d) to: #(a (b (c d))).
 		self assert: parser parse: #(a b c d e) to: #(a (b (c (d e))))
-	)"
+	)
 	
 	testTrimSpaces = (
 		| parser |
@@ -1247,7 +1247,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser fail: 'b'
 	)
 	
-	"testFoldLeft3 = (
+	testFoldLeft3 = (
 		| parser |
 		parser := #any asParser star 
 			foldLeft: [ :a :b :c | Array with: a with: b with: c ].
@@ -1255,7 +1255,7 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser parse: #(a) to: #a.
 		self assert: parser parse: #(a b c) to: #(a b c).
 		self assert: parser parse: #(a b c d e) to: #((a b c) d e)
-	)"
+	)
 	
 	testBlock = (
 		| parser |
@@ -1466,13 +1466,13 @@ PPParserTest = PPAbstractParserTest (
 		self assert: parser name equals: 'star'
 	)
 	
-	"testMap3 = (
+	testMap3 = (
 		| parser |
 		parser := (#any asParser , #any asParser , #any asParser)
 			map: [ :a :b :c | Array with: c with: b with: a ].
 	
 		self assert: parser parse: #(a b c) to: #(c b a)
-	)"
+	)
 	
 	testWrapping = (
 		| parser result |

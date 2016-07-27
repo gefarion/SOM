@@ -34,10 +34,9 @@ PPContext = Object (
 	)
 	
 	remember = (
-		| memento receiver |
-		receiver := PPContextMemento new.
-		receiver stream: stream.
-		memento := receiver.
+		| memento |
+		memento := PPContextMemento new.
+		memento stream: stream.
 		memento	position: stream position.
 		self rememberProperties: memento.
 		^ memento

@@ -103,7 +103,7 @@ PPPredicateTest = PPAbstractParserTest (
 		self assert: parser fail: '.'.
 	)
 	
-	"testEndOfLine = (
+	testEndOfLine = (
 		| cr crlf lf parser |
 		cr := Character cr asString.
 		crlf := Character cr asString , Character lf asString.
@@ -129,7 +129,7 @@ PPPredicateTest = PPAbstractParserTest (
 		parser := #endOfLine asParser negate star, #endOfLine asParser, #any asParser star.
 		self assert: parser parse: crlf, 'lorem ipsum'.
 		self assert: parser parse: crlf.
-	)"
+	)
 	
 	testBetweenAnd = (
 		| parser |
@@ -213,7 +213,7 @@ PPPredicateTest = PPAbstractParserTest (
 		self assert: parser fail: '0'
 	)
 	
-	"testStartOfLine = (
+	testStartOfLine = (
 		| cr crlf lf parser |
 		cr := Character cr asString.
 		crlf := Character cr asString , Character lf asString.
@@ -237,7 +237,7 @@ PPPredicateTest = PPAbstractParserTest (
 		parser := #startOfLine asParser, #any asParser, #any asParser, #startOfLine asParser, #any asParser star.
 		self assert: parser parse: crlf, 'lorem ipsum'.
 		self assert: parser parse: crlf.
-	)"
+	)
 	
 	testTab = (
 		| parser |
