@@ -26,7 +26,6 @@ THE SOFTWARE.
 Block1 = Block (
 
     "For the creation of Block instances, see Universe_new_block()."
-
     "Evaluating"
     value = primitive
     ensure: aBlock = (
@@ -36,6 +35,5 @@ Block1 = Block (
     	aBlock value.
     	^returnValue
     )
-	
 	numArgs = (^0)
 )

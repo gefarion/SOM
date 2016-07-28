@@ -48,5 +48,7 @@ Block = (
     
     " Petit Parser" 
     asParser = (^ PPPluggableParser on: self)
+    "TODO: Must implement properly this method for exception handling"
+    on: exception do: handler = (^self value)
     
 )
