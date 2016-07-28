@@ -6,19 +6,11 @@ PPPluggableParser = PPParser (
 		^ String streamContents: [ :stream | block sourceNode printOn: stream ]
 	)
 	
-	block = (
-		"Answer the pluggable block."
+	block = (^ block)
 	
-		^ block
-	)
+	isIslandBorder = (^ false)
 	
-	isIslandBorder = (
-		^ false
-	)
-	
-	initializeOn: aBlock = (
-		block := aBlock
-	)
+	initializeOn: aBlock = (block := aBlock)
 	
 	match: aParser inContext: aDictionary seen: anIdentitySet = (
 		^ (super match: aParser inContext: aDictionary seen: anIdentitySet) and: [ self block = aParser block ]

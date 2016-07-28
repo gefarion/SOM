@@ -224,45 +224,36 @@ PPSmalltalkGrammar = PPCompositeParser (
 		^ char smalltalkToken
 	)
 	
-	pragmas = (
-		^ pragma star
-	)
+	pragmas = (^ pragma star)
 	
+	"Original method depends on Exceptions!"
 	number = (
 		^ ($- asParser optional , #digit asParser) and , [ :context | 
 			[ (NumberParser on: context stream) nextNumber ] 
-				on: Error
+				on: 'Error'
 				do: [ :err | PPFailure message: err messageText at: context position ] ] 
 					asParser
 	)
 	
 	string = (
-		^ $' asParser , ('''''' asParser / $' asParser negate) star , $' asParser
+		^ $' asParser , ('\'\'' asParser / $' asParser negate) star , $' asParser
 	)
 	
-	unaryExpression = (
-		^ primary , unaryMessage star
-	)
+	unaryExpression = (^ primary , unaryMessage star)
 	
-	assignment = (
-		^ variable , assignmentToken
-	)
+	assignment = (^ variable , assignmentToken)
 	
 	methodSequence = (
 		^ periodToken star , pragmas , periodToken star , temporaries , periodToken star , pragmas , periodToken star , statements
 	)
 	
-	char = (
-		^ $$ asParser , #any asParser
-	)
+	char = (^ $$ asParser , #any asParser)
 	
 	nilToken = (
 		^ ('nil' asParser , #word asParser not) smalltalkToken
 	)
 	
-	methodDeclaration = (
-		^ keywordMethod / unaryMethod / binaryMethod
-	)
+	methodDeclaration = (^ keywordMethod / unaryMethod / binaryMethod)
 	
 	binaryPragma = (
 		^ (binaryToken , arrayItem) ==> [ :nodes | 
@@ -397,7 +388,7 @@ PPSmalltalkGrammar = PPCompositeParser (
 	)
 	
 	allowUnderscoreAssignment = (
-		^ (Scanner respondsTo: #allowUnderscoreAsAssignment) and: [ Scanner allowUnderscoreAsAssignment ]
+		^ false
 	)
 	
 	parseExpression: aString = (
