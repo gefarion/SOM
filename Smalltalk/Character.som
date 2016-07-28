@@ -27,6 +27,7 @@ Character = (
     "Characters are immutable"
     asInteger 	   = primitive
     asString 	   = primitive
+    asDigitBase: radix = primitive
     isCharacter	   = (^true)
     isDigit	  	   = primitive
     isLetter  	   = primitive
@@ -37,6 +38,7 @@ Character = (
     isLowercase	   = primitive
     compareWith: anotherChar	   = primitive
     asSymbol = (^self asString asSymbol)
+    
     
     isVowel = (
 		^'AEIOU' includes: self asUppercase
@@ -70,6 +72,8 @@ Character = (
 		^ (self asInteger to: other asInteger) collect:
 					[:ascii | Character value: ascii]
 	)
+	
+	digitValue = (^self asDigitBase: 10)
 	------------------------
     
     codePoint: anInteger = (^self value: anInteger)
