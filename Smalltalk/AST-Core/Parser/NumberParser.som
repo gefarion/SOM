@@ -18,7 +18,7 @@ NumberParser = Object (
 		
 		| decimalMultiplier decimalFraction |
 		decimalMultiplier := base raisedToInteger: numberOfNonZeroFractionDigits.
-		decimalFraction := integerPart * decimalMultiplier + (fractionPart // (base raisedTo: numberOfTrailingZeroInFractionPart)) / decimalMultiplier.
+		decimalFraction := integerPart * decimalMultiplier + (fractionPart // (base exp: numberOfTrailingZeroInFractionPart)) / decimalMultiplier.
 		neg
 			ifTrue: [decimalFraction := decimalFraction negated].
 		^decimalFraction asScaledDecimal: scale
@@ -68,7 +68,7 @@ NumberParser = Object (
 	
 		^(k positive
 			ifTrue: [m * (aRadix raisedToInteger: k)]
-			ifFalse: [Fraction numerator: m denominator: (aRadix raisedToInteger: k negated)]) asFloat
+			ifFalse: [m // (aRadix raisedToInteger: k negated)]) asFloat
 	)
 	
 	nextNumberBase: b = (
@@ -349,7 +349,7 @@ NumberParser = Object (
 		
 		| value |
 		value := self nextUnsignedIntegerOrNilBase: aRadix.
-		value ifNil: [^self expected: ('a digit between 0 and ' copyWith: (Character digitValue: aRadix - 1))].
+		value ifNil: [^self expected: ('a digit between 0 and ' , (Character digitValue: aRadix - 1))].
 		^value
 	)
 	
