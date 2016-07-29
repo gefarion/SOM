@@ -70,6 +70,7 @@ Class = (
 		self subclasses do: aBlock
 	)
 	
+	"TODO: Add support for subclasses inspection"
 	subclasses = (
 		^#()
 	)
