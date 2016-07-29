@@ -193,6 +193,8 @@ String = (
 		^output
 	)
 	sameAs: anotherString = (^self asLowercase = anotherString asLowercase)
+	contains: anElement = (^self includes: anElement)
+	
 	-------------------------------------------------------------
 	
 	streamContents: blockWithArg = (

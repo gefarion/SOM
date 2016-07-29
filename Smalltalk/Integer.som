@@ -24,7 +24,6 @@ THE SOFTWARE.
 "
 
 Integer = (
-
     "Arithmetic"
     + argument  = primitive
     - argument  = primitive
@@ -59,9 +58,10 @@ Integer = (
     >  argument = ( ^(self >= argument) and: [ self <> argument ] )
     >= argument = ( ^(self < argument) not )
     <= argument = ( ^(self < argument) or: [ self = argument ] )
+    positive 	= (^self > 0)
     negative    = ( ^self < 0 )
+    isInteger 	= (^true)
     between: a and: b = ( ^(self >= a) and: [ self <= b ] )
-    isInteger = (^true)
     
     "Converting"
     asString    = primitive
@@ -132,20 +132,16 @@ Integer = (
     )
     
     "Delegation Proxies"
-    proxyClass = (
-    	^IntegerProxy
-    )
-    
-    equal: anInteger myself: slf = (
-    	^self = anInteger
-    )
-    
-    plus: anInteger myself: slf = (
-    	^self + anInteger
-    )
+    proxyClass = (^IntegerProxy)
+    equal: anInteger myself: slf = (^self = anInteger)
+    plus: anInteger myself: slf = (^self + anInteger)
 	
 	"Readonly"
 	readOnly = (^self)
+	
+	"Petit Parser"
+	isZero = (^self = 0)
+	raisedToInteger: anInteger = (^self exp: anInteger)
 	
     ----
     
