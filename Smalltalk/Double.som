@@ -29,7 +29,7 @@ Double = (
     + argument  = primitive
     - argument  = primitive
     * argument  = primitive
-    // argument  = primitive
+    // argument = primitive
     % argument  = primitive
     abs         = ( ^(self < 0.0) ifTrue: (0.0 - self) ifFalse: self )
     sqrt        = primitive
@@ -38,6 +38,7 @@ Double = (
     asInteger   = primitive
     cos         = primitive
     sin         = primitive
+    / arg = (self printLastMethods: 5)
     
     "Comparing"
     =  argument = primitive
@@ -47,9 +48,11 @@ Double = (
     <= argument = ( ^(self < argument) or: [ self = argument ] )
     negative    = ( ^self < 0.0 )
     between: a and: b = ( ^(self > a) and: [ self < b ] )
+    isZero = (^self = 0)
     
     "Converting"
-    asString    = primitive
+    asString = primitive
+    asFloat  = (^self) 
     
     "Iterating"
     to: limit do: block = (
