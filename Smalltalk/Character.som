@@ -27,7 +27,7 @@ Character = (
     "Characters are immutable"
     asInteger 	   = primitive
     asString 	   = primitive
-    asDigitBase: radix = primitive
+    asDigit 	   = primitive
     isCharacter	   = (^true)
     isDigit	  	   = primitive
     isLetter  	   = primitive
@@ -73,10 +73,15 @@ Character = (
 					[:ascii | Character value: ascii]
 	)
 	
-	digitValue = (^self asDigitBase: 10)
+	digitValue = (^self asDigit)
 	------------------------
     
     codePoint: anInteger = (^self value: anInteger)
+    digitValue: anIndex = (
+    	^anIndex < 10
+			ifTrue: [self new: 48 + anIndex]
+			ifFalse: [self new: 55 + anIndex]
+	)
 	
 	value: aNumber = (^self new: aNumber)
 	new: aValue = primitive
