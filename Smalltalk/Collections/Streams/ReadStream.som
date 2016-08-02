@@ -1,18 +1,10 @@
 ReadStream = PositionableStream (
 	"I represent an accessor for a sequence of objects that can only read objects from the sequence."
 	
-	size = (
-		"Compatibility with other streams (e.g., FileStream)"
-		^readLimit
-	)
-	
-	localName = (
-		^'ReadStream'
-	)
-	
-	nextPut: anObject = (
-		self shouldNotImplement
-	)
+	size = (^readLimit)
+	localName = (^'ReadStream')
+	nextPut: anObject = (self shouldNotImplement)
+	readStream = (^ self)
 	
 	next = (
 		"<primitive: 65>"
@@ -22,7 +14,6 @@ ReadStream = PositionableStream (
 	)
 	
 	next: anInteger = (
-	
 		"Answer the next anInteger elements of my collection.  overriden for efficiency"
 	
 		| ans endPosition |
@@ -32,12 +23,6 @@ ReadStream = PositionableStream (
 		position := endPosition.
 		^ans
 	
-	)
-	
-	readStream = (
-		"polymorphic with SequenceableCollection.  Return self"
-	
-		^ self
 	)
 	
 	upToAnyOf: aCollection do: aBlock = (
@@ -52,7 +37,6 @@ ReadStream = PositionableStream (
 	)
 	
 	on: aCollection from: firstIndex to: lastIndex = (
-	
 		| len |
 		collection := aCollection.
 		readLimit :=  lastIndex > (len := collection size)

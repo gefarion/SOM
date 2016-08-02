@@ -28,7 +28,8 @@ PositionableStream = Stream (
 		Handle a zoo of line delimiters CR, LF, or CR-LF pair"
 	
 		self atEnd ifTrue: [^nil].
-		^self upToAnyOf: #(10 13) do: [:char | char = 10 ifTrue: [self peekFor: 13]]
+		^self upToAnyOf: (Array with: Character cr with: Character lf) do: 
+			[:char | char = Character cr ifTrue: [self peekFor: Character lf]]
 	)
 	
 	untilEnd: aBlock displayingProgress: aString = (
