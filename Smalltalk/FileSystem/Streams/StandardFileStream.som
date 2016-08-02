@@ -16,7 +16,7 @@ StandardFileStream = FileStream (
 		fileID := aFileID.
 		name := streamName.
 		rwmode := writeMode.
-		buffer1 := ByteArray new: 1.
+		buffer1 := Array new: 1.
 		self enableReadBuffering
 	)
 	
@@ -72,8 +72,6 @@ StandardFileStream = FileStream (
 		self skip: -1.
 		^ false
 	)
-	
-	primSetPosition: id to: anInteger = primitive
 	
 	position: pos = (
 		"Set the receiver's position as indicated."
@@ -160,35 +158,46 @@ StandardFileStream = FileStream (
 		name := fileName.
 		"self register."
 		rwmode := writeMode.
-		buffer1 := ByteArray new: 1.
+		buffer1 := Array new: 1.
 		self enableReadBuffering
 		
 	)
 	
-	readOnlyCopy = (
-		^ self class readOnlyFileNamed: self name.
-	)
+	primClose: id = primitive
+	primCloseNoError: id = primitive
+	primFlush: id = primitive 
+	primTruncate: id to: anInteger = primitive
+	primGetPosition: id = primitive
+	primRead: id into: byteArray startingAt: startIndex count: count = primitive
+	primAtEnd: id = primitive
+	primOpen: fileName writable: writableFlag = primitive
+	primSizeNoError: id = primitive
+	primWrite: id from: stringOrByteArray startingAt: startIndex count: count = primitive
+	primSize: id = primitive
+	primDropRequestFileName: dropIndex = primitive
+	primSetPosition: id to: anInteger = primitive
 	
-	openReadOnly = (
-		"Open the receiver as a read-only file."
-	
-		^ self open: name forWrite: false
-	)
-	
-	finalize = (
-		self primCloseNoError: fileID.
-	)
-	
-	nextBytesPutAll: aCollection = (
-		self nextPutAll: aCollection
-	)
-	
-	fullName = (
-		"Answer this file's full path name."
-	
-		^ name
-	
-	)
+	flush = (^self primFlush: fileID)
+	readOnly = (rwmode := false)
+	readOnlyCopy = (^ self class readOnlyFileNamed: self name)
+	openReadOnly = (^ self open: name forWrite: false)
+	finalize = (self primCloseNoError: fileID)
+	readWrite = (rwmode := true)
+	setToEnd = (self position: self size)
+	nextBytesPutAll: aCollection = (self nextPutAll: aCollection)
+	next: n = (^ self nextInto: (self collectionSpecies new: n))
+	size = (^ self primSize: fileID)
+	fullName = (^ name)
+	name = (^ name)
+	directory = (^ self fullName asFileReference parent)
+	open = (^ self reopen)
+	next = (^ self basicNext)
+	register = (^self class register: self)
+	collectionSpecies = (^buffer1 species)
+	getFileType = (^ self fullName asFileReference macTypeAndCreator)
+	closed = (^ fileID == nil or: [ (self primSizeNoError: fileID) == nil ])
+	isReadOnly = (^ rwmode not)
+	isDirectory = (^ false)
 	
 	setFileTypeToObject = (
 		"On the Macintosh, set the file type and creator of this file to be a Pharo object file. On other platforms, do nothing. Setting the file type allows Pharo object files to be sent as email attachments and launched by double-clicking. On other platforms, similar behavior is achieved by creating the file with the '.sqo' file name extension."
@@ -202,17 +211,7 @@ StandardFileStream = FileStream (
 		self position: 0.
 	)
 	
-	next: n = (
-		"Return a string with the next n characters of the filestream in it."
-		^ self nextInto: (self collectionSpecies new: n)
-	)
 	
-	directory = (
-		"Return the directory containing this file."
-	
-		^ self fullName asFileReference parent
-	
-	)
 	
 	padToEndWith: aChar = (
 		"On the Mac, files do not truncate.  One can delete the old file and write a new one, but sometime deletion fails (file still open? file stale?).  This is a sad compromise.  Just let the file be the same length but pad it with a harmless character."
@@ -224,8 +223,6 @@ StandardFileStream = FileStream (
 		self nextPutAll: (self collectionSpecies new: ((self length - self position) min: 20000) 
 								withAll: pad).
 	)
-	
-	primClose: id = primitive 
 	
 	nextWordsInto: aBitmap = (
 		"Note: The file primitives automatically adjust for word based objects."
@@ -253,8 +250,6 @@ StandardFileStream = FileStream (
 			ifFalse: [ ^nil ]
 	)
 	
-	primCloseNoError: id = primitive
-	primFlush: id = primitive 
 	
 	upToAnyOf: delimiters do: aBlock = (
 		"Fast version to speed up nextChunk"
@@ -288,17 +283,6 @@ StandardFileStream = FileStream (
 		^self primGetPosition: fileID
 	)
 	
-	open = (
-		"For compatibility with a few existing things."
-		^ self reopen
-	)
-	
-	isReadOnly = (
-		^ rwmode not
-	)
-	
-	primTruncate: id to: anInteger = primitive
-	
 	next: anInteger putAll: aString startingAt: startIndex = (
 		"Store the next anInteger elements from the given collection."
 		rwmode ifFalse: [^ self error: 'Cannot write a read-only file'].
@@ -306,12 +290,6 @@ StandardFileStream = FileStream (
 			position < readLimit ifTrue: [ self flushReadBuffer ] ].	
 		self primWrite: fileID from: aString startingAt: startIndex count: anInteger.
 		^aString
-	)
-	
-	name = (
-		"Answer this file's full path name."
-		^ name
-	
 	)
 	
 	ensureOpen = (
@@ -354,28 +332,6 @@ StandardFileStream = FileStream (
 			fileID := nil].
 	
 	)
-	
-	next = (
-		"Answer the next byte from this file, or nil if at the end of the file."
-	
-		^ self basicNext
-	)
-	
-	register = (
-		^self class register: self
-	)
-	
-	collectionSpecies = (
-		"Answer the species of collection into which the receiver can stream"
-		^buffer1 species
-	)
-	
-	isDirectory = (
-		"Answer whether the receiver represents a directory.  For the post-transition case, uncertain what to do."
-		^ false
-	)
-	
-	primGetPosition: id = primitive
 	
 	peekLast = (
 		"Return that item just put at the end of the stream"
@@ -442,18 +398,6 @@ StandardFileStream = FileStream (
 		^0
 	)
 	
-	readWrite = (
-		"Make this file writable."
-	
-		rwmode := true.
-	)
-	
-	setToEnd = (
-		"Set the position of the receiver to the end of file."
-	
-		self position: self size
-	)
-	
 	compressFile = (
 		"Write a new file that has the data in me compressed in GZip format."
 	
@@ -479,20 +423,6 @@ StandardFileStream = FileStream (
 		^ aWordObject
 	)
 	
-	primAtEnd: id = primitive
-	
-	primOpen: fileName writable: writableFlag = primitive
-	
-	primSizeNoError: id = primitive
-	
-	size = (
-		"Answer the size of the file in characters."
-	
-		^ self primSize: fileID
-	)
-	
-	primRead: id into: byteArray startingAt: startIndex count: count = primitive
-	
 	atEnd = (
 		"Answer whether the receiver is at its end.  "
 		
@@ -516,8 +446,6 @@ StandardFileStream = FileStream (
 		^ name ifNotNil: [
 			(name findTokens: FileSystem disk delimiter asString) last]
 	)
-	
-	primWrite: id from: stringOrByteArray startingAt: startIndex count: count = primitive
 	
 	findString: string = (
 		"Fast version of #upToAll: to find a String in a file starting from the beginning.
@@ -551,8 +479,6 @@ StandardFileStream = FileStream (
 		readLimit := position := 0
 	)
 	
-	primDropRequestFileName: dropIndex = primitive
-	
 	insertLineFeeds = (
 		"(FileStream oldFileNamed: 'BBfix2.st') insertLineFeeds"
 		| s crLf f |
@@ -566,20 +492,6 @@ StandardFileStream = FileStream (
 		f close
 	)
 	
-	primSize: id = primitive
-	
-	flush = (
-		"Flush pending changes"
-		^self primFlush: fileID
-	)
-	
-	readOnly = (
-		"Make this file read-only."
-	
-		rwmode := false.
-	
-	)
-	
 	disableReadBuffering = (
 	
 		collection ifNotNil: [
@@ -591,13 +503,6 @@ StandardFileStream = FileStream (
 					self position: currentPosition ]
 				ifFalse: [
 					collection := readLimit := position := nil ] ]
-			
-	)
-	
-	getFileType = (
-		"On the Macintosh, get the file type and creator of this file. On other platforms, do nothing."
-	
-		^ self fullName asFileReference macTypeAndCreator
 	)
 	
 	upToEnd = (
@@ -618,14 +523,6 @@ StandardFileStream = FileStream (
 		^read = n 
 			ifTrue: [ aString ]
 			ifFalse: [ aString copyFrom: 1 to: startIndex + read - 1 ]	
-		
-	)
-	
-	closed = (
-		"Answer true if this file is closed."
-	
-		^ fileID == nil or: [ (self primSizeNoError: fileID) == nil ]
-	
 	)
 	
 	upTo: delim = (
@@ -651,9 +548,8 @@ StandardFileStream = FileStream (
 	
 	----------------------------------
 	
-	register: anObject = (
-		^self registry add: anObject
-	)
+	register: anObject = (^self registry add: anObject)
+	unregister: anObject = (^self registry remove: anObject ifAbsent:[])
 	
 	oldFileNamed: fileName = (
 		"Open an existing file with the given name for reading and writing. If the name has no directory part, then the  default directory will be assumed. If the file does not exist, an exception is signaled. If the file exists, its prior contents may be modified or replaced, but the file will not be truncated on close."
@@ -694,10 +590,6 @@ StandardFileStream = FileStream (
 	
 	)
 	
-	unregister: anObject = (
-		^self registry remove: anObject ifAbsent:[]
-	)
-	
 	newFileNamed: fileName = (
 	 	"Create a new file with the given name, and answer a stream opened for writing on that file. If the file already exists, ask the user what to do."
 	
@@ -708,12 +600,9 @@ StandardFileStream = FileStream (
 			ifTrue: ["file already exists:"
 				(FileExistsException fileName: fullName fileClass: self) signal]
 			ifFalse: [self new open: fullName forWrite: true]
-	
-	
 	)
 	
 	forceNewFileNamed: fileName = (
-	
 		"Create a new file with the given name, and answer a stream opened 
 		for writing on that file. If the file already exists, delete it without 
 		asking before creating the new file."
@@ -737,9 +626,7 @@ StandardFileStream = FileStream (
 	
 	fileNamed: fileName = (
 		"Open a file with the given name for reading and writing. If the name has no directory part, then the file will be created in the default directory. If the file already exists, its prior contents may be modified or replaced, but the file will not be truncated on close."
-	
 		^ self new open: (self fullName: fileName) forWrite: true
-	
 	)
 	
 	readOnlyFileNamed: fileName = (
@@ -750,7 +637,5 @@ StandardFileStream = FileStream (
 		f := self new open: fullName forWrite: false.
 		^ f ifNil: ["File does not exist..."
 				((FileDoesNotExistException fileName: fullName) readOnly: true) signal].
-	
-		"StandardFileStream readOnlyFileNamed: 'kjsd.txt' "
 	)
 )

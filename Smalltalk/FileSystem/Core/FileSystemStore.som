@@ -1,7 +1,6 @@
 FileSystemStore = Object (
 	"I am an abstract superclass for store implementations. My subclasses provide access to the actual data storage of a particular kind of filesystem. The file system can be accessed via	FileSystem disk 	FileSystem memory	My associated filesystem can be accessed as follows:      DiskStore currentFileSystem"
 	
-	
 	nodeAt: aPath = (
 		^ self 
 			nodeAt: aPath 
@@ -285,7 +284,6 @@ FileSystemStore = Object (
 			nodeAt: aPath 
 			ifPresent: [ :entry | self basicSize: entry ] 
 			ifAbsent: [ self signalFileDoesNotExist: aPath ]
-		
 	)
 	
 	basicCreationTime: aNode = (
@@ -316,7 +314,6 @@ FileSystemStore = Object (
 			nodeAt: aPath 
 			ifPresent: [ :entry | ^ self basicIsFile: entry ] 
 			ifAbsent: [ ^ false ]
-		
 	)
 	
 	basicModificationTime: aNode = (

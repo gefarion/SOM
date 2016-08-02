@@ -1,11 +1,5 @@
 Path = Vector (
 	"I'm a private and abstract filesystem path, independent of the string representation used to describe paths on a specific filesystem. I provide methods for navigating the filesystem hierarchy and working with absolute and relative paths. I only refer to a concrete file or directory with regard to a specific filesystem. Normally users should not use me directly. Path independent representation of delimiter is defined by DiskFileSystem current delimiter.API instance creation:#* and #/ are mnemonic to . and /whose arguments should  be string file- or directory names, not fragments of Unix path notation intended to be parsed.#/ and #* provide a mini-DSL for building up paths, while#readFrom:delimiter: parses path strings.Note that (Path with: 'parent/child/') isRelative returns truebecause it creates to a relative path to a file/directory called'parent/child'. In bash you'd escape the slashes like this: parent\/child\/similarly (Path with: '/parent/child/') isRelative returns trueThat's a relative path to '/parent/child'. In bash: /\parent\/child\/(Path with: '') isRelative returns falseBecause this is an absolute path to the root of the file system. Absolute pathshave an empty first element. If you consider $/ the separator,'/usr/local/bin' has an empty first element."
-	
-	
-	isRoot = (
-		self subclassResponsibility 
-	)
-	
 	resolve: anObject = (
 		"Return a path in which the argument has been interpreted in the context of the receiver. Different 
 		argument types have different resolution semantics, so we use double dispatch to resolve them correctly."
@@ -22,14 +16,23 @@ Path = Vector (
 		1 to: self size do: [:i | (self at: i) = '..' ifFalse: [^ false]].
 		^ true
 	)
-	
-	containsReference: aReference = (
-		^ false
-	)
-	
-	isWorkingDirectory = (
-		^ self size = 0
-	)
+		
+	containsReference: aReference = (^ false)
+	contains: anObject = (^ anObject isContainedBy: self)
+	resolve = (^ self)
+	extensionDelimiter = (^ self class extensionDelimiter)
+	isWorkingDirectory = (^ self size = 0)
+	isEmpty = (^ self size = 0)
+	isRoot = (self subclassResponsibility)
+	isRelative = (^ self isAbsolute not)
+	isChildOf: anObject = (^ self parent = anObject)
+	isAbsolute = (self subclassResponsibility)
+	asUrl = (^ self asZnUrl)
+	fullName = (^ self printString)
+	delimiter = (^ $/)
+	asPathWith: anObject = (^ self)
+	asFileReference = (^ FileSystem disk referenceTo: self)
+	asResolvedBy: anObject = (^ anObject resolvePath: self)
 	
 	resolveString: aString = (
 		"Treat strings as relative paths with a single element."
@@ -75,45 +78,18 @@ Path = Vector (
 		^ self basename copyAfterLast: self extensionDelimiter
 	)
 	
-	isEmpty = (
-		^ self size = 0
-	)
-	
-	fullName = (
-		"Return the fullName of the receiver."
-		
-		^ self printString
-	)
-	
-	relativeToReference: aReference = ( 
-		^ self relativeToPath: aReference path
-	)
-	
-	relativeTo: anObject = (
-		^ anObject makeRelative: self
-	)
-	
-	asUrl = ( 
-		^ self asZnUrl
-	)
-	
-	makeRelative: anObject = (
-		^ anObject relativeToPath: self
-	)
-	
 	, extension = ( 
 		^ self withName: self basename extension: extension
 	)
+	
+	relativeToReference: aReference = (^ self relativeToPath: aReference path)
+	relativeTo: anObject = (^ anObject makeRelative: self)
+	makeRelative: anObject = (^ anObject relativeToPath: self)
 	
 	copyFrom: aPath = (
 		| size |
 		size := aPath size min: self size.
 		1 to: size do: [:i | self at: i put: (aPath at: i)].
-		
-	)
-	
-	isRelative = (
-		^ self isAbsolute not
 	)
 	
 	resolvePath: aPath = (
@@ -194,10 +170,6 @@ Path = Vector (
 		^ self at: self size
 	)
 	
-	delimiter = (
-		^ '/'
-	)
-	
 	/ aString = (
 		| path |
 	
@@ -211,10 +183,7 @@ Path = Vector (
 		^ path
 	)
 	
-	contains: anObject = (
-		"Return true if anObject is in a subfolder of me"
-		^ anObject isContainedBy: self
-	)
+	
 	
 	basename: newBasename = (
 		"change the basename"
@@ -224,13 +193,6 @@ Path = Vector (
 		self at: self size put: newBasename
 	)
 	
-	asPathWith: anObject = (
-		^ self
-	)
-	
-	isChildOf: anObject = (
-		^ self parent = anObject
-	)
 	
 	printOn: aStream = ( 
 		self printOn: aStream delimiter: self delimiter.
@@ -248,9 +210,7 @@ Path = Vector (
 		^ String streamContents: [:out | self printOn: out delimiter: aCharacter]
 	)
 	
-	resolveReference: aReference = (
-		^ aReference
-	)
+	resolveReference: aReference = (^ aReference)
 	
 	hash = (
 		| hash |
@@ -304,18 +264,6 @@ Path = Vector (
 		^ index - 1
 	)
 	
-	isAbsolute = (
-		self subclassResponsibility 
-	)
-	
-	asFileReference = (
-		^ FileSystem disk referenceTo: self
-	)
-	
-	asResolvedBy: anObject = (
-		^ anObject resolvePath: self
-	)
-	
 	= other = (
 		^ self species = other species
 			and: [self size = other size
@@ -328,14 +276,6 @@ Path = Vector (
 			segment := self at: index.
 			segment isEmpty ifFalse: [ aBlock value: segment ] 
 		]
-	)
-	
-	resolve = (
-		^ self
-	)
-	
-	extensionDelimiter = (
-		^ self class extensionDelimiter
 	)
 	
 	<= other = (
@@ -351,9 +291,7 @@ Path = Vector (
 		^ AbsolutePath new
 	)
 	
-	isAbsoluteUnixPath: aString = (
-		^aString first = '/' 
-	)
+	isAbsoluteUnixPath: aString = (^aString first = $/)
 	
 	canonicalizeElements: aCollection = (
 		| result |
@@ -392,9 +330,7 @@ Path = Vector (
 		^ AbsolutePath with: aString
 	)
 	
-	isAbsoluteWindowsPath: aString = (
-		^ self absoluteWindowsPathRegex matches: aString
-	)
+	isAbsoluteWindowsPath: aString = (^ self absoluteWindowsPathRegex matches: aString)
 	
 	with: aString = (
 		"Answer a relative path of the given string. N.B. that the argument is not parsed; 
@@ -418,13 +354,8 @@ Path = Vector (
 			
 	)
 	
-	from: aString = (
-		^ self from: aString delimiter: '/'
-	)
-	
-	cleanUp = (
-		absoluteWindowsPathRegex := nil.
-	)
+	from: aString = (^ self from: aString delimiter: $/)
+	cleanUp = (absoluteWindowsPathRegex := nil)
 	
 	from: aString delimiter: aDelimiterCharacter = ( 
 		"Answer a path composed of several elements delimited by aCharacter"
@@ -460,10 +391,7 @@ Path = Vector (
 		^ RelativePath with: '..'
 	)
 	
-	extensionDelimiter = (
-		"Return the extension delimiter character."
-		^ '.'
-	)
+	extensionDelimiter = (^ $.)
 	
 	withAll: aCollection = (
 		| inst |

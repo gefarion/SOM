@@ -4,7 +4,6 @@ FileStream = ReadWriteStream (
 	
 	file = (
 		"Answer the file for the page the receiver is streaming over."
-	
 		self subclassResponsibility
 	)
 	
@@ -15,19 +14,24 @@ FileStream = ReadWriteStream (
 		self subclassResponsibility
 	)
 	
-	binary = (
-		"Set this file to binary mode."
-	
-		self subclassResponsibility
-	
-	)
-	
-	close = (
-		"Close this file."
-	
-		self subclassResponsibility
-	
-	)
+	binary = (self subclassResponsibility)
+	close = (self subclassResponsibility)
+	atEnd = (self subclassResponsibility)
+	size = (self subclassResponsibility)
+	nextPut: aByte = (self subclassResponsibility)
+	nextPutAll: aCollection = (self subclassResponsibility)
+	ascii = (self subclassResponsibility)
+	position = (self subclassResponsibility)
+	flush = (self subclassResponsibility)
+	readOnly = (self subclassResponsibility)
+	name = (self subclassResponsibility)
+	closed = (self subclassResponsibility)
+	asBinaryOrTextStream = (^ self)
+	text = (self ascii)
+	mimeTypes = (^ self name asFileReference mimeTypes)
+	localName = (^ self name asFileReference basename)
+	asUrl = (^ self asZnUrl)
+	readOnlyStream = (^self readOnly)
 	
 	next = (
 		(position >= readLimit and: [self atEnd])
@@ -52,13 +56,6 @@ FileStream = ReadWriteStream (
 		s := self next: self size.
 		self close.
 		^s
-	)
-	
-	text = (
-		"Set this file to text (ascii) mode."
-	
-		self ascii.
-	
 	)
 	
 	reopen = (
@@ -92,15 +89,8 @@ FileStream = ReadWriteStream (
 		self file printOn: aStream
 	)
 	
-	mimeTypes = (
-		^ self name asFileReference mimeTypes.
-	)
 	
-	nextPutAll: aCollection = (
-		"1/31/96 sw: made subclass responsibility"
 	
-		self subclassResponsibility
-	)
 	
 	longPrintOn: aStream = (
 		"Do nothing, so it will print short.  Called to print the error file.  If the error was in a file operation, we can't read the contents of that file.  Just print its name instead."
@@ -121,12 +111,6 @@ FileStream = ReadWriteStream (
 		self subclassResponsibility
 	)
 	
-	ascii = (
-		"Set this file to ascii (text) mode."
-	
-		self subclassResponsibility
-	
-	)
 	
 	fileIntoNewChangeSet = (
 		"File all of my contents into a new change set." 
@@ -135,30 +119,7 @@ FileStream = ReadWriteStream (
 		ChangeSet newChangesFromStream: self named: (self localName)
 	
 	)
-	
-	size = (
-		"Answer the size of the file in characters."
-	
-		self subclassResponsibility
-	)
-	
-	localName = (
-		^ self name asFileReference basename
-	
-	)
-	
-	atEnd = (
-		"Answer true if the current position is >= the end of file position."
-	
-		self subclassResponsibility
-	)
-	
-	nextPut: aByte = (
-		"1/31/96 sw: subclassResponsibility"
-	
-		self subclassResponsibility
-	)
-	
+		
 	edit = (
 		"Create and schedule an editor on this file."
 	
@@ -199,32 +160,11 @@ FileStream = ReadWriteStream (
 		^self asUrl asString
 	)
 	
-	asUrl = (
-		^ self asZnUrl 
-	)
-	
-	readOnlyStream = (
-		^self readOnly
-	)
 	
 	longPrintOn: aStream limitedTo: sizeLimit indent: indent = (
-	
 		"Do nothing, so it will print short.  Called to print the error file.  If the error was in a file operation, we can't read the contents of that file.  Just print its name instead."
 	
 		aStream cr
-	)
-	
-	position = (
-		"Answer the current character position in the file."
-	
-		self subclassResponsibility
-	)
-	
-	flush = (
-		"When writing, flush the current buffer out to disk."
-	
-		self subclassResponsibility
-	
 	)
 	
 	fileIn = (
@@ -233,25 +173,6 @@ FileStream = ReadWriteStream (
 	
 		self readOnly.
 		CodeImporter evaluateFileStream: self.
-	)
-	
-	readOnly = (
-		"Set this file's mode to read-only."
-	
-		self subclassResponsibility
-	
-	)
-	
-	asBinaryOrTextStream = (
-		"I can switch between binary and text data"
-	
-		^ self
-	)
-	
-	name = (
-		"Answer the name of the file for the page the receiver is streaming over."
-	
-		self subclassResponsibility
 	)
 	
 	contents = (
@@ -264,19 +185,9 @@ FileStream = ReadWriteStream (
 		^s
 	)
 	
-	closed = (
-		"Answer true if this file is closed."
-	
-		self subclassResponsibility
-	
-	)
-	
 	----------------------------------
-	| Stderr Stdin StdioFiles Stdout TheStdioHandles|
 	
-	fullName: fileName = (
-		^ fileName asFileReference fullName 
-	)
+	| Stderr Stdin StdioFiles Stdout TheStdioHandles|
 	
 	removeLineFeeds: fullName = (
 		| fileContents fileStream |
@@ -284,17 +195,6 @@ FileStream = ReadWriteStream (
 		fileStream := (FileStream newFileNamed: fullName).
 		fileStream nextPutAll: fileContents.
 		fileStream close.
-	)
-	
-	oldFileNamed: fileName do: aBlock = (
-		"Returns the result of aBlock."
-		
-		^ self detectFile: [ self oldFileNamed: fileName ] do: aBlock
-	)
-	
-	newFileNamed: fileName = (
-	
-		^ self concreteStream newFileNamed: (self fullName: fileName)
 	)
 	
 	concreteStream = (
@@ -327,44 +227,13 @@ FileStream = ReadWriteStream (
 		
 	)
 	
-	initialize = (
-		TheStdioHandles := Array new: 3.
-		
-		"original comment was: the intent being before: AutoStart"
-		"Smalltalk addToStartUpList: self after: DiskStore; 
-			addToShutDownList: self after: DiskStore"
-	)
-	
-	fileNamed: fileName do: aBlock = (
-		"Returns the result of aBlock."
-		
-		^ self detectFile: [ self fileNamed: fileName ] do: aBlock
-	)
-	
-	readOnlyFileNamed: fileName = (
-	
-		^ self concreteStream readOnlyFileNamed: (self fullName: fileName)
-	)
-	
 	onHandle: aFileSystemHandle = (
 		^ self concreteStream new
 			open: aFileSystemHandle fullName
 			forWrite: aFileSystemHandle isWritable
 	)
 	
-	stdioHandles = primitive
-	
-	sourceFileSuffixes = (
-	
-		^#('st' 'cs')
-	
-	
-	)
-	
-	unload = (
-		FileServices unregisterFileReader: self 
-	)
-	
+		
 	flushAndVoidStdioFiles = (
 	
 		StdioFiles ifNotNil: [
@@ -380,12 +249,6 @@ FileStream = ReadWriteStream (
 	requestDropStream: dropIndex = (
 		"Request a read-only stream for some file that was dropped onto the application"
 		^self concreteStream new requestDropStream: dropIndex.
-	)
-	
-	isSourceFileSuffix: suffix = (
-	
-		^ self sourceFileSuffixes includes: suffix
-	
 	)
 	
 	startUp: resuming = (
@@ -410,11 +273,6 @@ FileStream = ReadWriteStream (
 			ifFalse: [fn fullName].
 		ff := self readOnlyFileNamed: fn.
 		ff fileIn.
-	
-	)
-	
-	oldFileNamed: fileName = (
-		^ self concreteStream oldFileNamed: (self fullName: fileName)
 	)
 	
 	stdin = (
@@ -424,27 +282,12 @@ FileStream = ReadWriteStream (
 		 	^Stdin ].
 	)
 	
-	newFileNamed: fileName do: aBlock = (
-		"Returns the result of aBlock."
-		
-		^ self detectFile: [ self newFileNamed: fileName ] do: aBlock
-	)
 	
 	readOnlyFileNamed: fileName do: aBlock = (
 		"Open the existing file with the given name for read-only access and pass it as argument to aBlock.
 		Returns the result of aBlock."
 		
 		^ self detectFile: [ self readOnlyFileNamed: fileName ] do: aBlock
-	)
-	
-	isAFileNamed: fName = (
-		"return whether a file exists with the given name"
-		^self concreteStream isAFileNamed: (self fullName: fName)
-	)
-	
-	voidStdioFiles = (
-	
-		 Stdin := Stdout := Stderr := StdioFiles := nil
 	)
 	
 	standardIOStreamNamed: moniker forWrite: forWrite = (
@@ -473,7 +316,6 @@ FileStream = ReadWriteStream (
 									openOnHandle: handle
 									name: moniker
 									forWrite: forWrite ]) ]
-	
 	)
 	
 	oldFileOrNoneNamed: fileName = (
@@ -511,13 +353,6 @@ FileStream = ReadWriteStream (
 					justPutCR := false]].
 		in close.
 		out close.
-	
-	)
-	
-	newForStdio = (
-		"This is a hook for subclasses to initialize themselves properly."
-	
-		^self new
 	)
 	
 	writeSourceCodeFrom: aStream baseName: baseName isSt: stOrCsFlag = (
@@ -558,29 +393,25 @@ FileStream = ReadWriteStream (
 			buttonLabel: 'Filein'
 	)
 	
-	new = (
-		^ self basicNew
-	)
-	
-	shutDown: quitting = (
-		quitting ifTrue: [ self flushAndVoidStdioFiles ]
-	)
-	
-	forceNewFileNamed: fileName do: aBlock = (
-		"Returns the result of aBlock."
-		
-		^ self detectFile: [ self forceNewFileNamed: fileName ] do: aBlock
-	)
-	
-	fileNamed: fileName = (
-		^ self concreteStream fileNamed: (self fullName: fileName)
-	)
-	
-	stderr = (
-		^Stderr ifNil: [ Stderr := self standardIOStreamNamed: #stderr forWrite: true ]
-	)
-	
-	stdout = (
-		^Stdout ifNil: [ Stdout := self standardIOStreamNamed: #stdout forWrite: true ]
-	)
+	newForStdio = (^self new)
+	voidStdioFiles = (Stdin := Stdout := Stderr := StdioFiles := nil)
+	new = (^ self basicNew)
+	shutDown: quitting = (quitting ifTrue: [ self flushAndVoidStdioFiles ])
+	forceNewFileNamed: fileName do: aBlock = (^ self detectFile: [ self forceNewFileNamed: fileName ] do: aBlock)
+	fileNamed: fileName = (^ self concreteStream fileNamed: (self fullName: fileName))
+	stderr = (^Stderr ifNil: [ Stderr := self standardIOStreamNamed: #stderr forWrite: true ])
+	stdout = (^Stdout ifNil: [ Stdout := self standardIOStreamNamed: #stdout forWrite: true ])
+	isAFileNamed: fName = (	^self concreteStream isAFileNamed: (self fullName: fName))
+	oldFileNamed: fileName = (^ self concreteStream oldFileNamed: (self fullName: fileName))
+	unload = (FileServices unregisterFileReader: self)
+	stdioHandles = primitive
+	sourceFileSuffixes = (^#('st' 'cs'))
+	isSourceFileSuffix: suffix = (^ self sourceFileSuffixes includes: suffix)
+	fileNamed: fileName do: aBlock = (^ self detectFile: [ self fileNamed: fileName ] do: aBlock)
+	readOnlyFileNamed: fileName = (	^ self concreteStream readOnlyFileNamed: (self fullName: fileName))
+	newFileNamed: fileName do: aBlock = (^ self detectFile: [ self newFileNamed: fileName ] do: aBlock)
+	initialize = (TheStdioHandles := Array new: 3.)
+	fullName: fileName = (^ fileName asFileReference fullName)
+	oldFileNamed: fileName do: aBlock = (^ self detectFile: [ self oldFileNamed: fileName ] do: aBlock)
+	newFileNamed: fileName = (^ self concreteStream newFileNamed: (self fullName: fileName))
 )
