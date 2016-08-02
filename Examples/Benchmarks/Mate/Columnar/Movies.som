@@ -24,9 +24,10 @@ Movies = Benchmark (
     )
     
     verifyResult: result = (
-     	self problemSize = 10000 ifTrue:[^result = 3.6303].
-     	self problemSize = 50000 ifTrue:[^result = 3.62886].
-     	self problemSize = 100000 ifTrue:[^result = 3.56627].
+     	self problemSize = 1000 ifTrue:[^result = 3.777].
+     	self problemSize = 10000 ifTrue:[^result = 3.6339].
+     	self problemSize = 50000 ifTrue:[^result = 3.58554].
+     	self problemSize = 100000 ifTrue:[^result = 3.61014].
      	^false.
     )
     
