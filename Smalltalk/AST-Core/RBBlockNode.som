@@ -1,0 +1,314 @@
+RBBlockNode = RBValueNode (
+	"RBBlockNode is an AST node that represents a block "[...]".Instance Variables:	arguments	<SequenceableCollection of: RBVariableNode>	the arguments for the block	bar	<Integer | nil>	position of the | after the arguments	body	<RBSequenceNode>	the code inside the block	colons	<SequenceableCollection of: Integer>	positions of each : before each argument	left	<Integer>	position of [	right	<Integer>	position of ]"
+	| left right colons arguments bar body scope |
+	
+	hasTemporaryNamed: aString = (
+	
+		^ self temporaries anySatisfy: [ :temp| temp name = aString ]
+	)
+	
+	isInlinedLoop = (
+		parent isMessage ifFalse: [ ^ false ].
+		parent isInlineToDo ifTrue: [^ true].
+		parent isInlineWhile ifTrue: [^ true].
+		parent isInlineTimesRepeat ifTrue: [^ true].
+		(parent parent isArray and: [parent parent parent isMessage and: [parent parent parent isInlineCase]]) ifTrue: [^ true].
+		parent isInlineCase ifTrue: [^ true].  "otherwise branch"
+		^ false
+	)
+	
+	right: anInteger = (
+		right := anInteger
+	)
+	
+	specialCommands = (
+		^ SugsSuggestionFactory commandsForBlock
+	)
+	
+	children = (
+		^self arguments copyWith: self body
+	)
+	
+	isBlock = (
+		^true
+	)
+	
+	isImmediateNode = (
+		^true
+	)
+	
+	colons: anArray = (
+	
+		colons := anArray
+	)
+	
+	references: aVariableName = (
+	
+		^body references: aVariableName
+	)
+	
+	scope = (
+		^ scope
+	)
+	
+	isLast: aNode = (
+	
+		^body isLast: aNode
+	)
+	
+	precedence = (
+		^0
+	)
+	
+	uses: aNode = (
+	
+		aNode = body ifFalse: [^false].
+		^parent isMessage 
+			ifTrue: 
+				[(#(#ifTrue:ifFalse: #ifTrue: #ifFalse: #ifFalse:ifTrue:) 
+					includes: parent selector) not 
+					or: [parent isUsed]]
+			ifFalse: [self isUsed]
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		body == aNode ifTrue: [self body: anotherNode].
+		self arguments: (arguments 
+					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]])
+	)
+	
+	defines: aName = (
+	
+		^arguments anySatisfy: [:each | each name = aName]
+	)
+	
+	bar: anInteger = (
+		bar := anInteger
+	)
+	
+	postCopy = (
+		super postCopy.
+		self arguments: (self arguments collect: [ :each | each copy ]).
+		self body: self body copy
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		aNode class = self class ifFalse: [^false].
+		^(self 
+			matchList: arguments
+			against: aNode arguments
+			inContext: aDictionary) 
+				and: [body match: aNode body inContext: aDictionary]
+	)
+	
+	scope: aScopedNode = (
+		scope := aScopedNode
+	)
+	
+	needsParenthesis = (
+		^false
+	)
+	
+	methodOrBlockNode = (
+		"^ self"
+	)
+	
+	hasArgumentNamed: aString = (
+	
+		^ self arguments anySatisfy: [ :argument| argument name = aString ]
+	)
+	
+	temporaries = (
+		^ self body temporaries
+	)
+	
+	allDefinedVariables = (
+		^(self argumentNames asOrderedCollection)
+			addAll: super allDefinedVariables;
+			yourself
+	)
+	
+	body: stmtsNode = (
+	
+		body := stmtsNode.
+		body parent: self
+	)
+	
+	directlyUses: aNode = (
+	
+		^false
+	)
+	
+	bar = (
+		^ bar
+	)
+	
+	stopWithoutParentheses = (
+		^ right
+	)
+	
+	left = (
+		^ left
+	)
+	
+	isFaulty = (
+		^(self arguments anySatisfy:  #isFaulty ) or: [ self body isFaulty]
+	)
+	
+	right = (
+		^ right
+	)
+	
+	temporaryNames = (
+		^ self body temporaryNames
+	)
+	
+	isClean = (
+		"a block is clean if it has no escaping vars, has no non local return and its children are clean"
+		self isInlined ifTrue: [ ^ false ].
+		self scope hasEscapingVars ifTrue: [ ^ false ].
+		self lastIsReturn ifTrue: [ ^ false ].
+		^ super isClean
+		
+	)
+	
+	allArgumentVariables = (
+		^(self argumentNames asOrderedCollection)
+			addAll: super allArgumentVariables;
+			yourself
+	)
+	
+	statements = (
+		^ self body statements
+	)
+	
+	blockVariables = (
+		| vars |
+		vars := super blockVariables asOrderedCollection.
+		vars addAll: self argumentNames.
+		^vars
+	)
+	
+	lastIsReturn = (
+		^ self body lastIsReturn
+	)
+	
+	hash = (
+		^ (self hashForCollection: self arguments) bitXor: self body hash
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^ self class new
+			arguments: (self copyList: self arguments inContext: aDictionary);
+			body: (self body copyInContext: aDictionary);
+			yourself
+	)
+	
+	startWithoutParentheses = (
+		^ left
+	)
+	
+	arguments: argCollection = (
+	
+		arguments := argCollection.
+		arguments do: [:each | each parent: self]
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitBlockNode: self
+	)
+	
+	isJust: literal = (
+		body  statements size = 1 ifFalse: [ ^ false ].
+		body  statements anyOne isLiteralNode ifFalse: [ ^ false ].
+		^ body  statements anyOne value == literal
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		self class = anObject class ifFalse: [^false].
+		self arguments size = anObject arguments size ifFalse: [^false].
+		self arguments
+			with: anObject arguments
+			do: [:first :second |	(first equalTo: second withMapping: aDictionary) ifFalse: [^false]].
+		(self body equalTo: anObject body withMapping: aDictionary)
+			ifFalse: [^false].
+		self arguments do: [:each | aDictionary removeKey: each name].
+		^true
+	)
+	
+	owningScope = (
+	
+		^ self scope ifNil: ["inlined" ^ parent owningScope]
+	)
+	
+	body = (
+		^body
+	)
+	
+	sourceNodeForPC: anInteger = (
+	
+		^ self methodNode sourceNodeForPC: anInteger
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [^true].
+		self class = anObject class ifFalse: [^false].
+		self body = anObject body ifFalse: [^false].
+		self arguments size = anObject arguments size ifFalse: [^false].
+		self arguments with: anObject arguments do: [:first :second | first = second ifFalse: [^false]].
+		^true
+	)
+	
+	left: anInteger = (
+		left := anInteger
+	)
+	
+	colons = (
+		^ colons
+	)
+	
+	isInlined = (
+		parent isMessage ifFalse: [ ^ false ].
+		parent isInlineAndOr ifTrue: [^ true].
+		parent isInlineIf ifTrue: [^ true].
+		parent isInlineIfNil ifTrue: [^ true].
+		^ self isInlinedLoop
+	)
+	
+	arguments = (
+		^arguments
+	)
+	
+	statementComments = (
+		^self comments
+	)
+	
+	argumentNames = (
+		^self arguments collect: [:each | each name]
+	)
+	
+	enclosingMethodOrBlockNode = (
+		^ parent ifNotNil: [ parent methodOrBlockNode ]
+	)
+	
+	----------------------------------
+	
+	
+	arguments: argNodes body: sequenceNode = (
+	
+		^(self new)
+			arguments: argNodes;
+			body: sequenceNode;
+			yourself
+	)
+	
+	body: sequenceNode = (
+	
+		^self arguments: #() body: sequenceNode
+	)
+)

@@ -1,0 +1,34 @@
+RBNumberLiteralToken = RBLiteralToken (
+	| source |
+	
+	isNumberLiteralToken = (
+		^true.
+	)
+	
+	source: aString = (
+	
+		source := aString
+	)
+	
+	source = (
+		^source
+	)
+	
+	storeOn: aStream = (
+	
+		aStream nextPutAll: source
+	)
+	
+	----------------------------------
+	
+	
+	value: aNumber start: anInteger stop: stopInteger source: sourceString = (
+	
+		^(self 
+			value: aNumber
+			start: anInteger
+			stop: stopInteger)
+			source: sourceString;
+			yourself
+	)
+)

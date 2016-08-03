@@ -1,0 +1,36 @@
+RBPatternWrapperBlockNode = RBPatternBlockNode (
+	"RBPatternWrapperBlockNode allows further matching using a block after a node has been matched by a pattern node.Instance Variables:	wrappedNode	<RBProgramNode>	The original pattern node to match"
+	| wrappedNode |
+	
+	wrappedNode: aRBProgramNode = (
+	
+		wrappedNode := aRBProgramNode.
+		aRBProgramNode parent: self
+	)
+	
+	precedence = (
+		^1
+	)
+	
+	copyInContext: aDictionary = (
+	
+		"I don't know what this would mean, so ignore it."
+	
+		^ wrappedNode copyInContext: aDictionary
+	)
+	
+	wrappedNode = (
+		^wrappedNode
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		(wrappedNode match: aNode inContext: aDictionary) ifFalse: [^false].
+		^super match: aNode inContext: aDictionary
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitPatternWrapperBlockNode: self
+	)
+)

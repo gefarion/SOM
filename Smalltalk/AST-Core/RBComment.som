@@ -1,0 +1,36 @@
+RBComment = Object (
+	"A RBComment represents a text comment associated to an AST node."
+	| contents start |
+	
+	stop = (
+		^ start + self size - 1
+	)
+	
+	size = (
+		^ contents size + 2 "must take into account quotation marks"
+	)
+	
+	with: aString at: startPosition = (
+		start := startPosition.
+		contents := aString.
+	
+	)
+	
+	start = (
+		^ start.
+	)
+	
+	contents = (
+		^ contents
+	)
+	
+	----------------------------------
+	
+	
+	with: aString at: startPosition = (
+		^ self new
+			with: aString at: startPosition;
+			yourself. 
+		
+	)
+)

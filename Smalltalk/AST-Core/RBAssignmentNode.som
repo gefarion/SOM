@@ -1,0 +1,219 @@
+RBAssignmentNode = RBValueNode (
+	"RBAssignmentNode is an AST node for assignment statementsInstance Variables:	assignment	<Integer>	position of the :=	value	<RBValueNode>	the value that we're assigning	variable	<RBVariableNode>	the variable being assigned"
+	| variable assignment value |
+	
+	directlyUses: aNode = (
+	
+		^aNode = value ifTrue: [true] ifFalse: [self isDirectlyUsed]
+	)
+	
+	variable: aVariableNode value: aValueNode position: anInteger = (
+	
+		self variable: aVariableNode.
+		self value: aValueNode.
+		assignment := anInteger
+	)
+	
+	stopWithoutParentheses = (
+		^value stop
+	)
+	
+	toDoIncrement: var = (
+		var = variable ifFalse: [^ nil].
+		^ value toDoIncrement: var
+	)
+	
+	specialCommands = (
+		^ SugsSuggestionFactory commandsForAssignment.
+	)
+	
+	bestNodeFor: anInterval = (
+	
+		(self intersectsInterval: anInterval) ifFalse: [^nil].
+		(self containedBy: anInterval) ifTrue: [^self].
+		assignment ifNil: [^super bestNodeFor: anInterval].
+		((anInterval first between: assignment and: assignment + 1) 
+			or: [assignment between: anInterval first and: anInterval last]) 
+				ifTrue: [^self].
+		self children do: 
+				[:each | 
+				| node |
+				node := each bestNodeFor: anInterval.
+				node notNil ifTrue: [^node]]
+	)
+	
+	children = (
+		^Array with: value with: variable
+	)
+	
+	isFaulty = (
+		^self variable isFaulty or: [ self value isFaulty].
+	)
+	
+	replaceSourceWith: aNode = (
+	
+		"Check if we need to convert the assignment. Also check if we are being replaced with a setter message send. If so, create the replacements to edit the original source."
+	
+		(aNode isAssignment and: [ aNode assignmentOperator ~= self assignmentOperator ]) ifTrue: [
+			self addReplacement: (RBStringReplacement 
+				replaceFrom: self assignmentPosition
+				to: self assignmentPosition + self assignmentOperator size - 1
+				with: aNode assignmentOperator).
+			(aNode variable = variable and: [ aNode value = value ])
+				ifTrue: [ ^ self ] ].
+		aNode isMessage ifFalse: [^super replaceSourceWith: aNode].
+		aNode receiver isVariable ifFalse: [^super replaceSourceWith: aNode].
+		aNode numArgs = 1 ifFalse: [^super replaceSourceWith: aNode].
+		(self mappingFor: self value) = aNode arguments first 
+			ifFalse: [^super replaceSourceWith: aNode].
+		(self value hasParentheses not 
+			and: [aNode arguments first precedence >= aNode precedence]) 
+				ifTrue: 
+					[self
+						addReplacement: (RBStringReplacement 
+									replaceFrom: self value start
+									to: self value start - 1
+									with: '(');
+						addReplacement: (RBStringReplacement 
+									replaceFrom: self value stop + 1
+									to: self value stop
+									with: ')')].
+		self addReplacement: (RBStringReplacement 
+					replaceFrom: self variable start
+					to: self assignmentPosition + 1
+					with: aNode receiver name , ' ' , aNode selector)
+	)
+	
+	assignment = (
+		^ assignment
+	)
+	
+	assignmentOperator = (
+		^  ':=' 
+	)
+	
+	value: aValueNode = (
+	
+		value := aValueNode.
+		value parent: self
+	)
+	
+	value = (
+		^value
+	)
+	
+	assigns: aVariableName = (
+	
+		^variable name = aVariableName or: [value assigns: aVariableName]
+	)
+	
+	hash = (
+		^self variable hash bitXor: self value hash
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^ self class new
+			variable: (self variable copyInContext: aDictionary);
+			value: (self value copyInContext: aDictionary);
+			yourself
+	)
+	
+	variable: varNode = (
+	
+		variable := varNode.
+		variable parent: self
+	)
+	
+	precedence = (
+		^5
+	)
+	
+	uses: aNode = (
+	
+		^aNode = value ifTrue: [true] ifFalse: [self isUsed]
+	)
+	
+	startWithoutParentheses = (
+		^variable start
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		^self class = anObject class and: 
+				[(self variable equalTo: anObject variable withMapping: aDictionary) 
+					and: [self value equalTo: anObject value withMapping: aDictionary]]
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitAssignmentNode: self
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		value == aNode ifTrue: [self value: anotherNode].
+		variable == aNode ifTrue: [self variable: anotherNode]
+	)
+	
+	isAssignment = (
+		^true
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [^true].
+		self class = anObject class ifFalse: [^false].
+		^self variable = anObject variable and: [self value = anObject value]
+	)
+	
+	postCopy = (
+		super postCopy.
+		self variable: self variable copy.
+		self value: self value copy
+	)
+	
+	variable = (
+		^variable
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		aNode class = self class ifFalse: [^false].
+		^(variable match: aNode variable inContext: aDictionary)
+			and: [value match: aNode value inContext: aDictionary]
+	)
+	
+	needsParenthesis = (
+		^parent
+			ifNil: [false]
+			ifNotNil: [self precedence > parent precedence]
+	)
+	
+	assignmentPosition = (
+		^ assignment
+	)
+	
+	assignment: anInteger = (
+		assignment := anInteger
+	)
+	
+	----------------------------------
+	
+	
+	variable: aVariableNode value: aValueNode position: anInteger = (
+	
+		^(self new)
+			variable: aVariableNode
+				value: aValueNode
+				position: anInteger;
+			yourself
+	)
+	
+	variable: aVariableNode value: aValueNode = (
+	
+		^self 
+			variable: aVariableNode
+			value: aValueNode
+			position: nil
+	)
+)

@@ -1,0 +1,13 @@
+RBArgumentNode = RBVariableNode (
+	"I am a specific variable node for method and block arguments."
+	
+	
+	isArgument = (
+		^ true
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitArgumentNode: self
+	)
+)

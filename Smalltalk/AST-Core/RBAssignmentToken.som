@@ -1,0 +1,12 @@
+RBAssignmentToken = RBToken (
+	"RBAssignmentToken is the first-class representation of the assignment token ':='"
+	
+	
+	length = (
+		^2
+	)
+	
+	isAssignment = (
+		^true
+	)
+)

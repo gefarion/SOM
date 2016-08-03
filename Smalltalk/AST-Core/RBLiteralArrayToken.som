@@ -1,0 +1,11 @@
+RBLiteralArrayToken = RBValueToken (
+	
+	
+	isLiteralArrayToken = (
+		^true
+	)
+	
+	isForByteArray = (
+		^value last = $[
+	)
+)

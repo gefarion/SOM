@@ -1,0 +1,12 @@
+RBIdentifierToken = RBValueToken (
+	"RBIdentifierToken is the first class representation of an identifier token (e.g. Class)"
+	| stopPosition |
+	
+	isIdentifier = (
+		^true
+	)
+	
+	isPatternVariable = (
+		^value first = RBScanner patternVariableCharacter
+	)
+)

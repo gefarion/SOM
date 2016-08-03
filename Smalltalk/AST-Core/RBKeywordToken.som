@@ -1,0 +1,12 @@
+RBKeywordToken = RBValueToken (
+	"RBKeywordToken is the first-class representation of a keyword token (e.g. add:)"
+	| stopPosition |
+	
+	isKeyword = (
+		^true
+	)
+	
+	isPatternVariable = (
+		^value first = RBScanner patternVariableCharacter
+	)
+)

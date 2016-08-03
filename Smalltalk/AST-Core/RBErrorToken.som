@@ -1,0 +1,34 @@
+RBErrorToken = RBValueToken (
+	"I'm an scanned error.I can have multiple causes."
+	| cause location |
+	
+	location = (
+		^ location
+	)
+	
+	value: theValue start: tokenStart cause: errorCause location: errorPosition = (
+		self value: theValue start: tokenStart .
+		location := errorPosition.
+		cause := errorCause .
+	)
+	
+	cause = (
+		^ cause
+	)
+	
+	isError = (
+		^true
+	)
+	
+	----------------------------------
+	
+	
+	value: value start: tokenStart cause: errorCause location: thePosition = (
+		^ self new
+			value: value
+				start: tokenStart
+				cause: errorCause
+				location: thePosition;
+			yourself
+	)
+)

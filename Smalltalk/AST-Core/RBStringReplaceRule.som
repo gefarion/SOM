@@ -1,0 +1,108 @@
+RBStringReplaceRule = RBReplaceRule (
+	"RBStringReplaceRule replaces a matched tree with another tree (which may include metavariable from the matching tree). This is a very succint syntax for specifying most rewrites.Instance Variables:	replaceTree	<RBProgramNode>	The tree to replace the matched tree with."
+	| replaceTree |
+	
+	searchFor: searchString replaceWith: replaceString = (
+	
+		self searchString: searchString.
+		self replaceString: replaceString
+	)
+	
+	searchForMethod: searchString replaceWith: replaceString = (
+	
+		self methodSearchString: searchString.
+		self methodReplaceString: replaceString
+	)
+	
+	searchForTree: aBRProgramNode replaceWith: replaceNode = (
+	
+		searchTree := aBRProgramNode.
+		replaceTree := replaceNode
+	)
+	
+	searchForTree: aBRProgramNode replaceWith: replaceString when: aBlock = (
+	
+		self searchForTree: aBRProgramNode replaceWith: replaceString.
+		verificationBlock := aBlock
+	)
+	
+	foundMatchFor: aProgramNode = (
+	
+		| newNode |
+		newNode := replaceTree copyInContext: self context.
+		aProgramNode replaceMethodSource: newNode.
+		newNode copyCommentsFrom: aProgramNode.
+		^newNode
+	)
+	
+	methodReplaceString: replaceString = (
+	
+		replaceTree := RBParser parseRewriteMethod: replaceString
+	)
+	
+	replaceString: replaceString = (
+	
+		replaceTree := RBParser parseRewriteExpression: replaceString.
+		searchTree isSequence = replaceTree isSequence 
+			ifFalse: 
+				[searchTree isSequence 
+					ifTrue: [replaceTree := RBSequenceNode statements: (Array with: replaceTree)]
+					ifFalse: [searchTree := RBSequenceNode statements: (Array with: searchTree)]]
+	)
+	
+	searchForMethod: searchString replaceWith: replaceString when: aBlock = (
+	
+		self searchForMethod: searchString replaceWith: replaceString.
+		verificationBlock := aBlock
+	)
+	
+	searchFor: searchString replaceWith: replaceString when: aBlock = (
+	
+		self searchFor: searchString replaceWith: replaceString.
+		verificationBlock := aBlock
+	)
+	
+	----------------------------------
+	
+	
+	searchFor: searchString replaceWith: replaceString when: aBlock = (
+	
+		^self new 
+			searchFor: searchString
+			replaceWith: replaceString
+			when: aBlock
+	)
+	
+	searchForMethod: searchString replaceWith: replaceString when: aBlock = (
+	
+		^self new 
+			searchForMethod: searchString
+			replaceWith: replaceString
+			when: aBlock
+	)
+	
+	searchForMethod: searchString replaceWith: replaceString = (
+	
+		^(self new)
+			searchForMethod: searchString replaceWith: replaceString;
+			yourself
+	)
+	
+	searchForTree: aRBProgramNode replaceWith: replaceString when: aBlock = (
+	
+		^self new 
+			searchForTree: aRBProgramNode
+			replaceWith: replaceString
+			when: aBlock
+	)
+	
+	searchFor: searchString replaceWith: replaceString = (
+	
+		^self new searchFor: searchString replaceWith: replaceString
+	)
+	
+	searchForTree: aRBProgramNode replaceWith: replaceString = (
+	
+		^self new searchForTree: aRBProgramNode replaceWith: replaceString
+	)
+)

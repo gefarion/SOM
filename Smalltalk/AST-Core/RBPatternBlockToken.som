@@ -1,0 +1,8 @@
+RBPatternBlockToken = RBValueToken (
+	"RBPatternBlockToken is the first-class representation of the pattern block token."
+	
+	
+	isPatternBlock = (
+		^true
+	)
+)

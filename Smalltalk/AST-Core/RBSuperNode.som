@@ -1,0 +1,13 @@
+RBSuperNode = RBVariableNode (
+	"I am a specialized variable node for 'super'"
+	
+	
+	isSuper = (
+		^ true
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitSuperNode: self
+	)
+)

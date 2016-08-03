@@ -1,0 +1,507 @@
+RBProgramNode = Object (
+	"RBProgramNode is an abstract class that represents an abstract syntax tree node in a Smalltalk program.Subclasses must implement the following messages:	accessing		start		stop	visitor		acceptVisitor:The #start and #stop methods are used to find the source that corresponds to this node. 'source copyFrom: self start to: self stop' should return the source for this node.The #acceptVisitor: method is used by RBProgramNodeVisitors (the visitor pattern). This will also require updating all the RBProgramNodeVisitors so that they know of the new node.Subclasses might also want to redefine match:inContext: and copyInContext: to do parse tree searching and replacing.Subclasses that contain other nodes should override equalTo:withMapping: to compare nodes while ignoring renaming temporary variables, and children that returns a collection of our children nodes.Instance Variables:	comments	<Collection of: Interval>	the intervals in the source that have comments for this node	parent	<RBProgramNode>	the node we're contained inShared Variables:	FormatterClass	<Behavior>	the formatter class that is used when we are formatted"
+	| parent properties |
+	
+	replaceMethodSource: aNode = (
+		"We are being replaced with aNode -- if possible try to perform an in place edit of the source."
+	
+		| method |
+		method := self methodNode.
+		method notNil ifTrue: [method map: self to: aNode].
+		aNode parent: self parent.
+		[self replaceSourceWith: aNode] on: Error
+			do: 
+				[:ex | 
+				self clearReplacements.
+				ex return]
+	)
+	
+	children = (^#())
+	literalCharacter = (^$#)
+	parent = (^parent)
+	asReturnNode = (^ RBReturnNode value: self)
+	precedence = (^6)
+	size = (^1)
+	match: aNode inContext: aDictionary = (^ self = aNode)
+	methodOrBlockNode = (^ parent ifNotNil: [ parent methodOrBlockNode ])
+	newSource = (^self formattedCode)
+	directlyUses: aNode = (^true)
+	toDoIncrement: variable = (^ nil)
+	isLiteralNode = (^false)
+	statements = (^ #())
+	source = (^parent notNil ifTrue: [parent source] ifFalse: [nil])
+	afterLinks = (^ self links select: [ :each | each control == #after ])
+	sourceInterval = (^ self start to: self stop)
+	isIndirectTempVector = (^ false)
+	doSemanticAnalysis = (^ self methodNode doSemanticAnalysis)
+	isDirectlyUsed = (^parent ifNil: [false] ifNotNil: [parent directlyUses: self])
+	removeDeadCode = (self children do: [:each | each removeDeadCode])
+	acceptVisitor: aProgramNodeVisitor = (self subclassResponsibility)
+	hasProperty: aKey = (^ properties notNil and: [ properties includesKey: aKey ])
+	owningScope = (^ parent owningScope)
+	methodComments = (^self comments)
+	formattedCode = (^ self formatterClass new format: self)
+	parent: aRBProgramNode = (parent := aRBProgramNode)
+	specialCommands = (^#())
+	formatterClass = (^ self class formatterClass)
+	replaceSourceWith: aNode = (aNode replaceSourceFrom: self)
+	propertyAt: aKey = (^ self propertyAt: aKey ifAbsent: [ self error: 'Property not found' ])
+	temporaryVariables = (^parent ifNil: [#()] ifNotNil: [parent temporaryVariables])
+	methodNode = (^parent ifNotNil: [parent methodNode])
+	references: aVariableName = (^self children anySatisfy: [:each | each references: aVariableName])
+	assigns: aVariableName = (^self children anySatisfy: [:each | each assigns: aVariableName])
+	scope = (^ self methodOrBlockNode scope)
+	debugHighlightStart = (^ self start)
+	replaceNode: aNode withNode: anotherNode = (self error: 'I don''t store other nodes')
+	cascadeListCharacter = (^$;)
+	listCharacter = (^$@)
+	defines: aName = (^false)
+	debugHighlightRange = (^ self debugHighlightStart to: self debugHighlightStop)
+	printAsIfCompiledOn: aStream = (aStream nextPutAll: self formattedCode)
+	recurseInto = (^false)
+	links = (^self propertyAt: #links ifAbsent: nil)
+	debugHighlightStop = (^ self stop )
+	start = (self subclassResponsibility)
+	stop = (self subclassResponsibility)
+	blockVariables = (^parent ifNil: [#()] ifNotNil: [parent blockVariables])
+	beforeLinks = (^ self links select: [ :each | each control == #before ])
+	copyInContext: aDictionary = (^ self copy)
+	
+	equalTo: aNode withMapping: aDictionary = (^self = aNode)
+	statementCharacter = (^$.)
+	recurseIntoCharacter = (^$`)
+	enclosingMethodOrBlockNode = (^ self methodOrBlockNode )
+	
+	do: aBlock = (aBlock value: self)
+	collect: aBlock = (^aBlock value: self)
+	
+	containsReturn = (^self children anySatisfy: [:each | each containsReturn])
+	hasMetalink = (^self hasProperty: #links)
+	uses: aNode = (^true)
+	lastIsReturn = (^self isReturn)
+	isImmediateNode = (^false)
+	isJust: node = (^ false)
+	isSuper = (^false)
+	isArgument = (^false)
+	isTemp = (^ false)
+	isValue = (^false)
+	isLiteralArray = (^false)
+	isFaulty = (self subclassResponsibility)
+	isClean = (^ self children allSatisfy: [ :child | child isClean ])
+	isImmediate = (^self isImmediateNode)
+	isMethod = (^false)
+	isMessage = (^false)
+	isSelf = (^ false)
+	isReturn = (^false)
+	isSequence = (^false)
+	isPatternNode = (^false)
+	isAssignment = (^false)
+	isList = (^false)
+	isVariable = (^false)
+	isPragma = (^false)
+	isCascade = (^false)
+	
+	comments: aCollection = (
+		(aCollection ifNil: #())
+			ifEmpty: [ self removeProperty: #comments ifAbsent: [] ] 
+			ifNotEmpty: [ self propertyAt: #comments put: aCollection ].
+	)
+	
+	removeProperty: aKey = (
+		"Remove the property with aKey. Answer the property or raise an error if aKey isn't found."
+		
+		^ self removeProperty: aKey ifAbsent: [ self error: 'Property not found' ].
+	)
+	
+	clearReplacements = (
+		parent ifNil: [^self].
+		parent clearReplacements
+	)
+	
+	link: aMetaLink = (
+		(self propertyAt: #links ifAbsentPut: [ IdentitySet new ]) add: aMetaLink.
+		aMetaLink installOn: self.
+		self methodNode method installLink. 
+	)
+	
+	replaceSourceFrom: aNode = (
+		self == aNode
+			ifFalse: [ self clearReplacements ]
+	)
+		
+	canMatchMethod: aCompiledMethod = (
+		^self sentMessages allSatisfy: 
+				[:each | 
+				(self class optimizedSelectors includes: each) 
+					or: [aCompiledMethod refersToLiteral: each]]
+	)
+	
+	sentMessages = (
+		^ self children
+			inject: Set new
+			into: [ :messages :each | 
+				messages addAll: each sentMessages.
+				messages ]
+	)
+	
+	superMessages = (
+		| searcher |
+		searcher := RBParseTreeSearcher new.
+		searcher matches: 'super `@msg: ``@args'
+			do: 
+				[:aNode :answer | 
+					answer add: aNode selector.
+					answer].
+		^searcher executeTree: self initialAnswer: Set new
+	)
+	
+	allChildren = (
+		| children |
+		children := OrderedCollection new.
+		self nodesDo: [ :each | children addLast: each ].
+		^ children
+	)
+	
+	
+	nodesDo: aBlock = (
+		aBlock value: self.
+		self children do: [ :each | each nodesDo: aBlock ]
+	)
+	
+	replaceWith: aNode = (
+		parent ifNil: [self error: 'This node doesn''t have a parent'].
+		self replaceMethodSource: aNode.
+		parent replaceNode: self withNode: aNode
+	)
+	
+	isUsed = (
+		"Answer true if this node could be used as part of another expression. For example, you could use the 
+		result of this node as a receiver of a message, an argument, the right part of an assignment, or the 
+		return value of a block. This differs from isDirectlyUsed in that it is conservative since it also includes 
+		return values of blocks."
+	
+		^parent ifNil: [false] ifNotNil: [parent uses: self]
+	)
+	
+	selfMessages = (
+		| searcher |
+		searcher := RBParseTreeSearcher new.
+		searcher matches: 'self `@msg: ``@args'
+			do: 
+				[:aNode :answer | 
+					answer add: aNode selector.
+					answer].
+		^searcher executeTree: self initialAnswer: Set new
+	)
+	
+	propertyAt: aKey put: anObject = (
+		"Set the property at aKey to be anObject. If aKey is not found, create a new entry for aKey and set is value to anObject. Answer anObject."
+		^ (properties ifNil: [ properties := SmallDictionary new: 1 ])
+			at: aKey put: anObject
+	)
+	
+	copyList: matchNodes inContext: aDictionary = (
+		| newNodes |
+		newNodes := OrderedCollection new.
+		matchNodes do: 
+				[:each | 
+				| object |
+				object := each copyInContext: aDictionary.
+				newNodes addAll: object].
+		^newNodes
+	)
+	
+	allArgumentVariables = (
+		| children |
+		children := self children.
+		children isEmpty ifTrue: [^#()].
+		^children inject: OrderedCollection new
+			into: 
+				[:vars :each | 
+					vars addAll: each allArgumentVariables.
+					vars]
+	)
+	
+	printOn: aStream = (
+		aStream nextPutAll: self class name.
+		aStream	nextPut: $(.
+		aStream	nextPutAll: self formattedCode.
+		aStream	nextPut: $).
+	)
+	
+	evaluatedFirst: aNode = (
+		self children do: 
+				[:each | 
+				each == aNode ifTrue: [^true].
+				each isImmediateNode ifFalse: [^false]].
+		^false
+	)
+	
+	copyCommentsFrom: aNode = (
+		"Add all comments from aNode to us. If we already have the comment, then don't add it."
+	
+		| newComments |
+		newComments := OrderedCollection new.
+		aNode nodesDo: [:each | newComments addAll: each comments].
+		self nodesDo: 
+				[:each | 
+				each comments do: [:comment | newComments remove: comment ifAbsent: []]].
+		newComments isEmpty ifTrue: [^self].
+		newComments := newComments asSortedCollection: [:a :b | a start < b start].
+		self comments: newComments
+	)
+	
+	addReplacement: aStringReplacement = (
+		parent ifNil: [^self].
+		parent addReplacement: aStringReplacement
+	)
+	
+	whichNodeIsContainedBy: anInterval = (
+		| selectedChildren |
+		(self intersectsInterval: anInterval) ifFalse: [^nil].
+		(self containedBy: anInterval) ifTrue: [^self].
+		selectedChildren := self children 
+					select: [:each | each intersectsInterval: anInterval].
+		^selectedChildren size == 1 
+			ifTrue: [selectedChildren first whichNodeIsContainedBy: anInterval]
+			ifFalse: [nil]
+	)
+	
+	intersectsInterval: anInterval = (
+		^(anInterval first between: self start and: self stop) 
+			or: [self start between: anInterval first and: anInterval last]
+	)
+	
+	statementComments = (
+		| statementComments |
+		statementComments := OrderedCollection withAll: self comments.
+		self children do: [:each | statementComments addAll: each statementComments].
+		^statementComments asSortedCollection: [:a :b | a start < b start]
+	)
+	
+	matchList: matchNodes against: programNodes inContext: aDictionary = (
+		^self
+			matchList: matchNodes
+			index: 1
+			against: programNodes
+			index: 1
+			inContext: aDictionary
+	)
+	
+	matchList: matchNodes index: matchIndex against: programNodes index: programIndex inContext: aDictionary = (
+		| node currentIndex currentDictionary nodes |
+		matchNodes size < matchIndex ifTrue: [^programNodes size < programIndex].
+		node := matchNodes at: matchIndex.
+		node isList 
+			ifTrue: 
+				[currentIndex := programIndex - 1.
+				
+				[currentDictionary := aDictionary copy.
+				programNodes size < currentIndex or: 
+						[nodes := programNodes copyFrom: programIndex to: currentIndex.
+						(currentDictionary at: node ifAbsentPut: [nodes]) = nodes and: 
+								[(self 
+									matchList: matchNodes
+									index: matchIndex + 1
+									against: programNodes
+									index: currentIndex + 1
+									inContext: currentDictionary) 
+										ifTrue: 
+											[currentDictionary 
+												keysAndValuesDo: [:key :value | aDictionary at: key put: value].
+											^true].
+								false]]] 
+						whileFalse: [currentIndex := currentIndex + 1].
+				^false].
+		programNodes size < programIndex ifTrue: [^false].
+		(node match: (programNodes at: programIndex) inContext: aDictionary) 
+			ifFalse: [^false].
+		^self 
+			matchList: matchNodes
+			index: matchIndex + 1
+			against: programNodes
+			index: programIndex + 1
+			inContext: aDictionary
+	)
+	
+	hasMultipleReturns = (
+		| count |
+		count := 0.
+		self nodesDo: [:each | each isReturn ifTrue: [count := count + 1]].
+		^count > 1
+	)
+	
+	bestNodeFor: anInterval = (
+		| selectedChildren |
+		(self intersectsInterval: anInterval) ifFalse: [^nil].
+		(self containedBy: anInterval) ifTrue: [^self].
+		selectedChildren := self children 
+					select: [:each | each intersectsInterval: anInterval].
+		^selectedChildren size == 1 
+			ifTrue: [selectedChildren first bestNodeFor: anInterval]
+			ifFalse: [self]
+	)
+	
+	equalTo: aNode exceptForVariables: variableNameCollection = (
+	
+		| dictionary |
+		dictionary := Dictionary new.
+		(self equalTo: aNode withMapping: dictionary) ifFalse: [^false].
+		dictionary keysAndValuesDo: 
+				[:key :value | 
+				(key = value or: [variableNameCollection includes: key]) ifFalse: [^false]].
+		^true
+	)
+	
+	whoDefines: aName = (
+		^(self defines: aName) 
+			ifTrue: [self]
+			ifFalse: [parent notNil ifTrue: [parent whoDefines: aName] ifFalse: [nil]]
+	)
+	
+	parents = (
+		^ parent 
+			ifNil: [ OrderedCollection with: self ]
+			ifNotNil: [ 
+				parent parents addLast: self.
+				parent parents ]
+	)
+	
+	isLast: aNode = (
+		| children |
+		children := self children.
+		^children notEmpty and: [children last == aNode]
+	)
+	
+	statementNode = (
+		"Return your topmost node that is contained by a sequence node."
+	
+		(parent isNil or: [parent isSequence]) ifTrue: [^self].
+		^parent statementNode
+	)
+	
+	hashForCollection: aCollection = (
+		^ aCollection isEmpty ifTrue: [ 0 ] ifFalse: [ aCollection first hash ]
+	)
+	
+	propertyAt: aKey ifAbsent: aBlock = (
+		"Answer the property value associated with aKey or, if aKey isn't found, answer the result of evaluating aBlock."
+		
+		^ properties 
+			ifNil: [ aBlock value ]
+			ifNotNil: [ properties at: aKey ifAbsent: aBlock ]
+	)
+	
+	postCopy = (
+		super postCopy.
+		properties := properties copy
+	)
+	
+	allDefinedVariables = (
+		| children |
+		children := self children.
+		children isEmpty ifTrue: [^#()].
+		^children inject: OrderedCollection new
+			into: 
+				[:vars :each | 
+					vars addAll: each allDefinedVariables.
+					vars]
+	)
+	
+	comments = (
+		"Answer the comments of the receiving parse tree node"
+		^ (self propertyAt: #comments ifAbsent: [ #() ]) ifNil:[ #() ]
+	)
+	
+	isEvaluatedFirst = (
+		"Return true if we are the first thing evaluated in this statement."
+	
+		^parent isNil or: [parent isSequence or: [parent evaluatedFirst: self]]
+	)
+	
+	suggestions = (
+		SugsSuggestionFactory globalCommands addAll: self specialCommands.
+		^SugsSuggestionFactory globalCommands 
+	)
+	
+	removeLink: aMetaLink = (
+		self links remove: aMetaLink.
+		self links ifEmpty: [ self removeProperty: #links ].
+		self methodNode method removeLink. 
+	)
+	
+	mappingFor: aNode = (
+		| method |
+		method := self methodNode.
+		method ifNil: [^aNode].
+		^method mappingFor: aNode
+	)
+	
+	removeProperty: aKey ifAbsent: aBlock = (
+		"Remove the property with aKey. Answer the value or, if aKey isn't found, answer the result of evaluating aBlock."
+		
+		| answer |
+		properties ifNil: [ ^ aBlock value ].
+		answer := properties removeKey: aKey ifAbsent: aBlock.
+		properties isEmpty ifTrue: [ properties := nil ].
+		^ answer
+	)
+	
+	asReturn = (
+		"Change the current node to a return node."
+	
+		parent ifNil: [self error: 'Cannot change to a return without a parent node.'].
+		parent isSequence 
+			ifFalse: [self error: 'Parent node must be a sequence node.'].
+		(parent isLast: self) ifFalse: [self error: 'Return node must be last.'].
+		^parent addReturn
+	)
+	
+	addComments: aCollectionOfIntervals = (
+		(aCollectionOfIntervals isNil or: [ aCollectionOfIntervals isEmpty ])
+			ifFalse: [ self comments: self comments , aCollectionOfIntervals ]
+	)
+	
+	allTemporaryVariables = (
+		| children |
+		children := self children.
+		children isEmpty ifTrue: [^#()].
+		^children inject: OrderedCollection new
+			into: 
+				[:vars :each | 
+					vars addAll: each allTemporaryVariables.
+					vars]
+	)
+	
+	irInstruction = (
+		"search for the first ir instruction that I generate"
+		self methodNode ir sourceNode == self  ifTrue: [^self methodNode ir].
+		^self methodNode ir firstInstructionMatching: [:instr | instr sourceNode == self ]
+		
+	
+	)
+	
+	propertyAt: aKey ifAbsentPut: aBlock = (
+		"Answer the property associated with aKey or, if aKey isn't found store the result of evaluating aBlock as new value."
+		
+		^ self propertyAt: aKey ifAbsent: [ self propertyAt: aKey put: aBlock value ]
+	)
+	
+	----------------------------------
+	| FormatterClass |
+
+	formatterClass: aClass = (
+		FormatterClass := aClass
+			
+	)
+	
+	optimizedSelectors = (
+		^ #( and: caseOf: caseOf:otherwise: ifFalse: ifFalse:ifTrue: ifNil: ifNil:ifNotNil: ifNotNil: ifNotNil:ifNil: ifTrue: ifTrue:ifFalse: or: to:by:do: to:do: whileFalse whileFalse: whileTrue whileTrue: )
+	)
+	
+	formatterClass = (
+		^ FormatterClass 
+			ifNil: [ RBConfigurableFormatter ] 
+			ifNotNil: [ FormatterClass ]
+	)
+)

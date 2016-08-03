@@ -1,0 +1,11 @@
+RBPatternScanner = RBScanner (
+	"RBPatternScanner is a subclass of RBScanner that allows the extended syntax of pattern matching trees."
+	
+	
+	scanToken = (
+		currentCharacter = PatternVariableCharacter 
+			ifTrue: [^self scanPatternVariable].
+		currentCharacter = $} ifTrue: [^self scanSpecialCharacter].
+		^super scanToken
+	)
+)

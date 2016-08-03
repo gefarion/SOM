@@ -1,0 +1,9 @@
+RBThisContextNode = RBVariableNode (
+	"I represent the specialized variable named 'thisContext'"
+	
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitThisContextNode: self
+	)
+)

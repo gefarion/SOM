@@ -1,0 +1,43 @@
+ASTCache = WeakIdentityKeyDictionary (
+	"I am a simple cache for AST nodes corresponding to CompiledMethods in the image. The cache is emptied when the image is saved."
+	
+	
+	at: aCompiledMethod = (
+		^ self 
+			at: aCompiledMethod
+			ifAbsentPut: [ 
+				aCompiledMethod parseTree doSemanticAnalysisIn: aCompiledMethod methodClass ]
+	)
+	
+	reset = (
+		self removeAll
+	)
+	
+	----------------------------------
+	| default |
+	
+	reset = (
+		default reset.
+	)
+	
+	initialize = (
+		default := self new.
+		Smalltalk addToShutDownList: self.
+	)
+	
+	default = (
+		^ default
+	)
+	
+	shutDown = (	
+		self reset.
+	)
+	
+	default: anASTCache = (
+		default := anASTCache.
+	)
+	
+	at: aCompiledMethod = (
+		^ default at: aCompiledMethod
+	)
+)

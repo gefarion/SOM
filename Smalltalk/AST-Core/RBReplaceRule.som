@@ -1,0 +1,60 @@
+RBReplaceRule = RBParseTreeRule (
+	"RBReplaceRule is the abstract superclass of all of the transforming rules. The rules change the source code by replacing the node that matches the rule. Subclasses implement different strategies for this replacement.Subclasses must implement the following messages:	matching		foundMatchFor:Instance Variables:	verificationBlock	<BlockClosure>	Is evaluated with the matching node. This allows for further verification of a match beyond simple tree matching."
+	| verificationBlock |
+	
+	initialize = (
+		super initialize.
+		verificationBlock := [:aNode | true]
+	)
+	
+	replace: aProgramNode with: newNode = (
+	
+		aProgramNode replaceMethodSource: newNode
+	)
+	
+	searchFor: searchString replaceWith: replaceString = (
+	
+	
+		self subclassResponsibility
+	)
+	
+	canMatch: aProgramNode = (
+	
+		^verificationBlock value: aProgramNode
+	)
+	
+	searchForMethod: searchString replaceWith: replaceString = (
+	
+	
+		self subclassResponsibility
+	)
+	
+	searchForTree: aBRProgramNode replaceWith: replaceNode = (
+	
+	
+		self subclassResponsibility
+	)
+	
+	searchForTree: aBRProgramNode replaceWith: replaceString when: aBlock = (
+	
+	
+		self subclassResponsibility
+	)
+	
+	foundMatchFor: aProgramNode = (
+	
+		self subclassResponsibility
+	)
+	
+	searchForMethod: searchString replaceWith: replaceString when: aBlock = (
+	
+	
+		self subclassResponsibility
+	)
+	
+	searchFor: searchString replaceWith: replaceString when: aBlock = (
+	
+	
+		self subclassResponsibility
+	)
+)

@@ -1,0 +1,12 @@
+RBSpecialCharacterToken = RBValueToken (
+	"RBSpecialCharacterToken is the first class representation of special characters."
+	
+	
+	length = (
+		^1
+	)
+	
+	isSpecial = (
+		^true
+	)
+)

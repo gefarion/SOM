@@ -1,0 +1,235 @@
+RBPragmaNode = RBProgramNode (
+	"RBPragmaNode is an AST node that represents a method pragma.Instance Variables:	arguments <SequenceableCollection of: RBLiteralNode> our argument nodes	left <Integer | nil> position of <	right <Integer | nil> position of >	selector	<Symbol>	the selector we're sending	keywordsPositions	<IntegerArray | nil>	the positions of the selector keywords"
+	| selector keywordsPositions arguments left right |
+	
+	argumentAt: keywordSelector ifAbsent: absentBlock = (
+		self selectorParts with: self arguments do: [ :selectorPart :argument |
+			selectorPart value = keywordSelector
+				ifTrue: [ ^ argument ]].
+		^ absentBlock value
+	)
+	
+	selector = (
+		^ selector
+	)
+	
+	isKeyword = (
+		^(selector indexOf: $:) ~= 0.
+	)
+	
+	right: anInteger = (
+		right := anInteger
+	)
+	
+	left = (
+		^ left
+	)
+	
+	asPrimitive = (
+		| args module name spec  |
+		args := (self arguments collect: [ :each | each value ]) asArray.
+		self isPrimitive
+			ifFalse: [ IRPrimitive null ].
+		args first isString
+			ifTrue: [ 
+				name := args first.
+				module := self argumentAt: #module: ifAbsent: [ nil ].
+				spec := {(module ifNotNil: [ module value asSymbol ]). (name asSymbol). 0. 0}.
+				^ IRPrimitive new
+					num: 117;
+					spec: spec;
+					yourself ]
+			ifFalse: [ 
+				^ IRPrimitive new
+					num: args first;
+					spec: nil;
+					yourself ]
+	)
+	
+	children = (
+		^ self arguments
+	)
+	
+	isFaulty = (
+		^self arguments anySatisfy: #isFaulty.
+	)
+	
+	isBinary = (
+		^ (self isUnary or: [self isKeyword]) not
+	)
+	
+	argumentAt: keywordSelector = (
+		^ self 
+			argumentAt: keywordSelector
+			ifAbsent: [ KeyNotFound signalFor: keywordSelector ]
+	)
+	
+	keywordsPositions: aPositionsList = (
+		keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ].
+	)
+	
+	right = (
+		^ right
+	)
+	
+	isPragma = (
+		^ true
+	)
+	
+	asPragma = (
+		^ Pragma keyword: selector arguments: (arguments collect: [ :each | each value ]) asArray
+	)
+	
+	keywordsPositions = (
+		^keywordsPositions ifNil: [ (selector keywords collect: [:char| 0 ]) asIntegerArray ]
+	)
+	
+	start = (
+		^ left
+	)
+	
+	isCompilerOption = (
+		^ self selector = #compilerOptions:
+	)
+	
+	sentMessages = (
+		^ super sentMessages
+			add: self selector;
+			yourself
+	)
+	
+	hash = (
+		^ self selector hash bitXor: (self hashForCollection: self arguments)
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^ self class
+			selector: self selector
+			arguments: (self arguments collect: [ :each | each copyInContext: aDictionary ])
+	)
+	
+	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
+		aSymbol numArgs == valueNodes size
+			ifFalse: 
+				[self error: 'Attempting to assign selector with wrong number of arguments.'].
+	
+		self 
+			arguments: valueNodes;
+			selector: aSymbol;
+			keywordsPositions: positionList.
+	)
+	
+	isPrimitiveError = (
+		^ #( primitive:error: primitive:module:error: primitive:error:module:) includes: self selector
+	)
+	
+	stop = (
+		^ right
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		self arguments: (arguments collect: [ :each | 
+			each == aNode 
+				ifTrue: [ anotherNode ]
+				ifFalse: [ each ] ])
+	)
+	
+	arguments: aLiteralCollection = (
+	
+		arguments := aLiteralCollection.
+		arguments do: [ :each | each parent: self ]
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^ aProgramNodeVisitor visitPragmaNode: self
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		self class = anObject class ifFalse: [ ^ false ].
+		self selector = anObject selector ifFalse: [ ^ false ].
+		self arguments size = anObject arguments size ifFalse: [ ^ false ].
+		self arguments with: anObject arguments do: [ :first :second |
+			(first equalTo: second withMapping: aDictionary) 
+				ifFalse: [ ^ false ] ].
+		^ true
+	)
+	
+	selector: aSelector = (
+	
+		keywordsPositions := nil.
+		selector := aSelector asSymbol.
+	)
+	
+	isPrimitive = (
+		^ #(primitive: primitive:error: primitive:error:module: primitive:module: primitive:module:error:) includes: self selector
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [^true].
+		self class = anObject class ifFalse: [^false].
+		self selector = anObject selector ifFalse: [^false].
+		self arguments size = anObject arguments size ifFalse: [^false].
+		self arguments
+			with: anObject arguments
+			do: [:first :second | first = second ifFalse: [^false]].
+		^true
+	)
+	
+	postCopy = (
+		super postCopy.
+		self arguments: (self arguments collect: [ :each | each copy ])
+	)
+	
+	numArgs = (
+		^ self selector numArgs
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		aNode class = self class
+			ifFalse: [ ^ false ].
+		self selector = aNode selector
+			ifFalse: [ ^ false ].
+		self arguments with: aNode arguments do: [ :first :second |
+			(first match: second inContext: aDictionary)
+				ifFalse: [ ^ false ] ].
+		^ true
+	)
+	
+	left: anInteger = (
+		left := anInteger
+	)
+	
+	keywordsIntervals = (
+		^selector keywords
+			with: self keywordsPositions 
+			collect: [:keyword :start| start to: (start = 0 ifTrue: [ -1 ] ifFalse: [ start + keyword size - 1]) ].
+	)
+	
+	selectorParts = (
+		^ selector keywords collect: [:keyword| keyword asSymbol ].
+	)
+	
+	arguments = (
+		^ arguments ifNil: [ #() ]
+	)
+	
+	isUnary = (
+		^ arguments isEmpty
+	)
+	
+	----------------------------------
+	
+	
+	selector: aSymbol arguments: valueNodes = (
+		^ self selector: aSymbol keywordsPositions: nil arguments: valueNodes 
+	)
+	
+	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
+		^ self new selector: aSymbol keywordsPositions: positionList arguments: valueNodes 
+	)
+)

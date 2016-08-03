@@ -1,0 +1,176 @@
+RBCascadeNode = RBValueNode (
+	"RBCascadeNode is an AST node for cascaded messages (e.g., "self print1 ; print2").Instance Variables:	messages	<SequenceableCollection of: RBMessageNode>	the messages 	semicolons	<SequenceableCollection of: Integer>	positions of the ; between messages"
+	| messages semicolons |
+	
+	directlyUses: aNode = (
+	
+		^messages last = aNode and: [self isDirectlyUsed]
+	)
+	
+	stopWithoutParentheses = (
+		^messages last stop
+	)
+	
+	bestNodeFor: anInterval = (
+	
+		| selectedChildren |
+		(self intersectsInterval: anInterval) ifFalse: [^nil].
+		(self containedBy: anInterval) ifTrue: [^self].
+		messages 
+			reverseDo: [:each | (each containedBy: anInterval) ifTrue: [^each]].
+		selectedChildren := (messages 
+					collect: [:each | each bestNodeFor: anInterval]) 
+						reject: [:each | each isNil].
+		^selectedChildren detect: [:each | true] ifNone: [nil]
+	)
+	
+	children = (
+		^self messages
+	)
+	
+	isFaulty = (
+		^self messages anySatisfy: #isFaulty
+	)
+	
+	messages = (
+		^messages
+	)
+	
+	messages: messageNodes semicolons: integerCollection = (
+	
+		self messages: messageNodes.
+		semicolons := integerCollection
+	)
+	
+	semicolons: anArray = (
+		semicolons := anArray
+	)
+	
+	messages: messageNodeCollection = (
+	
+		messages := messageNodeCollection.
+		messages do: [:each | each parent: self]
+	)
+	
+	hash = (
+		^ self hashForCollection: self messages
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^ self class new
+			messages: (self copyList: self messages inContext: aDictionary);
+			yourself
+	)
+	
+	whichNodeIsContainedBy: anInterval = (
+	
+		| selectedChildren |
+		(self intersectsInterval: anInterval) ifFalse: [^nil].
+		(self containedBy: anInterval) ifTrue: [^self].
+		messages 
+			reverseDo: [:each | (each containedBy: anInterval) ifTrue: [^each]].
+		selectedChildren := (messages 
+					collect: [:each | each whichNodeIsContainedBy: anInterval]) 
+						reject: [:each | each isNil].
+		^selectedChildren detect: [:each | true] ifNone: [nil]
+	)
+	
+	precedence = (
+		^4
+	)
+	
+	startWithoutParentheses = (
+		^messages first start
+	)
+	
+	semicolons = (
+		^ semicolons
+	)
+	
+	receiver = (
+		^self messages first receiver
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitCascadeNode: self
+	)
+	
+	uses: aNode = (
+	
+		^messages last = aNode and: [self isUsed]
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		self class = anObject class ifFalse: [^false].
+		self messages size = anObject messages size ifFalse: [^false].
+		self messages
+			with: anObject messages
+			do: [:first :second | (first equalTo: second withMapping: aDictionary) ifFalse: [^false]].
+		^true
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		self messages: (messages 
+					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]])
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [^true].
+		self class = anObject class ifFalse: [^false].
+		self messages size = anObject messages size ifFalse: [^false].
+		self messages with: anObject messages do: [:first :second | first = second ifFalse: [^false]].
+		^true
+	)
+	
+	postCopy = (
+		super postCopy.
+		self messages: (self messages collect: [ :each | each copy ])
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		aNode class = self class ifFalse: [^false].
+		^self 
+			matchList: messages
+			against: aNode messages
+			inContext: aDictionary
+	)
+	
+	needsParenthesis = (
+		^parent 
+			ifNil: [false]
+			ifNotNil: [self precedence > parent precedence]
+	)
+	
+	isCascade = (
+		^true
+	)
+	
+	statementComments = (
+		| statementComments |
+		statementComments := OrderedCollection withAll: self comments.
+		statementComments addAll: messages first receiver statementComments.
+		messages do: 
+				[:each | 
+				each arguments 
+					do: [:arg | statementComments addAll: arg statementComments]].
+		^statementComments asSortedCollection: [:a :b | a start < b start]
+	)
+	
+	----------------------------------
+	
+	
+	messages: messageNodes = (
+	
+		^self new messages: messageNodes
+	)
+	
+	messages: messageNodes semicolons: integerCollection = (
+	
+		^self new messages: messageNodes semicolons: integerCollection
+	)
+)

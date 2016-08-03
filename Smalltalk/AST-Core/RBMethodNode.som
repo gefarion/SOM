@@ -1,0 +1,664 @@
+RBMethodNode = RBProgramNode (
+	"RBMethodNode is the AST that represents a Smalltalk method.Instance Variables:	arguments	<SequenceableCollection of: RBVariableNode>	the arguments to the method	body	<BRSequenceNode>	the body/statements of the method	nodeReplacements	<Dictionary>	a dictionary of oldNode -> newNode replacements	replacements	<Collection of: RBStringReplacement>	the collection of string replacements for each node replacement in the parse tree	selector	<Symbol>	the method name	keywordsPositions	<IntegerArray | nil>	the positions of the selector keywords	source	<String>	the source we compiled	tags	<Collection of: Interval>	the source location of any resource/primitive tags"
+	| scope selector keywordsPositions body source arguments pragmas replacements nodeReplacements compilationContext |
+	
+	hasTemporaryNamed: aString = (
+	
+		^ self temporaries anySatisfy: [ :temp| temp name = aString ]
+	)
+	
+	children = (
+		^ OrderedCollection new
+			addAll: self arguments;
+			addAll: self pragmas;
+			add: self body;
+			yourself
+	)
+	
+	pragmaNamed: aSymbol ifPresent: foundBlock = (
+		^ self pragmas 
+			detect: [ :pragma| pragma selector = aSymbol ]
+			ifFound: foundBlock
+	)
+	
+	clearReplacements = (
+		replacements := nil
+	)
+	
+	initialize = (
+		replacements := SortedCollection sortBlock: 
+						[:a :b | 
+						a startPosition < b startPosition 
+							or: [a startPosition = b startPosition and: [a stopPosition < b stopPosition]]].
+		nodeReplacements := IdentityDictionary new
+	)
+	
+	properties: aMethodeProperties = (
+	
+		^self propertyAt: #methodProperties put: aMethodeProperties
+	)
+	
+	reformatSource = (
+		| stream newSource newTree |
+		stream := WriteStream on: (String new: source size + 100).
+		stream
+			nextPutAll: (source
+				copyFrom: (replacements
+					inject: 1
+					into: [ :sum :each | 
+						stream
+							nextPutAll: (source copyFrom: sum to: each startPosition - 1);
+							nextPutAll: (each string).
+						each stopPosition + 1 ])
+				to: source size).
+		newSource := stream contents.
+		newTree := RBParser 
+			parseMethod: newSource 
+			onError: [ :msg :pos | ^ self formattedCode ].
+		self = newTree
+			ifFalse: [ ^ self formattedCode ].
+		^ newSource
+	)
+	
+	ir: aIRMethodNode = (
+	
+		^ self propertyAt: #ir put: aIRMethodNode.
+	)
+	
+	renameSelector: newSelector andArguments: varNodeCollection = (
+	
+		| oldIntervals oldArguments oldSelector |
+		oldSelector := selector.
+		oldIntervals := self keywordsIntervals.
+		oldArguments := arguments.
+		self
+			arguments: varNodeCollection;
+			selector: newSelector.
+		self changeSourceSelector: oldSelector keywordsIntervals: oldIntervals arguments: oldArguments
+	)
+	
+	decompileString = ( 
+	
+		^ self formattedCode 
+	
+	)
+	
+	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
+		self 
+			arguments: valueNodes;
+			selector: aSymbol;
+			keywordsPositions: positionList.
+	)
+	
+	properties = (
+		^self propertyAt: #methodProperties ifAbsent: nil
+	)
+	
+	sourceText: aString = (
+		self source: aString
+	)
+	
+	primitiveSources = (
+		^ self pragmas collect: [ :each | self source copyFrom: each first to: each last ]
+	)
+	
+	selector: aSelector = (
+		keywordsPositions := nil.
+		selector := aSelector asSymbol.
+	)
+	
+	compiledMethod = (
+		^ self ir compiledMethod
+	)
+	
+	isPrimitive = (
+		^ self pragmas anySatisfy: [ :each | each isPrimitive ]
+	)
+	
+	changeSourceSelector: oldSelector keywordsIntervals: oldIntervals arguments: oldArguments = (
+		"If this is the same number of arguments, we try a one to one replacement of selector parts and arguments. If this is not the c
+	ase try to rewrite the signature as a whole, what unfortunately drops the comments within the signature."
+	
+		[ (oldIntervals size = self keywordsPositions size and: [ oldArguments size = arguments size ])
+			ifTrue: [
+				self selectorParts keysAndValuesDo: [ :index :part |
+					self addReplacement: (RBStringReplacement 
+						replaceFrom: (oldIntervals at: index) first
+						to: (oldIntervals at: index) last
+						with: part) ].
+				oldArguments with: arguments do: [ :old :new | 
+					self addReplacement: (RBStringReplacement 
+						replaceFrom: old start
+						to: old stop
+						with: new name) ] ]
+			ifFalse: [
+				self addReplacement: (RBStringReplacement
+					replaceFrom: oldIntervals first first
+					to: (oldArguments notEmpty
+						ifTrue: [ oldArguments last stop ]
+						ifFalse: [ oldIntervals last last ])
+					with: (String streamContents: [ :stream |
+						self selectorParts keysAndValuesDo: [ :index :part |
+							index = 1 ifFalse: [ stream space ].
+							stream nextPutAll: part.
+							index <= arguments size
+								ifTrue: [ stream space; nextPutAll: (arguments at: index) name ] ] ])) ] ]
+			on: Error
+			do: [ :ex | ex return ]
+	)
+	
+	generateIR = (
+		| ir |
+		scope ifNil: [self doSemanticAnalysisInContext: self compilationContext ].
+	 	ir := (self compilationContext astTranslatorClass new
+				visitNode: self)
+				ir.
+		^ self ir: ir
+	)
+	
+	scope: aScopedNode = (
+		scope := aScopedNode
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		self class = aNode class ifFalse: [ ^ false ].
+		aDictionary at: '-source-' put: aNode source.
+		self selector = aNode selector ifFalse: [ ^ false ].
+		^ (self matchList: arguments against: aNode arguments inContext: aDictionary)
+			and: [ (self matchPragmas: self pragmas against: aNode pragmas inContext: aDictionary)
+			and: [ body match: aNode body inContext: aDictionary ] ]
+	)
+	
+	methodOrBlockNode = (
+		"^ self"
+	)
+	
+	compilationContext: aCompilationContext = (
+		compilationContext := aCompilationContext.
+	)
+	
+	newSource = (
+		replacements ifNil: [^self formattedCode].
+		^[self reformatSource] on: Error do: [:ex | ex return: self formattedCode]
+	)
+	
+	ir = (
+	
+		^ self propertyAt: #ir ifAbsent: [self generateIR].
+	)
+	
+	addReturn = (
+		^ body addReturn
+	)
+	
+	generateWithSource = (
+		"Answer a CompiledMethod with source encoded in trailer."
+	
+		
+		"for doits, we need to store the source pretty printed from the 
+		AST to get the return and methodName correct"
+		self selector isDoIt ifTrue: [source := self formattedCode].
+		
+		^self generate: (CompiledMethodTrailer new sourceCode: source).
+	)
+	
+	methodClass = (
+		^self compilationContext getClass 
+	)
+	
+	addSelfReturn = (
+		^ body addSelfReturn
+	)
+	
+	removeAndRenameLastTempIfErrorCode = (
+		self primitiveErrorVariableName ifNotNil: [ :primitiveErrorVariableName |
+			 body temporaries removeLast ].
+	)
+	
+	allArgumentVariables = (
+		^(self argumentNames asOrderedCollection)
+			addAll: super allArgumentVariables;
+			yourself
+	)
+	
+	source = (
+		^source
+	)
+	
+	printOn: aStream = (
+	
+		aStream nextPutAll: self formattedCode
+	)
+	
+	pragmaNamed: aSymbol ifAbsent: absentBlock = (
+		^ self pragmas 
+			detect: [ :pragma| pragma selector = aSymbol ]
+			ifNone: absentBlock
+	)
+	
+	statements = (
+		^ self body statements
+	)
+	
+	sourceCode = (
+		"compatibility to MethodNode"
+		^source
+	)
+	
+	doSemanticAnalysis = (
+	
+		self compilationContext ifNil: [ self methodClass: nil class ].
+	
+		self
+			compilationContext semanticAnalyzerClass new
+			compilationContext: self compilationContext;
+			analyze: self
+	)
+	
+	doSemanticAnalysisIn: behavior = (
+		self methodClass: behavior.
+		self doSemanticAnalysis
+	)
+	
+	addReplacement: aStringReplacement = (
+	
+		replacements ifNil: [^self].
+		replacements add: aStringReplacement
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitMethodNode: self
+	)
+	
+	addNode: aNode = (
+		^ body addNode: aNode
+	)
+	
+	methodComments = (
+		| methodComments |
+		methodComments := OrderedCollection withAll: self comments.
+		arguments do: [:each | methodComments addAll: each comments].
+		^methodComments asSortedCollection: [:a :b | a start < b start]
+	)
+	
+	owningScope = (
+		^ self scope
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [ ^ true ].
+		self class = anObject class ifFalse: [ ^ false ].
+		(self selector = anObject selector
+			and: [ self pragmas size = anObject pragmas size
+			and: [ self body = anObject body ] ])
+				ifFalse: [ ^ false ].
+		self arguments with: anObject arguments do: [ :first :second |
+			first = second 
+				ifFalse: [ ^ false ] ].
+		self pragmas with: anObject pragmas do: [ :first :second |
+			first = second 
+				ifFalse: [ ^ false ] ].
+		^ true
+	)
+	
+	sourceNodeForPC: anInteger = (
+		^(self ir instructionForPC: anInteger) sourceNode
+	)
+	
+	arguments = (
+		^arguments
+	)
+	
+	source: anObject = (
+		source := anObject
+	)
+	
+	tempNames = (
+		"compatibility method to old MethodNode"
+		self flag: #Clean.
+		^ self argumentNames, self temporaryNames
+	)
+	
+	isMethod = (
+		^true
+	)
+	
+	specialCommands = (
+		 ^SugsSuggestionFactory commandsForMethod.
+	)
+	
+	map: oldNode to: newNode = (
+	
+		nodeReplacements at: oldNode put: newNode
+	)
+	
+	rewriteTempsForContext: aContext = (
+		
+		| rewriter  |
+		rewriter := RBParseTreeRewriter new.
+		aContext tempNames withIndexDo: [ :tempName :index | 
+			rewriter 
+				replace: tempName, ' := ``@object'
+				with: 'ThisContext namedTempAt:', index asString,  'put: ``@object';
+				replace: tempName
+				with: 'ThisContext namedTempAt:', index asString ].
+		^ rewriter
+			executeTree: self;
+			tree
+	)
+	
+	keywordsPositions: aPositionsList = (
+		keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ]
+	)
+	
+	primitiveFromPragma = (
+		pragmas ifNil: [ ^ IRPrimitive null ].
+		^ pragmas
+			detect: [ :each | each isPrimitive ]
+			ifFound: [ :aPragmaPrimitive | aPragmaPrimitive asPrimitive ]
+			ifNone: [ IRPrimitive null ]
+	)
+	
+	keywordsPositions = (
+		^keywordsPositions ifNil: [ (selector keywords collect: [:char| 0 ]) asIntegerArray ]
+	)
+	
+	methodNode = (
+		^self
+	)
+	
+	statements: aCollection = (
+		self body statements: aCollection 
+	)
+	
+	pragmas: aCollection = (
+		pragmas := aCollection.
+		pragmas do: [ :each | each parent: self ]
+	)
+	
+	references: aVariableName = (
+	
+		^body references: aVariableName
+	)
+	
+	scope = (
+		^ scope
+	)
+	
+	isLast: aNode = (
+	
+		^body isLast: aNode
+	)
+	
+	uses: aNode = (
+	
+		^body == aNode and: [aNode lastIsReturn]
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		aNode == body ifTrue: [self body: anotherNode].
+		self arguments: (arguments 
+					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]])
+	)
+	
+	generate: trailer = (
+		^ self generateIR compiledMethodWith: trailer.
+	)
+	
+	defines: aName = (
+	
+		^arguments anySatisfy: [:each | each name = aName]
+	)
+	
+	postCopy = (
+		super postCopy.
+		self arguments: (self arguments collect: [ :each | each copy ]).
+		self pragmas: (self pragmas collect: [ :each | each copy ]).
+		self body: self body copy
+	)
+	
+	hasArgumentNamed: aString = (
+	
+		^ self arguments anySatisfy: [ :argument| argument name = aString ]
+	)
+	
+	temporaries = (
+		^ self body temporaries
+	)
+	
+	allDefinedVariables = (
+		^(self argumentNames asOrderedCollection)
+			addAll: super allDefinedVariables;
+			yourself
+	)
+	
+	body: stmtsNode = (
+	
+		body := stmtsNode.
+		body parent: self
+	)
+	
+	selector = (
+		^ selector
+	)
+	
+	pragmas = (
+		^ pragmas ifNil: [ #() ]
+	)
+	
+	isFaulty = (
+		(self arguments anySatisfy: #isFaulty) ifTrue:[ ^true].
+		(self pragmas anySatisfy: #isFaulty) ifTrue:[ ^true].
+		^self body isFaulty
+	)
+	
+	temporaryNames = (
+		^ self body temporaryNames
+	)
+	
+	start = (
+		^ 1
+	)
+	
+	firstPrecodeComment = (
+		| comment  | 
+		self comments ifEmpty: [ ^nil ].
+		comment :=  self comments first.
+		^self source copyFrom: comment start to: comment stop.
+	)
+	
+	hasPragmaNamed: aSymbol = (
+	
+		self pragmaNamed: aSymbol ifAbsent: [ ^ false ].
+		^ true
+	)
+	
+	mappingFor: oldNode = (
+	
+		^nodeReplacements at: oldNode ifAbsent: [oldNode]
+	)
+	
+	pragmaNamed: aSymbol = (
+	
+		^ self pragmaNamed: aSymbol ifAbsent: [ KeyNotFound signalFor: aSymbol  ]
+	)
+	
+	doSemanticAnalysisInContext: aCompilationContext = (
+		self compilationContext: aCompilationContext.
+		self doSemanticAnalysis.
+	)
+	
+	methodClass: aClass = (
+	
+		compilationContext ifNil: [compilationContext := aClass compiler compilationContext].
+		self compilationContext class: aClass
+	)
+	
+	primitiveErrorVariableName = (
+		"Answer the primitive error code temp name, or nil if none."
+		self isPrimitive ifTrue: [ 
+			self pragmas do: [ :pragma | 
+				pragma selectorParts first = 'primitive:' ifTrue: [ 
+					^ pragma argumentAt: 'error:' ifAbsent: nil ] ] ].
+		^ nil
+	)
+	
+	lastIsReturn = (
+		^body lastIsReturn
+	)
+	
+	hash = (
+		^ ((self selector hash bitXor: (self hashForCollection: self arguments)) bitXor: (self hashForCollection: self pragmas)) bitXor: self body hash
+	)
+	
+	generate = (
+		"The receiver is the root of a parse tree. Answer a CompiledMethod. The
+		argument, trailer, is the references to the source code that is stored with 
+		every CompiledMethod."
+	
+		^ self generate: CompiledMethodTrailer empty
+	)
+	
+	copyInContext: aDictionary = (
+		^ self class new
+			selector: self selector;
+			arguments: (self arguments collect: [ :each | each copyInContext: aDictionary ]);
+			pragmas: (self pragmas isEmpty
+				ifTrue: [ aDictionary at: '-pragmas-' ifAbsent: [ #() ] ]
+				ifFalse: [ self copyList: self pragmas inContext: aDictionary ]);
+			body: (self body copyInContext: aDictionary);
+			source: (aDictionary at: '-source-' ifAbsentPut: [ self source ]);
+			yourself
+	)
+	
+	method = (
+		"return the method that I have been compiled for"
+		self compilationContext ifNil: [ ^nil ].
+		^self compilationContext getClass >> self selector
+	)
+	
+	stop = (
+		^ self newSource size
+	)
+	
+	startWithoutParentheses = (
+		^ 1
+	)
+	
+	compilationContext = (
+		^ compilationContext
+	)
+	
+	arguments: variableNodes = (
+	
+		arguments := variableNodes.
+		arguments do: [:each | each parent: self]
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		self class = anObject class ifFalse: [ ^ false ].
+		(self selector = anObject selector
+			and: [ self pragmas size = anObject pragmas size
+			and: [ self body equalTo: anObject body withMapping: aDictionary ] ]) 
+				ifFalse: [ ^ false ].
+		self arguments with: anObject arguments do: [ :first :second |
+			(first equalTo: second	withMapping: aDictionary)
+				ifFalse: [ ^ false ].
+			aDictionary removeKey: first name ].
+		self pragmas with: anObject pragmas do: [ :first :second |
+			(first equalTo: second	withMapping: aDictionary) 
+				ifFalse: [ ^ false ] ].
+		^ true
+	)
+	
+	keywords = (
+		^ selector keywords.
+	)
+	
+	matchPragmas: matchNodes against: pragmaNodes inContext: aDictionary = (
+		matchNodes isEmpty ifTrue: [ 
+			aDictionary at: '-pragmas-' put: pragmaNodes.
+			^ true ].
+		^ matchNodes allSatisfy: [ :matchNode |
+			pragmaNodes anySatisfy: [ :pragmaNode |
+				matchNode match: pragmaNode inContext: aDictionary ] ]
+	)
+	
+	body = (
+		^body
+	)
+	
+	numArgs = (
+		^self selector numArgs
+	)
+	
+	keywordsIntervals = (
+		^selector keywords
+			with: self keywordsPositions 
+			collect: [:keyword :start| start to: (start = 0 ifTrue: [ -1 ] ifFalse: [ start + keyword size - 1]) ]
+	)
+	
+	selectorParts = (
+		^ self keywords collect: #asSymbol.
+	)
+	
+	argumentNames = (
+		^self arguments collect: [:each | each name]
+	)
+	
+	----------------------------------
+	
+	
+	selector: aSymbol arguments: valueNodes = (
+		^(self new)
+			selector: aSymbol;
+			arguments: valueNodes;
+			yourself
+	)
+	
+	selector: aSymbol body: aSequenceNode = (
+	
+		^self 
+			selector: aSymbol
+			arguments: #()
+			body: aSequenceNode
+	)
+	
+	errorMethodNode: selector errorMessage: messageText = (
+	
+		| message |
+		message := RBMessageNode 
+			receiver: (RBSelfNode named: 'self')
+			selector: #error: 
+			arguments: {RBLiteralNode value: messageText}.
+		^ self 
+			selector: selector 
+			arguments: ((1 to: selector numArgs) collect: [ :i | RBArgumentNode named: 't' , i asString ]) 
+			body: (RBSequenceNode statements: {message}) 
+	)
+	
+	selector: aSymbol arguments: variableNodes body: aSequenceNode = (
+	
+		^(self new)
+			arguments: variableNodes;
+			selector: aSymbol;
+			body: aSequenceNode;
+			yourself
+	)
+	
+	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
+		^(self new)
+			selector: aSymbol
+				keywordsPositions: positionList 
+				arguments: valueNodes;
+			yourself.
+	)
+	
+	additionalInspectorClasses = (
+		^ super additionalInspectorClasses, { EyeSyntaxTreeInspector } 
+	)
+)

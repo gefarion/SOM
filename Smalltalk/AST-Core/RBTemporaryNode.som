@@ -1,0 +1,13 @@
+RBTemporaryNode = RBVariableNode (
+	"I am a specialized variable node for temporary variables"
+	
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitTemporaryNode: self
+	)
+	
+	isTemp = (
+		^ true
+	)
+)

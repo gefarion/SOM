@@ -1,0 +1,1718 @@
+TRBProgramNodeVisitor = nil (
+	"A TRBProgramNodeVisitor is a simple  that define visitor methods. "
+	
+	
+	visitSuperNode: aSuperNode = (
+		^ self visitVariableNode: aSuperNode
+	)
+	
+	visitThisContextNode: aThisContextNode = (
+		^ self visitVariableNode: aThisContextNode
+	)
+	
+	visitArgumentNodes: aNodeCollection = (
+	
+		"Sent *once* when visiting method and block nodes"
+		^aNodeCollection do: [ :each | self visitArgumentNode: each ]
+	)
+	
+	visitCascadeNode: aCascadeNode = (
+	
+		aCascadeNode messages do: [:each | self visitNode: each]
+	)
+	
+	visitMessageNode: aMessageNode = (
+	
+		(aMessageNode isCascaded not or: [aMessageNode isFirstCascaded]) 
+			ifTrue: [self visitNode: aMessageNode receiver].
+		aMessageNode arguments do: [:each | self visitNode: each]
+	)
+	
+	visitMethodNode: aMethodNode = (
+	
+		self visitArgumentNodes: aMethodNode arguments.
+		aMethodNode pragmas
+			do: [ :each | self visitNode: each ].
+		self visitNode: aMethodNode body
+	)
+	
+	visitArrayNode: anArrayNode = (
+	
+	
+		anArrayNode children do: [:each | self visitNode: each]
+	)
+	
+	visitPatternBlockNode: aRBPatternBlockNode = (
+	
+		self visitArgumentNodes: aRBPatternBlockNode arguments.
+		self visitNode: aRBPatternBlockNode body
+	)
+	
+	visitBlockNode: aBlockNode = (
+	
+		self visitArgumentNodes: aBlockNode arguments.
+		self visitNode: aBlockNode body
+	)
+	
+	visitSelfNode: aSelfNode = (
+		^ self visitVariableNode: aSelfNode
+	)
+	
+	visitTemporaryNode: aNode = (
+	
+		"Sent *each time* a temporary node is found"
+		^ self visitVariableNode: aNode
+	)
+	
+	visitVariableNode: aVariableNode = (
+		^ aVariableNode
+	)
+	
+	visitTemporaryNodes: aNodeCollection = (
+	
+		"This is triggered when defining the temporaries between the pipes"
+		^self visitArgumentNodes: aNodeCollection
+	)
+	
+	visitParseErrorNode: anErrorNode  = (
+	)
+	
+	visitSequenceNode: aSequenceNode = (
+	
+		self visitTemporaryNodes: aSequenceNode temporaries.
+		aSequenceNode statements do: [:each | self visitNode: each]
+	)
+	
+	visitLiteralArrayNode: aRBLiteralArrayNode = (
+	
+		aRBLiteralArrayNode contents do: [:each | self visitNode: each]
+	)
+	
+	visitNode: aNode = (
+	
+		^aNode acceptVisitor: self
+	)
+	
+	visitArgumentNode: anArgumentNode = (
+		"Sent *each time* an argument node is found"
+		^ self visitVariableNode: anArgumentNode
+	)
+	
+	visitAssignmentNode: anAssignmentNode = (
+	
+		self visitNode: anAssignmentNode variable.
+		self visitNode: anAssignmentNode value
+	)
+	
+	visitPatternWrapperBlockNode: aRBPatternWrapperBlockNode = (
+	
+		self visitNode: aRBPatternWrapperBlockNode wrappedNode.
+		self visitArgumentNodes: aRBPatternWrapperBlockNode arguments.
+		self visitNode: aRBPatternWrapperBlockNode body
+	)
+	
+	visitLiteralNode: aLiteralNode  = (
+	)
+	
+	visitReturnNode: aReturnNode = (
+	
+		^ self visitNode: aReturnNode value
+	)
+	
+	visitPragmaNode: aPragmaNode = (
+		aPragmaNode arguments do: [ :each | self visitNode: each ]
+	)
+	
+	----------------------------------
+	| name environment classTrait category |
+	
+	ensureClassPool = (
+		self deprecated: 'just use the accessor for classPool' on: '2 July 2014' in: 'Pharo40'.
+		^self classPool.
+	)
+	
+	isObsolete = (
+		"Return true if the receiver is obsolete."
+		^self propertyValueAt: #obsolete ifAbsent: false
+	)
+	
+	classPoolFrom: aClass = (
+		"share the classPool with aClass."
+		self deprecated: 'just use the accessor for classPool' on: '2 July 2014' in: 'Pharo40'.
+		self classPool: aClass classPool.
+	)
+	
+	classVariableDefinitionString = (
+		"Answer a string that evaluates to the definition of the class Variables"
+		
+		^String streamContents: [ :str | | special |
+			str nextPutAll: '{ '.
+			self classVariables do: [:global |
+					str nextPutAll: global definitionString.
+					special := global isSpecial]				
+				separatedBy: [ 
+					str nextPutAll: '. '.  
+					special ifTrue: [ str cr;tab;tab;tab;tab ]].
+			str nextPutAll: ' }'. ]
+	)
+	
+	spotterExamplesFor: aStep = (
+		<spotterOrder: 50>
+		aStep listProcessor
+				title: 'Examples';
+				allCandidates: [ self gtExamples ];
+				itemName: [ :example | example title ];
+				filter: GTFilterSubstring
+	)
+	
+	baseTrait = (
+		^ self
+	)
+	
+	name: aString traitComposition: aComposition methodDict: aMethodDict localSelectors: aSet organization: aClassOrganization = (
+	
+		"Used by copy"
+		
+		self name: aString.
+		self localSelectors: aSet.
+		self methodDict: aMethodDict.
+		self traitComposition: aComposition.
+		self organization: aClassOrganization
+	)
+	
+	externalName = (
+		"Answer a name by which the receiver can be known."
+	
+		^ self name
+	)
+	
+	initialize = (
+		super initialize.
+		classTrait := ClassTrait for: self
+	)
+	
+	classVariableNamed: aString = (
+		"Answer the Class Variable"
+	
+		^self classPool associationAt: aString asSymbol ifAbsent: [self error: 'no such class var']
+	)
+	
+	subclass: aSubclassSymbol  layout: layoutClass slots: slotDefinition classVariables: classVarDefinition category: aCategorySymbol = (
+	
+		^ PharoClassInstaller make: [ :builder |
+			builder name: aSubclassSymbol;
+			superclass: self;
+			layoutClass: layoutClass;
+			slots: slotDefinition;
+			sharedVariables: classVarDefinition;
+			category: aCategorySymbol ].
+	
+	)
+	
+	renameSilently: aName = (
+		 [ self rename: aName] fuelValueWithoutNotifications
+	)
+	
+	environment: anObject = (
+		environment := anObject
+	)
+	
+	weakSubclass: aName uses: aTraitComposition instanceVariableNames: someInstanceVariableNames classVariableNames: someClassVariableNames poolDictionaries: someSharedPoolNames category: aCategory = (
+		"Creates a new class as a subclass of an existing class (the receiver) 
+		in which the subclass is to have weak indexable pointer variables."
+		
+		^ self
+			subclass: aName
+			uses: aTraitComposition
+			with: [ 
+				self
+					weakSubclass: aName
+					instanceVariableNames: someInstanceVariableNames
+					classVariableNames: someClassVariableNames
+					poolDictionaries: someSharedPoolNames
+					category: aCategory ]
+	)
+	
+	systemIcon = ( 
+		^ Smalltalk ui icons traitIcon
+	)
+	
+	spotterPreviewCodeIn: aComposite = (
+		<spotterPreview: 10>
+		aComposite pharoMethod
+			title: [self name];
+			display: #definitionForNautilus;
+			smalltalkClass: [ nil ];
+			entity: self.
+			
+		self flag: 'move "entity: self" somewhere else, maybe'
+	)
+	
+	asFullRingDefinition = (
+		"A behavior is converted to a ring class including its variables, methods, direct superclass, direct subclasses and the package in which is loaded.
+		Active methods are generated and each knows its package as well.
+		Note that for its direct superclass and subclasses no full definitions are requested. If you need to traverse hierarchies use #asRingDefinitionWithMethods:withSuperclasses:withSubclasses:withPackages:"
+		
+		| rgClass rgSuper rgSub rgMethod packageKeys |
+		rgClass:= self asRingDefinition.
+		rgClass package: (RGContainer packageOfClass: rgClass).
+		
+		self superclass notNil 
+			ifTrue: [ 
+				rgSuper := self superclass asRingDefinition.
+				rgClass superclass: rgSuper ]
+			ifFalse: [  
+				self isTrait ifTrue: [ 
+					rgSuper := Trait asRingDefinition.
+					rgClass superclass: rgSuper. ]
+				].
+	
+		self subclasses do:[ :each |
+			rgSub := each asRingDefinition.
+			rgSub superclass: rgClass ].
+		
+		packageKeys := RGContainer packageKeys.
+		self methodsDo:[ :mth|  
+				rgMethod := mth asActiveRingDefinition.
+				rgClass addMethod: rgMethod.
+				rgMethod package: (RGContainer packageOfMethod: rgMethod using: packageKeys) ].
+		self theMetaClass methodsDo:[ :mth|  
+				rgMethod := mth asActiveRingDefinition.
+				rgClass theMetaClass addMethod: rgMethod.
+				rgMethod package: (RGContainer packageOfMethod: rgMethod using: packageKeys) ].
+		
+		^ rgClass
+	)
+	
+	superclass: aClass methodDictionary: mDict format: fmt = (
+		"Basic initialization of the receiver"
+		super superclass: aClass methodDictionary: mDict format: fmt.
+		self subclasses: nil. 
+	)
+	
+	basicCategory = (
+		^category
+	)
+	
+	subclass: t uses: aTraitComposition = (
+	
+		| cls |
+		cls := self
+					subclass: t
+					instanceVariableNames: ''
+					classVariableNames: ''
+					poolDictionaries: ''
+					category: 'Unclassified'.
+		cls setTraitComposition: aTraitComposition asTraitComposition.
+		^ cls
+	)
+	
+	readClassVariableNamed: aString = (
+		"Answer the content of the Class Variable"
+	
+		^(self classVariableNamed: aString) read
+	)
+	
+	removeFromSystemUnlogged = (
+		"Forget the receiver from the Smalltalk global dictionary. Any existing instances will refer to an obsolete version of the receiver.  Do not log the removal either to the current change set nor to the system changes log"
+		^self removeFromSystem: false
+	)
+	
+	variableByteSubclass: t instanceVariableNames: f 
+		classVariableNames: d poolDictionaries: s category: cat = (
+		"This is the standard initialization message for creating a new class as a 
+		subclass of an existing class (the receiver) in which the subclass is to 
+		have indexable byte-sized nonpointer variables."
+		^self classBuilder
+			superclass: self
+			variableByteSubclass: t
+			instanceVariableNames: f
+			classVariableNames: d
+			poolDictionaries: s
+			category: cat
+	)
+	
+	superclass: sup methodDict: md format: ft name: nm organization: org instVarNames: nilOrArray classPool: pool sharedPools: poolSet = (
+	
+		"Answer an instance of me, a new class, using the arguments of the 
+		message as the needed information.
+		Must only be sent to a new instance; else we would need Object flushCache."
+	
+		self superclass: sup.
+		self methodDict: md.
+		self setFormat: ft.
+		self setName: nm.
+		self instanceVariables: nilOrArray.
+		self classPool: pool.
+		self sharedPools: poolSet.
+		self organization: org.
+	)
+	
+	classTrait = (
+		^classTrait
+	)
+	
+	asClassDefinition = (
+		^ MCTraitDefinition
+			name: self name
+			traitComposition: self traitCompositionString
+			category: self category 
+			comment: self organization classComment asString
+			commentStamp: self organization commentStamp.
+	)
+	
+	writeClassVariableNamed: aString value: anObject = (
+		"Store anObject in the class variable."
+		
+		(self classVariableNamed: aString) write: anObject
+	)
+	
+	subclass: aSubclassSymbol  layout: layoutClass  slots: slotDefinition classVariables: classVarDefinition poolDictionaries: someSharedPoolNames category: aCategorySymbol = (
+	
+		^ PharoClassInstaller make: [ :builder |
+			builder name: aSubclassSymbol;
+			superclass: self;
+			layoutClass: layoutClass;
+			slots: slotDefinition;
+			sharedVariables:  classVarDefinition;
+			sharedPools: someSharedPoolNames;
+			category: aCategorySymbol ].
+	
+	)
+	
+	name: aSymbol = (
+		name := aSymbol
+	)
+	
+	subclass: t instanceVariableNames: f classVariableNames: d poolDictionaries: s category: cat = (
+	
+		"Compatibility purposes"
+		^self error: 'Traits cannot have subclasses'.
+	)
+	
+	hasClassVariable: aGlobal = (
+		"Return whether the receiver has a class variables (shared variables among its class and subclasses) named: aString"
+		
+		^ self classVariables identityIncludes: aGlobal
+	)
+	
+	subclass: aSubclassSymbol uses: aTraitCompositionOrArray  layout: layoutClass slots: slotDefinition classVariables: classVarDefinition poolDictionaries: someSharedPoolNames category: aCategorySymbol = (
+		^ self
+			subclass: aSubclassSymbol
+			uses: aTraitCompositionOrArray
+			with: [ 
+				PharoClassInstaller
+					make: [ :builder | 
+						builder
+							name: aSubclassSymbol;
+							superclass: self;
+							layoutClass: layoutClass;
+							slots: slotDefinition;
+							sharedVariables: classVarDefinition;
+							sharedPools: someSharedPoolNames;
+							category: aCategorySymbol ] ]
+	)
+	
+	removeSlot: aSlot = (
+	
+	
+		(self layout slots includes: aSlot)
+			ifFalse: [self error: aSlot name , ' is not one of my slots'].
+			
+		^PharoClassInstaller make: [ :builder |
+			builder
+				superclass:  self superclass;
+				name:  self name;
+				layoutClass: (OldClassBuilderAdapter new layoutForType: self typeOfClass);
+				slots: (self layout slots copyWithout: aSlot);
+				sharedVariablesFromString: self classVariablesString;
+				sharedPools: self sharedPoolsString;
+				category: self category;
+				environment: self environment;
+				copyTraitCompositionFromExistingClass;
+				copyClassSlotsFromExistingClass]
+		
+	)
+	
+	sharedPools = (
+		"Answer an ordered collection of  the shared pools that the receiver shares"
+	
+		^ OrderedCollection new
+	)
+	
+	category: aString = (
+	
+		"Categorize the receiver under the system category, aString, removing it from 
+		any previous categorization."
+	
+		| oldCategory |
+		oldCategory := self basicCategory.
+		aString isString
+			ifTrue: [
+				self basicCategory: aString asSymbol.
+				self environment organization classify: self name under: self basicCategory ]
+			ifFalse: [self errorCategoryName].
+		SystemAnnouncer uniqueInstance
+			class: self recategorizedFrom: oldCategory to: self basicCategory
+	)
+	
+	isAnonymous = (
+		^self getName isNil
+	)
+	
+	removeSharedPool: aDictionary = (
+	
+		"Remove the pool dictionary, aDictionary, as one of the receiver's pool 
+		dictionaries. Create an error notification if the dictionary is not one of 
+		the pools.
+		: Note that it removes the wrong one if there are two empty Dictionaries in the list."
+	
+		| satisfiedSet workingSet aSubclass |
+		(self sharedPools includes: aDictionary)
+			ifFalse: [^self error: 'the dictionary is not in my pool'].
+	
+		"first see if it is declared in a superclass in which case we can remove it."
+		(self selectSuperclasses: [:class | class sharedPools includes: aDictionary]) isEmpty
+			ifFalse: [self sharedPools remove: aDictionary.
+					self sharedPools isEmpty ifTrue: [self sharedPools: nil].
+					^self]. 
+	
+		"second get all the subclasses that reference aDictionary through me rather than a 
+		superclass that is one of my subclasses."
+	
+		workingSet := self subclasses asOrderedCollection.
+		satisfiedSet := Set new.
+		[workingSet isEmpty] whileFalse:
+			[aSubclass := workingSet removeFirst.
+			(aSubclass sharedPools includes: aDictionary)
+				ifFalse: 
+					[satisfiedSet add: aSubclass.
+					workingSet addAll: aSubclass subclasses]].
+	
+		"for each of these, see if they refer to any of the variables in aDictionary because 
+		if they do, we can not remove the dictionary."
+		satisfiedSet add: self.
+		satisfiedSet do: 
+			[:sub | 
+			aDictionary associationsDo: 
+				[:aGlobal | 
+				(sub whichSelectorsReferTo: aGlobal) isEmpty 
+					ifFalse: [^self error: aGlobal key 
+									, ' is still used in code of class '
+									, sub name]]].
+		self sharedPools remove: aDictionary.
+		self sharedPools isEmpty ifTrue: [self sharedPools: nil]
+	)
+	
+	usesClassVarNamed: aString = (
+		"Return whether the receiver or its superclasses have a class variable named: aString"
+		
+		^ self allClassVarNames includes: aString
+	)
+	
+	subclass: aSubclassSymbol uses: aTraitCompositionOrArray slots: slotDefinition classVariables: classVarDefinition poolDictionaries: someSharedPoolNames category: aCategorySymbol = (
+		^ self
+			subclass: aSubclassSymbol
+			uses: aTraitCompositionOrArray
+			with: [ 
+				PharoClassInstaller
+					make: [ :builder | 
+						builder
+							name: aSubclassSymbol;
+							superclass: self;
+							slots: slotDefinition;
+							sharedVariables: classVarDefinition;
+							sharedPools: someSharedPoolNames;
+							category: aCategorySymbol ] ]
+	)
+	
+	rename: aString = (
+	
+		"The new name of the receiver is the argument, aString."
+	
+		| oldName newName |
+		(newName := aString asSymbol) = (oldName := self name)
+			ifTrue: [^ self].
+		(self environment includesKey: newName)
+			ifTrue: [^ self error: newName , ' already exists'].
+		self setName: newName.
+		self environment renameClass: self from: oldName.
+		(Undeclared includesKey: newName)
+			ifTrue: [self inform: 'There are references to, ' , aString printString , '
+	from Undeclared. Check them after this change.'].
+	)
+	
+	compileAllFrom: oldClass = (
+		"Recompile all the methods in the receiver's method dictionary (not the
+		subclasses). Also recompile the methods in the metaclass."
+	
+		super compileAllFrom: oldClass.
+		self class compileAllFrom: oldClass class
+	)
+	
+	shouldFileOutPool: aPoolName = (
+		"respond with true if the user wants to file out aPoolName"
+		^self confirm: ('FileOut the sharedPool ', aPoolName, '?')
+	)
+	
+	spotterReferenceFor: aStep = (
+		<spotterOrder: 30>
+		aStep listProcessor
+				title: 'References';
+				allCandidates: [ (SystemNavigation default allReferencesTo: self binding) collect: #compiledMethod ];
+				itemName: [ :method | method gtDisplayString ];
+				filter: GTFilterSubstring
+	)
+	
+	applyChangesOfNewTraitCompositionReplacing: oldComposition = (
+	
+		| changedSelectors |
+		changedSelectors := super applyChangesOfNewTraitCompositionReplacing: oldComposition.
+		self classSide noteNewBaseTraitCompositionApplied: self traitComposition.
+		^ changedSelectors
+	)
+	
+	hasMethods = (
+		"Answer a Boolean according to whether any methods are defined for the 
+		receiver (includes whether there are methods defined in the receiver's 
+		metaclass)."
+	
+		^super hasMethods or: [self class hasMethods]
+	)
+	
+	classBuilder = (
+			"Answer the object responsible of creating subclasses of myself in the system."
+		
+			^ Smalltalk classBuilder
+	)
+	
+	sharedPools: aCollection = (
+		"Compatibilty purposes"
+	)
+	
+	spotterActDefault = (
+		^ self browse
+	)
+	
+	asRingDefinitionWithMethods: methodsBoolean withSuperclasses: supersBoolean withSubclasses: subsBoolean withPackages: packsBoolean = (
+		"Retrieves a ring class/trait based on the receiver.
+		The data loaded in the class/trait (active methods, superclasses, subclasses and packages) is requested by the users.
+		As it may need to traverse hierarchies for retrieving super and subclasses a ring slice is created as the container for every class, method and package.
+		To retrieve the slice:  aRGClass environment "
+		| rgClass rgSlice  rgPackageKeys |
+		
+		rgSlice := RGSlice named: #fromImage.
+		packsBoolean ifTrue: [ 
+			rgPackageKeys := rgSlice loadPackagesFromImage ].
+		rgClass := self asRingDefinitionWithMethods: methodsBoolean withSuperclasses: supersBoolean withSubclasses: subsBoolean withPackageKeys: rgPackageKeys in: rgSlice.
+		rgSlice cleanEmptyPackages.
+		rgSlice loadTraitUsers.
+			
+		^ rgClass
+	)
+	
+	compileAll = (
+		super compileAll.
+		self classSide compileAll.
+	)
+	
+	spotterSuperClassMethodsFor: aStep = (
+		<spotterOrder: 16>
+		|superclasses|
+		superclasses := self class withAllSuperclasses select: #isMeta.
+		aStep listProcessor
+				title: 'Super class methods';
+				allCandidates: [ self classSide allMethods select: [ :each |(each methodClass = self classSide) not & (superclasses includes: each methodClass) ] ];
+				filter: GTFilterSubstring
+	)
+	
+	variableSubclass: className instanceVariableNames: instVarNames classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+	
+		^ self variableSubclass: className
+			instanceVariableNames: instVarNames 
+			classVariableNames: classVarNames 
+			poolDictionaries: ''
+			category: cat
+	
+	)
+	
+	setName: aSymbol andRegisterInCategory: categorySymbol environment: aSystemDictionary = (
+		(self isValidTraitName: aSymbol) ifFalse: [TraitException signal: 'Invalid trait name'].
+		
+		(self environment == aSystemDictionary
+			and: [self name = aSymbol
+				and: [self category = categorySymbol]]) ifTrue: [^self].
+			
+		((aSystemDictionary includes: aSymbol) and: [(aSystemDictionary at: aSymbol) ~~ self])
+			ifTrue: [TraitException signal: 'The name ''' , aSymbol , ''' is already used'].
+	
+		(self environment notNil and: [self name notNil and: [self name ~= aSymbol]]) ifTrue: [
+			self environment renameClass: self as: aSymbol].
+		
+		self name: aSymbol.
+		self environment: aSystemDictionary.	
+		self environment at: self name put: self.
+		self environment organization classify: self name under: categorySymbol.
+		^ true
+	)
+	
+	subclassesDo: aBlock = (
+	
+		"Evaluate the argument, aBlock, for each of the receiver's immediate subclasses."
+		self subclasses size == 0 
+			ifFalse:[self subclasses do: aBlock]
+	)
+	
+	spotterMethodsFor: aStep = (
+		<spotterOrder: 10>
+		aStep listProcessor
+				title: 'Instance methods';
+				allCandidates: [ self methods ];
+				itemName: [ :method | method selector ];
+				filter: GTFilterSubstring
+	)
+	
+	definesClassVariableNamed: aString = (
+		"Return whether the receiver has a class variables (shared variables among its class and subclasses) named: aString"
+		
+		^ self classVarNames includes: aString
+	)
+	
+	variableWordSubclass: aName uses: aTraitComposition instanceVariableNames: someInstanceVariableNames classVariableNames: someClassVariableNames poolDictionaries: someSharedPoolNames category: aCategory = (
+		"Creates a new class as a subclass of an existing class (the receiver) 
+		in which the subclass is to have indexable word-sized nonpointer variables."
+		
+		^ self
+			subclass: aName
+			uses: aTraitComposition
+			with: [ 
+				self
+					variableWordSubclass: aName
+					instanceVariableNames: someInstanceVariableNames
+					classVariableNames: someClassVariableNames
+					poolDictionaries: someSharedPoolNames
+					category: aCategory ]
+	)
+	
+	fileOutOn: aFileStream moveSource: moveSource toFile: fileIndex initializing: aBool = (
+		"File a description of the receiver on aFileStream. If the boolean argument,
+		moveSource, is true, then set the trailing bytes to the position of aFileStream and
+		to fileIndex in order to indicate where to find the source code."
+	
+		self crTrace: name.
+		super
+			fileOutOn: aFileStream
+			moveSource: moveSource
+			toFile: fileIndex.
+		self hasClassSide ifTrue: [
+			aFileStream cr; nextPutAll: '"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!'; cr; cr.
+			self classTrait
+				fileOutOn: aFileStream
+				moveSource: moveSource
+				toFile: fileIndex]
+	)
+	
+	possibleVariablesFor: misspelled continuedFrom: oldResults = (
+	
+		| results |
+		results := misspelled correctAgainstDictionary: self classPool continuedFrom: oldResults.
+		self sharedPools do: [:pool | 
+			results := misspelled correctAgainstDictionary: pool continuedFrom: results ].
+		self superclass == nil
+			ifTrue: 
+				[ ^ misspelled correctAgainstDictionary: self environment continuedFrom: results ]
+			ifFalse:
+				[ ^ self superclass possibleVariablesFor: misspelled continuedFrom: results ]
+	)
+	
+	setName: aSymbol = (
+		self name: aSymbol.
+	)
+	
+	isClassTrait = (
+		^false
+	)
+	
+	isBaseTrait = (
+		^true
+	)
+	
+	allSharedPools = (
+		"Answer an ordered collection of the pools the receiver shares, including those defined  in the superclasses of the receiver."
+		| aSet | 
+		^self superclass == nil
+			ifTrue: [self sharedPools copy]
+			ifFalse: [aSet := self superclass allSharedPools.
+				aSet addAll: self sharedPools.
+				aSet]
+	)
+	
+	variableSubclass: aClassName uses: aTraitCompositionOrArray instanceVariableNames: instVarNames 
+		classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+		
+		^ self variableSubclass: aClassName 
+			uses: aTraitCompositionOrArray
+			instanceVariableNames: instVarNames  
+			classVariableNames: classVarNames 
+			poolDictionaries: ''
+			category: cat
+	)
+	
+	replaceClassVariable: newVar = (
+	
+		"replace an exisiting class var with the same name. used to wrap class vars for MetaLinks"
+		
+		(self classPool includesKey: newVar key) ifFalse: [ ^self ].
+		self classPool removeKey: newVar key.
+		self classPool add: newVar.
+	)
+	
+	newSubclass = (
+		| i className |
+		i := 1.
+		[className := (self name , i printString) asSymbol.
+		 self environment includesKey: className]
+			whileTrue: [i := i + 1].
+	
+		^ self subclass: className
+			instanceVariableNames: ''
+			classVariableNames: ''
+			poolDictionaries: ''
+			category: 'Unclassified'
+	
+	"Point newSubclass new"
+	)
+	
+	subclasses = (
+		"for compatibility with classes"
+		
+		^ #()
+	)
+	
+	gtInspectorAllReferencesIn: composite = (
+		"This provides a list of all methods provided by the current class"
+		<gtInspectorPresentationOrder: 20>
+		composite list 
+			title: 'All Ref';
+			display: [ (SystemNavigation default allReferencesTo: self binding) 
+							sorted: [ :x :y | x name < y name ] ];
+			format: #name;
+			tags: [ :each | { each package name } ]
+	)
+	
+	duplicateClassWithNewName: aSymbol = (
+		| copysName class newDefinition |
+		copysName := aSymbol asSymbol.
+		copysName = self name
+			ifTrue: [ ^ self ].
+		(Smalltalk globals includesKey: copysName)
+			ifTrue: [ ^ self error: copysName , ' already exists' ].
+		newDefinition := self definition copyReplaceAll: '#' , self name asString with: '#' , copysName asString.
+		class := self class compiler source: newDefinition; logged: true; evaluate.
+		class classSide instanceVariableNames: self classSide instanceVariablesString.
+		class copyAllCategoriesFrom: self.
+		class class copyAllCategoriesFrom: self class.
+		^ class
+	)
+	
+	gtInspectorMethodsIn: composite = (
+		"This provides a list of all methods provided by the current class"
+		<gtInspectorPresentationOrder: 20>
+		composite list 
+			title: 'Methods';
+			display: [ (self allMethods collect: #asRingDefinition) 
+							sorted: [ :x :y | x selector < y selector ] ];
+			format: #selector;
+			tags: [ :each | {each methodClass name} ]
+	)
+	
+	variableSubclass: aName uses: aTraitComposition instanceVariableNames: someInstanceVariableNames classVariableNames: someClassVariableNames poolDictionaries: someSharedPoolNames category: aCategory = (
+		"Creates a new class as a subclass of an existing class (the receiver) 
+		in which the subclass is to have indexable pointer variables."
+		
+		^ self
+			subclass: aName
+			uses: aTraitComposition
+			with: [ 
+				self
+					variableSubclass: aName
+					instanceVariableNames: someInstanceVariableNames
+					classVariableNames: someClassVariableNames
+					poolDictionaries: someSharedPoolNames
+					category: aCategory ]
+	)
+	
+	subclass: aSubclassSymbol instanceVariableNames: instVarNames classVariableNames: classVarNames category: aCategorySymbol = (
+		"Added to allow for a simplified subclass creation experience. "
+		^ self
+			subclass: aSubclassSymbol
+			instanceVariableNames: instVarNames
+			classVariableNames: classVarNames
+			poolDictionaries: ''
+			category: aCategorySymbol
+	)
+	
+	usesLocalPoolVarNamed: aString = (
+		"Return whether the receiver uses a pool variable named: aString which is defined locally"
+		
+		self hasSharedPools
+			ifTrue: [ self sharedPools do: [:each | (each usesClassVarNamed: aString) 
+													ifTrue: [ ^true ]]]
+			ifFalse: [ ^false ].
+		^false
+	)
+	
+	getName = (
+		^ self name
+	)
+	
+	hasClassVarNamed: aString = (
+		"Return whether the receiver has a class variables (shared variables among its class and subclasses) named: aString"
+		
+		^ self classVarNames includes: aString
+	)
+	
+	weakSubclass: t instanceVariableNames: f 
+		classVariableNames: d poolDictionaries: s category: cat = (
+		"This is the standard initialization message for creating a new class as a subclass of an existing class (the receiver) in which the subclass is to have weak indexable pointer variables."
+		^self classBuilder
+			superclass: self
+			weakSubclass: t
+			instanceVariableNames: f
+			classVariableNames: d
+			poolDictionaries: s
+			category: cat
+	)
+	
+	removeClassVarNamed: aString = (
+		"Remove the class variable whose name is the argument, aString, from 
+	    the names defined in the receiver, a class. Create an error notification if 
+	    aString is not a class variable or if it is still being used in the code of 
+	    the class."
+	
+		| aSymbol |
+		aSymbol := aString asSymbol.
+		(self classPool includesKey: aSymbol)
+			ifFalse: [ ^ self error: aString , ' is not a class variable' ].
+		self withAllSubclasses
+			do: [ :subclass | 
+				(Array with: subclass with: subclass class)
+					do: [ :classOrMeta | 
+						(classOrMeta whichSelectorsReferTo: (self classPool associationAt: aSymbol)) isEmpty
+							ifFalse: [ 
+								InMidstOfFileinNotification signal
+									ifTrue: [ 
+										self crTrace: self name , ' (' , aString , ' is Undeclared) '.
+										^ Undeclared declare: aSymbol from: self classPool ]
+									ifFalse: [ 
+										(self
+											confirm:
+												(aString , ' is still used in code of class ' , classOrMeta name , '.\Is it okay to move it to Undeclared?') withCRs)
+											ifTrue: [ ^ Undeclared declare: aSymbol from: self classPool ]
+											ifFalse: [ ^ self ] ] ] ] ].
+		self classPool removeKey: aSymbol.
+		self classPool isEmpty
+			ifTrue: [ self classPool: nil ]
+	)
+	
+	addClassVarNamed: aString = (
+	
+		"Add the argument, aString, as a class variable of the receiver.
+		Signal an error if the first character of aString is not capitalized,
+		or if it is already a variable named in the class."
+		
+		self addClassVariable: (aString asSymbol => ClassVariable)
+	)
+	
+	allClassVarNames = (
+		"Answer a Set of the names of the receiver's class variables, including those
+		defined in the superclasses of the receiver."
+	
+		| aSet |
+		self superclass == nil
+			ifTrue: 
+				[^self classVarNames asSet]  "This is the keys so it is a new Set."
+			ifFalse: 
+				[aSet := self superclass allClassVarNames.
+				aSet addAll: self classVarNames.
+				^aSet]
+	)
+	
+	criticTheNonMetaclassClass = (
+	
+		"Return the class of the receiver for the critic browser. This behavior may be folded later by changing the name of this method or using another one."
+		
+		^ self 
+	)
+	
+	bindingOf: varName = (
+		"Answer the binding of some variable resolved in the scope of the receiver, or nil
+		if variable with such name is not defined"
+	
+		"The lookup recurses up to superclasses looking inside their class and shared pools,
+		but not the environment, since two classes, even if they have ancestry relationship,
+		could use different environments.
+		That's why we doing an environment lookup only as a last step of symbol lookup 
+		and taking only the environment of receiver only, not any of it's superclass(es) "
+		
+		| aSymbol |
+		aSymbol := varName asSymbol.
+	
+		^ (self innerBindingOf: aSymbol) ifNil: [
+			 self environment bindingOf: aSymbol
+		]
+	)
+	
+	variableWordSubclass: className instanceVariableNames: instVarNames
+		classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+		 
+		^ self variableWordSubclass: className
+			instanceVariableNames: instVarNames  
+			classVariableNames: classVarNames 
+			poolDictionaries: ''
+			category: cat
+	)
+	
+	addClassVariable: aGlobal = (
+		"Add the argument, aString, as a class variable of the receiver.
+		Signal an error if the first character of aString is not capitalized,
+		or if it is already a variable named in the class."
+		| symbol oldState |
+		oldState := self copy.
+		symbol := aGlobal name asSymbol.
+		self withAllSubclasses do: 
+			[:subclass | 
+			(subclass bindingOf: symbol) ifNotNil:[
+				^ self error: symbol asString 
+					, ' is already used as a variable name in class ' 
+					, subclass name]].
+		(self classPool includesKey: symbol) ifFalse: 
+			["Pick up any refs in Undeclared"
+			self classPool declareVariable: aGlobal from: Undeclared.
+			SystemAnnouncer uniqueInstance classDefinitionChangedFrom: oldState to: self]
+	)
+	
+	spotterClassMethodsFor: aStep = (
+		<spotterOrder: 15>
+		aStep listProcessor
+				title: 'Class methods';
+				allCandidates: [ self classSide methods ];
+				itemName: [ :method | method selector ];
+				filter: GTFilterSubstring
+	)
+	
+	subclass: aSubclassSymbol slots: slotDefinition classVariables: classVarDefinition poolDictionaries: someSharedPoolNames category: aCategorySymbol = (
+	
+		^ PharoClassInstaller make: [ :builder |
+			builder name: aSubclassSymbol;
+			superclass: self;
+			slots: slotDefinition;
+			sharedVariables:  classVarDefinition;
+			sharedPools: someSharedPoolNames;
+			category: aCategorySymbol ].
+	
+	)
+	
+	removeClassVariable: aGlobal = (
+		"Remove the class variable"
+		self removeClassVarNamed: aGlobal name
+	
+		
+	)
+	
+	addSubclass: aSubclass = (
+	
+		self shouldNotImplement
+	)
+	
+	obsolete = (
+		"Change the receiver and all of its subclasses to an obsolete class."
+		self == Object 
+			ifTrue: [^self error: 'Object is NOT obsolete'].
+		self setName: 'AnObsolete' , self name.
+		Object class instSize + 1 to: self classSide instSize do:
+			[:i | self instVarAt: i put: nil]. "Store nil over class instVars."
+		self classPool: nil.
+		self sharedPools: nil.
+		self hasClassSide ifTrue: [ self theMetaClass obsolete].
+		self propertyValueAt: #obsolete put: true.
+		super obsolete.
+	)
+	
+	category = (
+		"Answer the system organization category for the receiver. First check whether the
+		category name stored in the ivar is still correct and only if this fails look it up
+		(latter is much more expensive)"
+	
+		| result |
+		self basicCategory ifNotNil: [ :symbol |
+			((self environment organization listAtCategoryNamed: symbol) includes: self name)
+				ifTrue: [ ^symbol ] ].
+		result := (self environment organization categoryOfElement: self name)
+			ifNil: [ #Unclassified ]
+			ifNotNil: #yourself.
+		self basicCategory: result.
+		
+		^ result
+	)
+	
+	classSideCompiler = (
+		"Redefine this method if you want to customize the compiler for class-side methods"
+		^self classSideCompilerClass new
+			environment: self classSide environment;
+			class: self classSide
+	)
+	
+	isValidTraitName: aSymbol = (
+		^(aSymbol isEmptyOrNil
+			or: [aSymbol first isLetter not
+			or: [aSymbol anySatisfy: [:character | character isAlphaNumeric not]]]) not
+	)
+	
+	removeFromSystem = (
+		"Forget the receiver from the Smalltalk global dictionary. Any existing 
+		instances will refer to an obsolete version of the receiver."
+		self removeFromSystem: true.
+	)
+	
+	sharing: poolString = (
+	
+		"Set up sharedPools. Answer whether recompilation is advisable."
+		| oldPools |
+		oldPools := self sharedPools.
+		self sharedPools: OrderedCollection new.
+		(poolString substrings: ' ') do: 
+			[:poolName | 
+			self sharedPools add: (self environment at: poolName asSymbol ifAbsent:[
+				(self confirm: 'The pool dictionary ', poolName,' does not exist.',
+							'\Do you want it automatically created?' withCRs)
+					ifTrue: [ PharoClassInstaller make: [ :builder | 
+								builder superclass: SharedPool;
+								name: poolName;
+								category: self category ]]
+					ifFalse:[^self error: poolName,' does not exist']])].
+		self sharedPools isEmpty ifTrue: [self sharedPools: nil].
+		oldPools do: [:pool |
+					| found |
+					found := self sharedPools anySatisfy: [:p | p == pool].
+					found ifFalse: [^ true "A pool got deleted"]].
+		^ false
+	)
+	
+	asHelpTopic = (
+		^SystemReference forClass: self
+	)
+	
+	innerBindingOf: aSymbol = (
+		"Answer the binding of some variable resolved in the scope of the receiver, or one of its superclass
+		but do not look up binding in receiver's environment.
+		Use #bindingOf: for looking up the variable binding in a full scope, including receiver's environment"
+	
+		"First look in classVar dictionary."
+		(self classPool bindingOf: aSymbol) ifNotNil: [:binding | ^binding].
+		"Next look in shared pools."
+		self sharedPools do: [:pool | (pool bindingOf: aSymbol) ifNotNil: [:binding | ^binding]].
+		self superclass ifNotNil: [:supercl | ^ supercl innerBindingOf: aSymbol].	
+		^ nil
+	)
+	
+	weakSubclass: className uses: aTraitCompositionOrArray instanceVariableNames: instVarNames 
+		classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+		
+		^ self weakSubclass: className
+			uses: aTraitCompositionOrArray
+			instanceVariableNames: instVarNames 
+			classVariableNames: classVarNames 
+			poolDictionaries: ''
+			category: cat
+	
+	)
+	
+	removeFromSystem: logged = (
+		"Forget the receiver from the Smalltalk global dictionary. Any existing 
+		instances will refer to an obsolete version of the receiver."
+		
+		"keep the class name and category for triggering the system change message. If we wait to long, then we get obsolete information which is not what we want."
+	
+		"tell class to deactivate and unload itself-- two separate events in the module system"
+		self unload.
+		self traitUsers do: [ :user | user removeFromComposition: self ].
+		self superclass ifNotNil:
+			["If we have no superclass there's nothing to be remembered"
+			self superclass addObsoleteSubclass: self].
+		self environment forgetClass: self logged: logged.
+		self obsolete.
+	)
+	
+	binding = (
+	       "Answer a binding for the receiver, sharing if possible"
+	      | binding |
+		binding := self environment associationAt: self name ifAbsent: [nil -> self].
+	       ^binding value == self ifTrue: [binding] ifFalse: [nil -> self]
+	)
+	
+	subclass: t = (
+		^ self subclass: t instanceVariableNames: '' classVariableNames: '' poolDictionaries: '' category: 'Unclassified' 
+	)
+	
+	usesPoolVarNamed: aString = (
+		"Return whether the receiver has a pool variable named: aString, taking into account superclasses too"
+		
+		self allSharedPools do: [:each | (each usesClassVarNamed: aString) ifTrue: [^true]].
+		^false
+	)
+	
+	asRingDefinition = (
+		"A triat is converted to a ring class. Only the receiver is converted.
+		Methods, superclasses, subclasses are not generated"
+	
+		| ring |
+		ring:= (RGTraitDefinition named: self name)
+			category: self category;
+			superclassName: #Trait;  
+			traitCompositionSource: self traitCompositionString;
+			comment: self organization classComment;
+			stamp: self organization commentStamp;
+			definitionSource: self definition;
+			withMetaclass.
+			
+		ring theMetaClass 
+			traitCompositionSource: self theMetaClass traitCompositionString;
+			definitionSource: self theMetaClass definition.
+		^ring
+	)
+	
+	hasAbstractMethods = (
+		"Tells whether the receiver locally defines an abstract method, i.e., a method sending subclassResponsibility"
+		^ super hasAbstractMethods or: [self class hasAbstractMethods]
+	
+	)
+	
+	subclass: aName uses: aTraitComposition with: aBlock = (
+	
+		"Define (or redefine) a subclass by evaluating a block closure. 
+	
+		Note (MartinDias): 
+			This is a workaround for the subclass creation API when a trait is specified. 
+			To fix it well, in Pharo 4, a bit deeper refactoring is required, delegating this responsibility
+			to SlotClassBuilder."
+	
+		^ self environment 
+			at: aName
+			ifPresent: [ :old | 
+				| copyOfOld newClass |
+				copyOfOld := old copy.
+	
+				"Modify the class and set the new trait composition"
+				newClass := aBlock value. 
+				newClass setTraitComposition: aTraitComposition asTraitComposition.
+	
+				"Announce that the definition changed when there is a new trait composution. 
+				Note: It may be a re-announce if there was other change in the class definition, 
+				e.g. an instace variable added."
+				(newClass traitComposition syntacticallyEquals: copyOfOld traitComposition) ifFalse: [ 
+					SystemAnnouncer uniqueInstance 
+						classDefinitionChangedFrom: copyOfOld 
+						to: newClass ].
+	
+				newClass ]
+			ifAbsent: [
+				"Create the class and set the trait composition"
+				aBlock value
+					setTraitComposition: aTraitComposition asTraitComposition;
+					yourself ].
+	)
+	
+	name = (
+		^name
+	)
+	
+	classPool: aDictionary = (
+		"Compatibility purposes"
+	)
+	
+	classVariables = (
+		"Answer the meta objects of all class variables"
+	
+		^self classPool associations
+	)
+	
+	fileOutOn: aFileStream moveSource: moveSource toFile: fileIndex = (
+	
+		"File a description of the receiver on aFileStream. If the boolean argument,
+		moveSource, is true, then set the trailing bytes to the position of aFileStream and
+		to fileIndex in order to indicate where to find the source code."
+		^self fileOutOn: aFileStream moveSource: moveSource toFile: fileIndex initializing: true
+	)
+	
+	removeInstVarNamed: aString = (
+	
+		"Remove the argument, aString, as one of the receiver's instance variables."
+	
+		| newInstVarString |
+		(self instVarNames includes: aString)
+			ifFalse: [self error: aString , ' is not one of my instance variables'].
+		newInstVarString := ''.
+		(self instVarNames copyWithout: aString) do: 
+			[:varName | newInstVarString := newInstVarString , ' ' , varName].
+		^self classBuilder
+			name: self name
+			inEnvironment: self environment
+			subclassOf: self superclass
+			type: self typeOfClass
+			instanceVariableNames: newInstVarString
+			classVariableNames: self classVariablesString
+			poolDictionaries: self sharedPoolsString
+			category: self category
+	)
+	
+	removeSubclass: aSubclass = (
+	
+		"If the argument, aSubclass, is one of the receiver's subclasses, remove it."
+	
+		self subclasses == nil ifFalse:
+			[self subclasses:  (self subclasses copyWithout: aSubclass).
+			self subclasses isEmpty ifTrue: [self subclasses: nil]].
+	)
+	
+	sharedPoolOfVarNamed: aString = (
+		"Returns the SharedPool or nil from which the pool variable named aString is coming from."
+		
+		 ^ self sharedPools 
+				detect: [:each | each usesClassVarNamed: aString ]
+				ifNone: [
+							self superclass == nil
+								ifTrue: [nil]
+								ifFalse: [self superclass sharedPoolOfVarNamed: aString]
+							]
+	)
+	
+	fileOutPool: aPool onFileStream: aFileStream = (
+	
+		| aPoolName |
+		(aPool  isKindOf: SharedPool class) ifTrue:[^self notify: 'we do not fileout SharedPool type shared pools for now'].
+		aPoolName := self environment keyAtIdentityValue: aPool.
+		self crTrace: aPoolName.
+		aFileStream nextPutAll: 'Transcript show: ''' , aPoolName , '''; cr!'; cr.
+		aFileStream nextPutAll: 'Smalltalk at: #' , aPoolName , ' put: Dictionary new!'; cr.
+		aPool keys asSortedCollection do: [ :aKey | | aValue |
+			aValue := aPool at: aKey.
+			aFileStream nextPutAll: aPoolName , ' at: #''' , aKey asString , '''', ' put:  '.
+			(aValue isKindOf: Number)
+				ifTrue: [aValue printOn: aFileStream]
+				ifFalse: [aFileStream nextPutAll: '('.
+						aValue printOn: aFileStream.
+						aFileStream nextPutAll: ')'].
+			aFileStream nextPutAll: '!'; cr].
+		aFileStream cr
+	)
+	
+	basicCategory: aSymbol = (
+		category := aSymbol
+	)
+	
+	subclass: aSubclassSymbol uses: aTraitCompositionOrArray  layout: layoutClass slots: slotDefinition classVariables: classVarDefinition category: aCategorySymbol = (
+		^ self
+			subclass: aSubclassSymbol
+			uses: aTraitCompositionOrArray
+			with: [ 
+				PharoClassInstaller
+					make: [ :builder | 
+						builder
+							name: aSubclassSymbol;
+							superclass: self;
+							layoutClass: layoutClass;
+							slots: slotDefinition;
+							sharedVariables: classVarDefinition;
+							category: aCategorySymbol ] ]
+	)
+	
+	subclasses: aCollection = (
+		"Compatibility purposes"
+	)
+	
+	spotterSuperMethodsFor: aStep = (
+		<spotterOrder: 11>
+		aStep listProcessor
+				title: 'Super instance methods';
+				allCandidates: [ self allMethods reject: [ :each | each methodClass = self ] ];
+				filter: GTFilterSubstring
+	)
+	
+	fuelAccept: aGeneralMapper = (
+	
+		^aGeneralMapper visitTrait: self
+	)
+	
+	isClassOrTrait = (
+		^true
+	)
+	
+	environment = (
+		^environment
+	)
+	
+	fileOutInitializerOn: aStream = (
+		^self class fileOutInitializerOn: aStream
+	)
+	
+	shouldFileOutPools = (
+		"respond with true if the user wants to file out the shared pools"
+		^self confirm: 'FileOut selected sharedPools?'
+	)
+	
+	classTrait: aTrait = (
+		"Assigns the class trait associated with the receiver."
+		
+		[aTrait isClassTrait] assert.
+		classTrait := aTrait
+	)
+	
+	classVarNames = (
+		"Answer a collection of the names of the class variables defined in the receiver."
+	
+		^self classPool keys sort
+	)
+	
+	removeFromChanges = (
+		"References to the receiver, a class, and its metaclass should no longer be included in the system ChangeSet."
+	
+		ChangeSet current removeClassAndMetaClassChanges: self
+	)
+	
+	unload = (
+		"Sent when a the class is removed.  Does nothing, but may be overridden by (class-side) subclasses."
+	)
+	
+	reformatAll = ( 
+		"Reformat all methods in this class.
+		Leaves old code accessible to version browsing"
+		super reformatAll.		"me..."
+		self class reformatAll	"...and my metaclass"
+	)
+	
+	classVarNamed: aString = (
+		"for compatibility"
+	
+		^self readClassVariableNamed: aString
+	)
+	
+	variableWordSubclass: t instanceVariableNames: f 
+		classVariableNames: d poolDictionaries: s category: cat = (
+		"This is the standard initialization message for creating a new class as a 
+		subclass of an existing class (the receiver) in which the subclass is to 
+		have indexable word-sized nonpointer variables."
+		^self classBuilder
+			superclass: self
+			variableWordSubclass: t
+			instanceVariableNames: f
+			classVariableNames: d
+			poolDictionaries: s
+			category: cat
+	
+	)
+	
+	classDefinitions = (
+		| definitions |
+		definitions := OrderedCollection with: self asClassDefinition.
+		(self hasClassSide
+			and: [self classTrait hasTraitComposition])
+						ifTrue: [definitions add: self classTrait asMCDefinition].
+		^definitions asArray
+	)
+	
+	hasClassSide = (
+		^self classSide notNil.
+	)
+	
+	hasSharedPools = (
+		"Returns whether the receiver uses shared pools directly (Does not take into account that it may inherit shared pool uses."
+		^ self sharedPools notEmpty
+	)
+	
+	subclass: aName uses: aTraitCompositionOrArray instanceVariableNames: someInstanceVariableNames classVariableNames: someClassVariableNames poolDictionaries: someSharedPoolNames category: aCategory = (
+	
+		^ self
+			subclass: aName
+			uses: aTraitCompositionOrArray
+			with: [ 
+				self
+					subclass: aName
+					instanceVariableNames: someInstanceVariableNames
+					classVariableNames: someClassVariableNames
+					poolDictionaries: someSharedPoolNames
+					category: aCategory ]
+	)
+	
+	variableSubclass: t instanceVariableNames: f 
+		classVariableNames: d poolDictionaries: s category: cat = (
+		"This is the standard initialization message for creating a new class as a 
+		subclass of an existing class (the receiver) in which the subclass is to 
+		have indexable pointer variables."
+		^self classBuilder
+			superclass: self
+			variableSubclass: t
+			instanceVariableNames: f
+			classVariableNames: d
+			poolDictionaries: s
+			category: cat
+	
+	)
+	
+	subclass: aSubclassSymbol uses: aTraitCompositionOrArray slots: slotDefinition classVariables: classVarDefinition category: aCategorySymbol = (
+		^ self
+			subclass: aSubclassSymbol
+			uses: aTraitCompositionOrArray
+			with: [ 
+				PharoClassInstaller
+					make: [ :builder | 
+						builder
+							name: aSubclassSymbol;
+							superclass: self;
+							slots: slotDefinition;
+							sharedVariables: classVarDefinition;
+							category: aCategorySymbol ] ]
+	)
+	
+	classSideCompilerClass = ( 
+		"Redefine this method if you want to customize the compiler class for class-side methods"
+		^ Smalltalk compilerClass
+	)
+	
+	classVarNamed: aString put: anObject = (
+		"for compatibility"
+		
+		self writeClassVariableNamed: aString value: anObject
+	)
+	
+	addSharedPool: aSharedPool = (
+	
+		"Add the argument, aSharedPool, as one of the receiver's shared pools. 
+		Create an error if the shared pool is already one of the pools.
+		This method will work with shared pools that are plain Dictionaries or thenewer SharedPool subclasses"
+	
+		(self sharedPools includes: aSharedPool)
+			ifTrue: [^self error: 'This is already in my shared pool list'].
+		self sharedPools == nil
+			ifTrue: [self sharedPools: (OrderedCollection with: aSharedPool)]
+			ifFalse: [self sharedPools add: aSharedPool]
+	)
+	
+	weakSubclass: className instanceVariableNames: instVarNames 
+		classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+		
+		^ self weakSubclass: className 
+			instanceVariableNames: instVarNames 
+			classVariableNames: classVarNames 
+			poolDictionaries: ''
+			category: cat
+	)
+	
+	subclass: t instanceVariableNames: ins = (
+		^ self subclass: t instanceVariableNames: ins classVariableNames: '' poolDictionaries: '' category: 'Unclassified' 
+	)
+	
+	variableByteSubclass: aName uses: aTraitComposition instanceVariableNames: someInstanceVariableNames classVariableNames: someClassVariableNames poolDictionaries: someSharedPoolNames category: aCategory = (
+		"Creates a new class as a subclass of an existing class (the receiver) 
+		in which the subclass is to have indexable byte-sized nonpointer variables."
+		
+		^ self
+			subclass: aName
+			uses: aTraitComposition
+			with: [ 
+				self
+					variableByteSubclass: aName
+					instanceVariableNames: someInstanceVariableNames
+					classVariableNames: someClassVariableNames
+					poolDictionaries: someSharedPoolNames
+					category: aCategory ]
+	)
+	
+	copy = ( 
+		| newTrait |
+		newTrait := self class basicNew initialize
+			name: self name
+			traitComposition: self traitComposition copyTraitExpression 
+			methodDict: self methodDict copy
+			localSelectors: self localSelectors copy
+			organization: self organization copy.
+		
+		newTrait environment: self environment.	
+		newTrait classTrait initializeFrom: self classTrait.
+		^newTrait
+	)
+	
+	variableByteSubclass: className instanceVariableNames: instvarNames 
+		classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+		^self variableByteSubclass: className
+			instanceVariableNames: instvarNames
+			classVariableNames: classVarNames
+			poolDictionaries: ''
+			category: cat
+	)
+	
+	classPool = (
+		^ Dictionary new
+	)
+	
+	declareClassVariables: newVars = (
+	
+		"Declare class variables common to all instances. Answer whether 
+		recompilation is advisable."
+		|  conflicts |
+		
+		conflicts := false.	
+		(self classVariables reject: [:x | newVars includes: x]) do: [:var | [self removeClassVariable: var] on: InMidstOfFileinNotification do: [:ex | ex resume: true]].
+		
+		(newVars reject: [:var | self classVariables includes: var]) do: [:var | "adding"
+				"check if new vars defined elsewhere"
+				(self innerBindingOf: var key) 
+					ifNotNil: [(DuplicatedVariableError new) variable: var name;
+							signal: var name , ' is defined elsewhere'.
+						conflicts := true]].
+		newVars notEmpty
+			ifTrue: 
+				[self classPool: self classPool.
+				"in case it was nil"
+				newVars do: [:var | self classPool declareVariable: var from: Undeclared]].
+		^conflicts
+	)
+	
+	subclass: aSubclassSymbol slots: slotDefinition classVariables: classVarDefinition category: aCategorySymbol = (
+	
+		^ PharoClassInstaller make: [ :builder |
+			builder name: aSubclassSymbol;
+			superclass: self;
+			slots: slotDefinition;
+			sharedVariables: classVarDefinition;
+			category: aCategorySymbol ].
+	
+	)
+	
+	variableWordSubclass: className uses: aTraitCompositionOrArray instanceVariableNames: instVarNames
+		classVariableNames: classVarNames category: cat = (
+		"Added to allow for a simplified subclass creation experience. "
+	
+		^ self variableWordSubclass: className
+			uses: aTraitCompositionOrArray
+			instanceVariableNames: instVarNames
+			classVariableNames: classVarNames
+			poolDictionaries: ''
+			category: cat
+	)
+	
+	definesClassVariable: aGlobal = (
+		"Return whether the receiver has a class variables (shared variables among its class and subclasses) named: aString"
+		
+		^ self classVariables includes: aGlobal
+	)
+	
+	fileOutSharedPoolsOn: aFileStream = (
+		"file out the shared pools of this class after prompting the user about each pool"
+		| poolsToFileOut |
+		poolsToFileOut := self sharedPools select: 
+			[:aPool | (self shouldFileOutPool: (self environment keyAtIdentityValue: aPool))].
+		poolsToFileOut do: [:aPool | self fileOutPool: aPool onFileStream: aFileStream].
+		
+	)
+	
+	subclass: aTraitName uses: aTraitCompositionOrArray instanceVariableNames: instVarNames classVariableNames: classVarNames category: cat = (
+	
+	
+		^ self
+			subclass: aTraitName
+			uses: aTraitCompositionOrArray
+			instanceVariableNames: instVarNames
+			classVariableNames: classVarNames
+			poolDictionaries: ''
+			category: cat 
+	)
+	
+	variableByteSubclass: className uses: aTraitCompositionOrArray instanceVariableNames: instVarNames 
+		classVariableNames: classVarNames category: cat = (
+			"Added to allow for a simplified subclass creation experience. "
+		
+		^ self variableByteSubclass: className
+			uses: aTraitCompositionOrArray
+			instanceVariableNames: instVarNames
+			classVariableNames: classVarNames 
+			poolDictionaries: ''
+			category: cat
+	)
+	
+	isSelfEvaluating = (
+		^self isObsolete not
+	)
+	
+	gtInspectorCommentIn: composite = (
+		"This provides an editable comment of the current class"
+		<gtInspectorPresentationOrder: 20>
+		composite text 
+			title: 'Comment';
+			display: [ self comment ];
+			act: [ :text | 
+				self comment: text text stamp: Author changeStamp]
+				icon: GLMUIThemeExtraIcons glamorousAccept 
+				on: $s
+				entitled: 'Accept'
+	)
+	
+	fileOut = (
+		"Create a file whose name is the name of the receiver with '.st' as the 
+		extension, and file a description of the receiver onto it."
+		
+		| internalStream |
+		internalStream := (String new: 100) writeStream.
+		internalStream header; timeStamp.
+	
+		self hasSharedPools ifTrue: [
+			self shouldFileOutPools
+				ifTrue: [self fileOutSharedPoolsOn: internalStream]].
+		self fileOutOn: internalStream moveSource: false toFile: 0.
+		internalStream trailer.
+	
+		FileStream writeSourceCodeFrom: internalStream baseName: self name isSt: true
+	)
+	
+	gtInspectorAllReferencesOutsideIn: composite = (
+		"This provides a list of all methods provided by the current class"
+		<gtInspectorPresentationOrder: 20>
+		composite list 
+			title: 'All Ref Outside';
+			display: [ ((SystemNavigation default allReferencesTo: self binding) 
+								reject: [ :method | method package name == self package name ])
+							sorted: [ :x :y | x name < y name ] ];
+			format: #name;
+			tags: [ :each | { each package name } ]
+	)
+	
+	asRingDefinitionWithMethods: methodsBoolean withSuperclasses: supersBoolean withSubclasses: subsBoolean withPackageKeys: packageKeys in: aRGSlice = (
+		
+		| rgClass rgMethod rgSuper sup |	
+		rgClass := self asRingDefinition.
+		aRGSlice loadClass: rgClass using: packageKeys.
+	
+		methodsBoolean ifTrue: [
+			self methodsDo:[ :mth|  
+				rgMethod := mth asActiveRingDefinition.
+				aRGSlice loadMethod: rgMethod inClass: rgClass using: packageKeys ].
+			self theMetaClass methodsDo:[ :mth|  
+				rgMethod := mth asActiveRingDefinition.
+				aRGSlice loadMethod: rgMethod inClass: rgClass theMetaClass using: packageKeys ] ].
+	
+		supersBoolean ifTrue: [
+			rgSuper := aRGSlice classNamed: rgClass superclassName.
+			rgSuper isNil ifTrue: [
+				sup := aRGSlice environment classNamed: rgClass superclassName.
+				rgSuper := sup asRingDefinitionWithMethods: methodsBoolean withSuperclasses: supersBoolean withSubclasses: subsBoolean withPackageKeys: packageKeys in: aRGSlice ].
+			rgClass superclass: rgSuper ].
+		
+		^rgClass
+	)
+)

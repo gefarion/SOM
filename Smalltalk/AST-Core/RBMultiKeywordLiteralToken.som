@@ -1,0 +1,7 @@
+RBMultiKeywordLiteralToken = RBLiteralToken (
+	
+	
+	isMultiKeyword = (
+		^true
+	)
+)

@@ -1,0 +1,137 @@
+RBLiteralArrayNode = RBLiteralNode (
+	"A RBLiteralArrayNode is an AST node that represents literal arrays and literal byte arrays.Instance Variables	contents: <Array of: RBLiteralNode> literal nodes of the array	isByteArray: <Boolean> if the receiver is a literal byte array"
+	| isByteArray contents |
+	
+	isLiteralArray = (
+		^true
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^ self class 
+			startPosition: nil
+			contents: (self copyList: self contents inContext: aDictionary)
+			stopPosition: nil
+			isByteArray: isByteArray
+	)
+	
+	children = (
+		^contents
+	)
+	
+	isFaulty = (
+		^self contents anySatisfy: #isFaulty
+	)
+	
+	replaceSourceWith: aNode = (
+	
+		(self class = aNode class and: 
+				[self isForByteArray = aNode isForByteArray 
+					and: [self contents size = aNode contents size]]) 
+			ifFalse: [^super replaceSourceWith: aNode].
+		self contents
+			with: aNode contents 
+			do: [:first :second | first = second ifFalse: [ first replaceSourceWith: second]]
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		self class = anObject class ifFalse: [^false].
+		self isForByteArray = anObject isForByteArray ifFalse: [^false].
+		self contents size = anObject contents size ifFalse: [^false].
+		self contents
+			with: anObject contents
+			do: [:first :second | (first equalTo: second withMapping: aDictionary) ifFalse: [^false]].
+		^true
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		self contents: (contents 
+					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]])
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitLiteralArrayNode: self
+	)
+	
+	isForByteArray = (
+		^isByteArray
+	)
+	
+	value = (
+		| array |
+		array := (isByteArray ifTrue: [ByteArray] ifFalse: [Array]) 
+					new: contents size.
+		1 to: contents size
+			do: [:each | array at: each put: (contents at: each) value].
+		^array
+	)
+	
+	= = ( anObject 
+		super = anObject ifFalse: [^false].
+		self isForByteArray = anObject isForByteArray ifFalse: [^false].
+		self contents size = anObject contents size ifFalse: [^false].
+		self contents
+			with: anObject contents
+			do: [:first :second | first = second ifFalse: [^false]].
+		^true
+	)
+	
+	postCopy = (
+		super postCopy.
+		self contents: (self contents collect: [ :each | each copy ])
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		aNode class = self class ifFalse: [^false].
+		self isForByteArray = aNode isForByteArray ifFalse: [^false].
+		^self 
+			matchList: contents
+			against: aNode contents
+			inContext: aDictionary
+	)
+	
+	startPosition: startInteger contents: anArray stopPosition: stopInteger isByteArray: aBoolean = (
+	
+		start := startInteger.
+		self contents: anArray.
+		stop := stopInteger.
+		isByteArray := aBoolean
+	)
+	
+	contents: aRBLiteralNodeCollection = (
+	
+		contents := aRBLiteralNodeCollection.
+		contents do: [:each | each parent: self]
+	)
+	
+	contents = (
+		^contents
+	)
+	
+	----------------------------------
+	
+	
+	value: aValue = (
+	
+		^(self new)
+			startPosition: nil
+				contents: (aValue asArray collect: [:each | RBLiteralNode value: each])
+				stopPosition: nil
+				isByteArray: aValue class ~~ Array;
+			yourself
+	)
+	
+	startPosition: startInteger contents: anArray stopPosition: stopInteger isByteArray: aBoolean = (
+	
+		^(self new)
+			startPosition: startInteger
+				contents: anArray
+				stopPosition: stopInteger
+				isByteArray: aBoolean;
+			yourself
+	)
+)

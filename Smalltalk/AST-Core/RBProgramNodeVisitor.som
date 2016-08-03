@@ -1,0 +1,125 @@
+RBProgramNodeVisitor = Object (
+	"RBProgramNodeVisitor is an abstract visitor for the RBProgramNodes."
+	
+	
+	visitSuperNode: aSuperNode = (
+		^ self visitVariableNode: aSuperNode
+	)
+	
+	visitThisContextNode: aThisContextNode = (
+		^ self visitVariableNode: aThisContextNode
+	)
+	
+	visitArgumentNodes: aNodeCollection = (
+	
+		"Sent *once* when visiting method and block nodes"
+		^aNodeCollection do: [ :each | self visitArgumentNode: each ]
+	)
+	
+	visitCascadeNode: aCascadeNode = (
+	
+		aCascadeNode messages do: [:each | self visitNode: each]
+	)
+	
+	visitMessageNode: aMessageNode = (
+	
+		(aMessageNode isCascaded not or: [aMessageNode isFirstCascaded]) 
+			ifTrue: [self visitNode: aMessageNode receiver].
+		aMessageNode arguments do: [:each | self visitNode: each]
+	)
+	
+	visitMethodNode: aMethodNode = (
+	
+		self visitArgumentNodes: aMethodNode arguments.
+		aMethodNode pragmas
+			do: [ :each | self visitNode: each ].
+		self visitNode: aMethodNode body
+	)
+	
+	visitArrayNode: anArrayNode = (
+	
+	
+		anArrayNode children do: [:each | self visitNode: each]
+	)
+	
+	visitPatternBlockNode: aRBPatternBlockNode = (
+	
+		self visitArgumentNodes: aRBPatternBlockNode arguments.
+		self visitNode: aRBPatternBlockNode body
+	)
+	
+	visitBlockNode: aBlockNode = (
+	
+		self visitArgumentNodes: aBlockNode arguments.
+		self visitNode: aBlockNode body
+	)
+	
+	visitSelfNode: aSelfNode = (
+		^ self visitVariableNode: aSelfNode
+	)
+	
+	visitTemporaryNode: aNode = (
+	
+		"Sent *each time* a temporary node is found"
+		^ self visitVariableNode: aNode
+	)
+	
+	visitVariableNode: aVariableNode = (
+		^ aVariableNode
+	)
+	
+	visitTemporaryNodes: aNodeCollection = (
+	
+		"This is triggered when defining the temporaries between the pipes"
+		^self visitArgumentNodes: aNodeCollection
+	)
+	
+	visitParseErrorNode: anErrorNode  = (
+	)
+	
+	visitSequenceNode: aSequenceNode = (
+	
+		self visitTemporaryNodes: aSequenceNode temporaries.
+		aSequenceNode statements do: [:each | self visitNode: each]
+	)
+	
+	visitLiteralArrayNode: aRBLiteralArrayNode = (
+	
+		aRBLiteralArrayNode contents do: [:each | self visitNode: each]
+	)
+	
+	visitNode: aNode = (
+	
+		^aNode acceptVisitor: self
+	)
+	
+	visitArgumentNode: anArgumentNode = (
+		"Sent *each time* an argument node is found"
+		^ self visitVariableNode: anArgumentNode
+	)
+	
+	visitAssignmentNode: anAssignmentNode = (
+	
+		self visitNode: anAssignmentNode variable.
+		self visitNode: anAssignmentNode value
+	)
+	
+	visitPatternWrapperBlockNode: aRBPatternWrapperBlockNode = (
+	
+		self visitNode: aRBPatternWrapperBlockNode wrappedNode.
+		self visitArgumentNodes: aRBPatternWrapperBlockNode arguments.
+		self visitNode: aRBPatternWrapperBlockNode body
+	)
+	
+	visitLiteralNode: aLiteralNode  = (
+	)
+	
+	visitReturnNode: aReturnNode = (
+	
+		^ self visitNode: aReturnNode value
+	)
+	
+	visitPragmaNode: aPragmaNode = (
+		aPragmaNode arguments do: [ :each | self visitNode: each ]
+	)
+)

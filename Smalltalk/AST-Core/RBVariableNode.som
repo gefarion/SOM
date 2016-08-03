@@ -1,0 +1,176 @@
+RBVariableNode = RBValueNode (
+	"RBVariableNode is an AST node that represent a variable (global, inst var, temp, etc.).Instance Variables:	name	<RBValueToken>	the variable's name I represent	nameStart <Integer>	the position where I was found at the source code"
+	| name start |
+	
+	stopWithoutParentheses = (
+		^ start + name size - 1.
+	)
+	
+	specialCommands = (
+		^self binding specialCommands
+	)
+	
+	isSpecialVariable = (
+		^ self binding isSpecialVariable
+	)
+	
+	isInstance = (
+		^self binding isInstance
+	)
+	
+	isFaulty = (
+		^false
+	)
+	
+	isGlobal = (
+		^self binding isGlobal
+	)
+	
+	binding: aSemVar = (
+		aSemVar ifNil: [^self removeProperty: #binding ifAbsent: []].
+		self propertyAt: #binding put: aSemVar.
+	)
+	
+	isImmediateNode = (
+		^true
+	)
+	
+	replaceSourceWith: aNode = (
+		self addReplacement: (RBStringReplacement 
+					replaceFrom: self start
+					to: self stop
+					with: aNode formattedCode)
+	)
+	
+	isRead = (
+		^ self isWrite not and: [ self isUsed ]
+	)
+	
+	isClean = (
+		^ (self isInstance | self isSpecialVariable) not
+	)
+	
+	isUndeclared = (
+	
+		^self binding isUndeclared
+	)
+	
+	start = (
+		^ start
+	)
+	
+	isTemp = (
+		^self binding isTemp
+	)
+	
+	start: aPosition = (
+		start := aPosition
+	)
+	
+	references: aVariableName = (
+	
+		^self name = aVariableName
+	)
+	
+	replaceSourceFrom: aNode = (
+	
+		self addReplacement: (RBStringReplacement 
+					replaceFrom: aNode start
+					to: aNode stop
+					with: self name)
+	)
+	
+	isVariable = (
+		^true
+	)
+	
+	isWrite = (
+		^ self parent notNil and: [ self parent isAssignment and: [ self parent variable == self ] ]
+	)
+	
+	hash = (
+		^self name hash
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^ self class named: name.
+	)
+	
+	isArg = (
+	
+		^self binding isArg
+	)
+	
+	precedence = (
+		^0
+	)
+	
+	startWithoutParentheses = (
+		^ start
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		^self class = anObject class and: 
+				[(aDictionary at: self name ifAbsentPut: [anObject name]) = anObject name]
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitVariableNode: self
+	)
+	
+	binding = (
+		^self propertyAt: #binding ifAbsent: [nil].
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [^true].
+		((anObject isKindOf: self class) or: [self isKindOf: anObject class]) 
+			ifFalse: [^false].
+		^self name = anObject name
+	)
+	
+	name: aName = (
+		name := aName asSymbol.
+	)
+	
+	named: aName start: aPosition = (
+	
+		self name: aName.
+		self start: aPosition.
+	)
+	
+	needsParenthesis = (
+		^false
+	)
+	
+	name = (
+		^ name
+	)
+	
+	----------------------------------
+	
+	
+	named: aName = (
+		^self named: aName start: 0.
+	)
+	
+	identifierNamed: anIdentifierName at: aPosition = (
+		
+		anIdentifierName = 'self'
+			ifTrue: [ ^ RBSelfNode named: anIdentifierName start: aPosition ].
+		anIdentifierName = 'thisContext'
+			ifTrue: [ ^ RBThisContextNode named: anIdentifierName start: aPosition ].
+		anIdentifierName = 'super'
+			ifTrue: [ ^ RBSuperNode named: anIdentifierName start: aPosition ].
+		^ self named: anIdentifierName start: aPosition.
+	)
+	
+	named: aName start: aPosition = (
+		^self new 
+			named: aName start: aPosition; 
+			yourself.
+	)
+)

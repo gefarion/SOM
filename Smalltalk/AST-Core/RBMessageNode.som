@@ -1,0 +1,558 @@
+RBMessageNode = RBValueNode (
+	"RBMessageNode is an AST node that represents a message send.Instance Variables:	arguments	<SequenceableCollection of: RBValueNode>	our argument nodes	receiver	<RBValueNode>	the receiver's node	selector	<Symbol>	the selector we're sending	keywordsPositions	<IntegerArray | nil>	the positions of the selector keywords"
+	| receiver selector keywordsPositions arguments |
+	
+	isInlineWhile = (
+		
+		self methodNode compilationContext optionInlineWhile ifFalse: [ ^false ]. 
+		self isCascaded ifTrue: [^ false].
+		(#(whileFalse: whileTrue: whileFalse whileTrue) includes: self selector) ifFalse: [^ false].
+		self receiver isBlock ifFalse: [^ false].
+		self receiver arguments isEmpty ifFalse: [self notify: 'while receiver block must have no arguments'. ^ false].
+		self arguments isEmpty ifFalse: [
+			self arguments first isBlock ifFalse: [^ false].
+			self arguments first arguments isEmpty ifFalse: [^ false].
+		].
+		^ true
+	)
+	
+	isMessage = (
+		^true
+	)
+	
+	isInlineAndOr = (
+		self methodNode compilationContext optionInlineAndOr ifFalse: [ ^false ]. 
+		self receiver isBlock ifTrue: [^ false].
+		self isCascaded ifTrue: [^ false].
+		(#(and: or:) includes: self selector) ifFalse: [^ false].
+		(self arguments allSatisfy: [ :each | each isBlock ])  ifFalse: [^ false].
+		(self arguments allSatisfy: [ :each | each arguments isEmpty ]) ifFalse: [^ false ].
+		^ true
+	)
+	
+	specialCommands = (
+		^ SugsSuggestionFactory commandsForMessage
+	)
+	
+	isKeyword = (
+		^(selector indexOf: $:) ~= 0.
+	)
+	
+	isBinary = (
+		^(self isUnary or: [self isKeyword]) not
+	)
+	
+	children = (
+		^(OrderedCollection with: self receiver)
+			addAll: self arguments;
+			yourself
+	)
+	
+	replaceSourceWith: aNode = (
+	
+		(self isContainmentReplacement: aNode) 
+			ifTrue: [^self replaceContainmentSourceWith: aNode].
+		aNode isMessage ifFalse: [^super replaceSourceWith: aNode].
+		^self replaceSourceWithMessageNode: aNode
+	)
+	
+	bestNodeFor: anInterval = (
+	
+		(self intersectsInterval: anInterval) ifFalse: [^nil].
+		(self containedBy: anInterval) ifTrue: [^self].
+		self keywordsIntervals do:
+				[:each | 
+				((each rangeIncludes: anInterval first) 
+					or: [anInterval rangeIncludes:  each first]) 
+						ifTrue: [^self]].
+		self children do: 
+				[:each | 
+				| node |
+				node := each bestNodeFor: anInterval.
+				node notNil ifTrue: [^node]]
+	)
+	
+	keywordsPositions: aPositionsList = (
+		keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ].
+	)
+	
+	keywordsPositions = (
+		^keywordsPositions ifNil: [ (selector keywords collect: [:char| 0 ]) asIntegerArray ]
+	)
+	
+	isInlineToDo = (
+	
+		| block step |
+		self methodNode compilationContext optionInlineToDo ifFalse: [ ^false ]. 
+	
+		self receiver isBlock ifTrue: [^ false].
+		self isCascaded ifTrue: [^ false].
+		(#(to:do: to:by:do:) includes: self selector) ifFalse: [^ false].
+		block := self arguments last.
+		block isBlock ifFalse: [^ false].
+		block arguments size = 1 ifFalse: [^ false].
+		self arguments first isVariable ifTrue: [ 
+			(RBParseTreeSearcher new
+				matches: self arguments first name , ' := `@object' do: [:n :a | true];
+				executeTree: block initialAnswer: false) ifTrue: [^ false].
+		].
+		self arguments size = 3 "to:by:do:" ifTrue: [
+			step := self arguments second.
+			step isLiteralNode ifFalse: [^ false].
+			step value = 0 ifTrue: [^ false].
+		].
+		^ true
+	)
+	
+	isInlineTimesRepeat = (
+	
+		| block |
+		self methodNode compilationContext optionInlineTimesRepeat ifFalse: [ ^false ]. 
+	
+		self receiver isBlock ifTrue: [^ false].
+		self isCascaded ifTrue: [^ false].
+		#timesRepeat: = self selector ifFalse: [^ false].
+		block := self arguments last.
+		block isBlock ifFalse: [^ false].
+		block arguments size isZero ifFalse: [^ false].
+		^ true
+	)
+	
+	renameSelector: newSelector andArguments: varNodeCollection = (
+	
+		self
+			arguments: varNodeCollection;
+			selector: newSelector
+	)
+	
+	sentMessages = (
+		^ super sentMessages
+			add: self selector;
+			yourself
+	)
+	
+	debugHighlightStart = (
+	
+		^ self  keywordsPositions first
+	)
+	
+	precedence = (
+		^self isUnary 
+			ifTrue: [1]
+			ifFalse: [self isKeyword ifTrue: [3] ifFalse: [2]]
+	)
+	
+	receiver: aValueNode = (
+	
+		receiver := aValueNode.
+		receiver parent: self
+	)
+	
+	replaceNode: aNode withNode: anotherNode = (
+	
+		"If we're inside a cascade node and are changing the receiver, change all the receivers"
+	
+		receiver == aNode 
+			ifTrue: 
+				[self receiver: anotherNode.
+				(parent notNil and: [parent isCascade]) 
+					ifTrue: [parent messages do: [:each | each receiver: anotherNode]]].
+		self arguments: (arguments 
+					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]])
+	)
+	
+	isInlineIf = (
+		self methodNode compilationContext optionInlineIf ifFalse: [ ^false ]. 
+		self receiver isBlock ifTrue: [^ false].
+		self isCascaded ifTrue: [^ false].
+		(#(ifTrue: ifFalse: ifTrue:ifFalse: ifFalse:ifTrue:) includes: self selector) ifFalse: [^ false].
+		self arguments do: [:node | node isBlock ifFalse: [^ false]].
+		self arguments do: [:block |
+			block arguments isEmpty ifFalse: [
+				OCSemanticError new
+					node: self;
+					compilationContext: self methodNode compilationContext;
+					messageText: 'ifTrue:ifFalse: takes zero-arg blocks';
+					signal.
+				^ false
+			]
+		].
+		^ true
+	)
+	
+	selector: aSelector = (
+		keywordsPositions := nil.
+		selector := aSelector asSymbol.
+	)
+	
+	replaceContainmentSourceWith: aNode = (
+	
+		| originalNode needsParenthesis |
+		needsParenthesis := aNode hasParentheses not and: [aNode needsParenthesis].
+		originalNode := (self mappingFor: self receiver) = aNode 
+					ifTrue: [self receiver]
+					ifFalse: [self arguments detect: [:each | (self mappingFor: each) = aNode]].
+		self
+			addReplacement: (RBStringReplacement 
+						replaceFrom: self start
+						to: originalNode start - 1
+						with: (needsParenthesis ifTrue: ['('] ifFalse: ['']));
+			addReplacement: (RBStringReplacement 
+						replaceFrom: originalNode stop + 1
+						to: self stop
+						with: (needsParenthesis ifTrue: [')'] ifFalse: ['']))
+	)
+	
+	receiver: aValueNode selector: aSelector keywordsPositions: positionList arguments: valueNodes = (
+		aSelector numArgs == valueNodes size
+			ifFalse: 
+				[self error: 'Attempting to assign selector with wrong number of arguments.'].
+	
+		self 
+			receiver: aValueNode;
+			arguments: valueNodes;
+			selector: aSelector;
+			keywordsPositions: positionList.
+	)
+	
+	isInlineCase = (
+		self methodNode compilationContext optionInlineCase ifFalse: [ ^false ]. 
+		self isCascaded ifTrue: [^ false].
+		(#(caseOf: caseOf:otherwise:) includes: self selector) ifFalse: [^ false].
+		self arguments size = 2 ifTrue: [  "otherwise block"
+			self arguments last isBlock ifFalse: [^ false]].
+		self arguments first isArray ifFalse: [^ false].
+		self arguments first statements do: [:assoc |
+			(assoc isMessage and: [assoc selector == #->]) ifFalse: [^ false].
+			assoc receiver isBlock ifFalse: [^ false].
+			assoc receiver arguments isEmpty ifFalse: [^ false].
+			assoc arguments first isBlock ifFalse: [^ false].
+		].
+		^ true
+	)
+	
+	postCopy = (
+		super postCopy.
+		self receiver: self receiver copy.
+		self arguments: (self arguments collect: [ :each | each copy ])
+	)
+	
+	isSelfSend = (
+		^ self receiver isVariable and: [ self receiver name = 'self' ]
+	)
+	
+	match: aNode inContext: aDictionary = (
+	
+		aNode class = self class ifFalse: [^false].
+		self selector = aNode selector ifFalse: [^false].
+		(receiver match: aNode receiver inContext: aDictionary) ifFalse: [^false].
+		self arguments
+			with: aNode arguments
+			do: [:first :second | (first match: second inContext: aDictionary) ifFalse: [^false]].
+		^true
+	)
+	
+	ifNilReceiver = (
+		^ receiver
+	)
+	
+	needsParenthesis = (
+		^parent 
+			ifNil: [false]
+			ifNotNil: 
+				[self precedence > parent precedence 
+					or: [self precedence = parent precedence and: [self isUnary not]]]
+	)
+	
+	isUnary = (
+		^arguments isEmpty
+	)
+	
+	toDoFromWhileWithInit: initStmt = (
+		"Return nil, or a to:do: expression equivalent to this whileTrue:"
+		| variable increment limit toDoBlock body test  |
+		(selector == #whileTrue:
+		 and: [initStmt isAssignment
+		 and: [initStmt variable isMemberOf: RBTemporaryNode]]) ifFalse:
+			[^nil].
+		body := arguments last statements.
+		variable := initStmt variable.
+		increment := body last toDoIncrement: variable.
+		(increment == nil
+		 or: [receiver statements size ~= 1]) ifTrue:
+			[^nil].
+		test := receiver statements first.
+		"Note: test chould really be checked that <= or >= comparison
+		jibes with the sign of the (constant) increment"
+		(test isMessage
+		 and: [(limit := test toDoLimit: variable) notNil]) ifFalse:
+			[^nil].
+		"The block must not overwrite the limit"
+		(limit isVariable and: [body anySatisfy: [:e | e isAssignment and: [e variable = limit]]])
+			ifTrue: [^nil]. 
+		toDoBlock := RBBlockNode body: (RBSequenceNode statements: body allButLast).
+		toDoBlock arguments: (Array with: variable).
+		variable propertyAt: #hidden put: true.
+		increment value = 1 ifTrue: [
+			^ RBMessageNode 
+				receiver: initStmt value
+				selector: #to:do:
+				arguments: (Array with: limit with: toDoBlock)].
+		^ RBMessageNode 
+			receiver: initStmt value
+			selector: #to:by:do:
+			arguments: (Array with: limit with: increment with: toDoBlock)
+	)
+	
+	selector = (
+		^ selector.
+	)
+	
+	stopWithoutParentheses = (
+		^arguments isEmpty 
+			ifTrue: [self keywordsIntervals first last]
+			ifFalse: [arguments last stop]
+	)
+	
+	toDoIncrement: variable = (
+		(receiver = variable and: [selector = #+]) 
+			ifFalse: [^ nil].
+		(arguments first isLiteralNode and: [ arguments first value isInteger ])
+			ifTrue: [^ arguments first]
+			ifFalse: [^ nil]
+	)
+	
+	toDoLimit: variable = (
+		(receiver = variable and: [selector == #<= or: [selector == #>= ]]) 
+			ifTrue: [ ^ arguments first ]
+			ifFalse: [ ^ nil ]
+	)
+	
+	isFaulty = (
+		^self receiver isFaulty or: [self arguments anySatisfy: #isFaulty]
+	)
+	
+	isContainmentReplacement: aNode = (
+	
+		^(self mappingFor: self receiver) = aNode 
+			or: [self arguments anySatisfy: [:each | (self mappingFor: each) = aNode]]
+	)
+	
+	isCascaded = (
+		^parent notNil and: [parent isCascade]
+	)
+	
+	isSuperSend = (
+		^ self receiver isVariable and: [ self receiver name = 'super' ]
+	)
+	
+	debugHighlightStop = (
+	
+		^ self stopWithoutParentheses
+	)
+	
+	isInlineIfNil = (
+	
+		| assertNone assertOneOrNone |
+		
+		self methodNode compilationContext optionInlineIfNil ifFalse: [ ^false ]. 
+		self receiver isBlock ifTrue: [^ false].
+		self isCascaded ifTrue: [^ false].
+		(#(ifNil: ifNotNil: ifNil:ifNotNil: ifNotNil:ifNil:) includes: self selector) ifFalse: [^ false].
+		self arguments do: [:node | node isBlock ifFalse: [^ false]].
+		assertNone := [:block | 
+			block arguments isEmpty ifFalse: [^ false]
+		].
+		assertOneOrNone := [:block | 
+			block arguments size > 1 ifTrue: [^ false]
+		].
+		self selector == #ifNil: 	
+			ifTrue: [assertNone value: self arguments first].
+		self selector == #ifNil:ifNotNil: 
+			ifTrue: [assertNone value: self arguments first.  assertOneOrNone value: self arguments last].
+		self selector == #ifNotNil: 
+			ifTrue: [assertOneOrNone value: self arguments first].
+		self selector == #ifNotNil:ifNil: 
+			ifTrue: [assertOneOrNone value: self arguments first. assertNone value: self arguments last].
+		^ true
+	)
+	
+	lastIsReturn = (
+		^ (#(#ifTrue:ifFalse: #ifFalse:ifTrue: #ifNil:ifNotNil: #ifNotNil:ifNil:) includes: self selector)
+			and: [ arguments first isBlock and: [ arguments first body lastIsReturn 
+			and: [ arguments last isBlock and: [ arguments last body lastIsReturn ] ] ] ]
+	)
+	
+	hash = (
+		^ (self receiver hash bitXor: self selector hash) bitXor: (self hashForCollection: self arguments)
+	)
+	
+	copyInContext: aDictionary = (
+	
+		^self class
+			receiver: (self receiver copyInContext: aDictionary)
+			selector: self selector
+			arguments: (self arguments collect: [ :each | each copyInContext: aDictionary ]).
+	)
+	
+	startWithoutParentheses = (
+		^receiver start
+	)
+	
+	receiver = (
+		^receiver
+	)
+	
+	equalTo: anObject withMapping: aDictionary = (
+	
+		self class = anObject class ifFalse: [^false].
+		((self receiver equalTo: anObject receiver withMapping: aDictionary)
+			and: [self selector = anObject selector]) ifFalse: [^false].
+		self arguments
+			with: anObject arguments
+			do: [:first :second | (first equalTo: second withMapping: aDictionary) ifFalse: [^false]].
+		^true
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^aProgramNodeVisitor visitMessageNode: self
+	)
+	
+	arguments: argCollection = (
+	
+		arguments := argCollection.
+		arguments do: [:each | each parent: self]
+	)
+	
+	keywords = (
+		^ selector keywords.
+	)
+	
+	= = ( anObject 
+		self == anObject ifTrue: [^true].
+		self class = anObject class ifFalse: [^false].
+		(self receiver = anObject receiver 
+			and: [self selector = anObject selector]) ifFalse: [^false].
+		self arguments
+			with: anObject arguments
+			do: [:first :second | first = second ifFalse: [^false]].
+		^true
+	)
+	
+	replaceSourceWithMessageNode: aNode = (
+	
+		| isBinaryToKeyword newSelectorParts  oldkeywordsIntervals|
+		self numArgs = aNode numArgs ifFalse: [^super replaceSourceWith: aNode].
+		self arguments with: aNode arguments
+			do: [:old :new | (self mappingFor: old) = new ifFalse: [^super replaceSourceWith: aNode]].
+		(self mappingFor: self receiver) = aNode receiver 
+			ifFalse:
+				[(self receiver isVariable and: [aNode receiver isVariable])
+					ifFalse:
+						[^super replaceSourceWith: aNode].
+				self addReplacement:
+					(RBStringReplacement
+						replaceFrom: self receiver start
+						to: self receiver stop
+						with: aNode receiver name)].
+		(isBinaryToKeyword := self isBinary and: [aNode isKeyword]) 
+			ifTrue: 
+				[(self hasParentheses not and: [self parent precedence <= aNode precedence]) 
+					ifTrue: 
+						[self
+							addReplacement: (RBStringReplacement 
+										replaceFrom: self start
+										to: self start - 1
+										with: '(');
+							addReplacement: (RBStringReplacement 
+										replaceFrom: self stop + 1
+										to: self stop
+										with: ')')]].
+								
+		newSelectorParts := aNode selectorParts.
+		oldkeywordsIntervals := self keywordsIntervals.
+		
+		self selectorParts keysAndValuesDo: [:index :oldPart| 
+				(newSelectorParts at: index) ~= oldPart
+					ifTrue: 
+						[self addReplacement: (RBStringReplacement 
+									replaceFrom: (oldkeywordsIntervals at: index) first
+									to: (oldkeywordsIntervals at: index) last
+									with: ((isBinaryToKeyword 
+											and: [(self source at: (oldkeywordsIntervals at: index) first - 1) isSeparator not]) 
+												ifTrue: [' ' , newSelectorParts at: index]
+												ifFalse: [newSelectorParts at: index]))]].
+	)
+	
+	numArgs = (
+		^self selector numArgs
+	)
+	
+	keywordsIntervals = (
+		^ selector keywords
+			with: self keywordsPositions 
+			collect: [ :keyword :start | start to: (start == 0 ifTrue: [ -1 ] ifFalse: [ start + keyword size - 1]) ].
+	)
+	
+	isInlined = ( 
+		self methodNode compilationContext optionInlineNone ifTrue: [ ^false ]. 
+		self isInlineIf ifTrue: [^true].
+		self isInlineIfNil  ifTrue: [^true]. 
+		self isInlineAndOr  ifTrue: [^true].
+		self isInlineWhile ifTrue: [^true].
+		self isInlineToDo  ifTrue: [^true].
+		self isInlineCase  ifTrue: [^true].
+		self isInlineTimesRepeat ifTrue: [ ^true].
+		^false.
+	)
+	
+	selectorParts = (
+		^ self keywords collect: #asSymbol.
+	)
+	
+	arguments = (
+		^arguments ifNil: [#()] ifNotNil: [arguments]
+	)
+	
+	isFirstCascaded = (
+		^self isCascaded and: [parent messages first == self]
+	)
+	
+	----------------------------------
+	
+	
+	receiver: aValueNode selector: aSelector = (
+	
+		^self 
+			receiver: aValueNode
+			selector: aSelector
+			arguments: #()
+	)
+	
+	receiver: aValueNode selector: aSelector arguments: valueNodes = (
+	
+		^self
+			receiver: aValueNode
+			selector: aSelector
+			keywordsPositions: nil
+			arguments: valueNodes.
+	)
+	
+	receiver: aValueNode selector: aSelector keywordsPositions: positionList arguments: valueNodes = (
+		^(self new)
+			receiver: aValueNode
+				selector: aSelector
+				keywordsPositions: positionList 
+				arguments: valueNodes;
+			yourself.
+	)
+	
+	gtExampleAddition = (
+		<gtExample>
+		^ RBMessageNode 
+					receiver: (RBVariableNode named: 'self')
+					selector: #+
+					arguments: (Array with: (RBLiteralNode value: 0))
+	)
+)

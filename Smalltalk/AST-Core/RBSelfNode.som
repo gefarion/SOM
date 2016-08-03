@@ -1,0 +1,17 @@
+RBSelfNode = RBVariableNode (
+	"I am a specialized version for the 'self'"
+	
+	
+	specialCommands = ( 
+		^#().
+	)
+	
+	isSelf = (
+		^ true
+	)
+	
+	acceptVisitor: aProgramNodeVisitor = (
+	
+		^ aProgramNodeVisitor visitSelfNode: self
+	)
+)

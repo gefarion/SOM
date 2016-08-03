@@ -1,0 +1,7 @@
+RBShortAssignmentToken = RBAssignmentToken (
+	
+	
+	length = (
+		^ 1
+	)
+)
