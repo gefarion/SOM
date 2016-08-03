@@ -38,10 +38,11 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	)
 	
 	methodSequence = (
-		^ super methodSequence map: [ :periodNodes1 :pragmaNodes1 :periodNodes2 :tempNodes :periodNodes3 :pragmaNodes2 :periodNodes4 :statementNodes |
+		^ super methodSequence map: [:arrayOfArguments |
 			Array
-				with: pragmaNodes1 , pragmaNodes2
-				with: (self build: tempNodes sequence: periodNodes1 , periodNodes2 , periodNodes3 , periodNodes4 , statementNodes) ]
+				with: (arrayOfArguments at: 2) , (arrayOfArguments at: 6)
+				with: (self build: (arrayOfArguments at: 4) sequence: (arrayOfArguments at: 1) , (arrayOfArguments at: 3) , 
+					(arrayOfArguments at: 5) , (arrayOfArguments at: 7) , (arrayOfArguments at: 8)) ]
 	)
 	
 	build: aNode assignment: anArray = (
@@ -148,8 +149,8 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 		^ (aString 
 			copyFrom: 2
 			to: aString size - 1) 
-			copyReplaceAll: ''''''
-			with: ''''
+			copyReplaceAll: '\'\''
+			with: '\''
 	)
 	
 	block = (
@@ -343,9 +344,8 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 					keywordsPositions: (nodes second first collect: [ :each | each start ])
 					arguments: nodes second second.
 				receiver addComments: nodes first comments.
-				receiver
-					addComments: nodes last comments;
-					left: nodes first start.
+				receiver addComments: nodes last comments.
+				receiver left: nodes first start.
 				receiver right: nodes last start.
 				receiver yourself ]
 	)
