@@ -72,7 +72,7 @@ PPSequenceParser = PPListParser (
 	map: aBlock = (
 		^ (aBlock numArgs = self children length or: [
 			aBlock numArgs = 1 and: [self children length = 8]])
-			ifTrue: [ self ==> [ :nodes | aBlock valueWithArguments: nodes ] ]
+			ifTrue: [ self ==> [:nodes | aBlock valueWithArguments: nodes ] ]
 			ifFalse: [self error: aBlock numArgs asString , ' arguments expected.' ]
 	)
 	

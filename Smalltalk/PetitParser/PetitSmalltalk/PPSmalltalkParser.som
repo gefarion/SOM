@@ -4,10 +4,10 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	blockBody = (
 		^ super blockBody
 			==> [ :nodes | 
-				| result |
-				result := RBBlockNode arguments: nodes first first body: nodes last.
-				nodes first last ifNotNil: [ result bar: nodes first last start ].
-				result ]
+					| result |
+					result := RBBlockNode arguments: nodes first first body: nodes last.
+					nodes first last ifNotNil: [ result bar: nodes first last start ].
+					result ]
 	)
 	
 	falseLiteral = (
@@ -140,7 +140,7 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	)
 	
 	sequence = (
-		^ super sequence map: [ :tempNodes :periodNodes :statementNodes | self build: tempNodes sequence: periodNodes , statementNodes ]
+		^ super sequence map: [ :tempNodes :periodNodes :statementNodes | tempNodes length println. periodNodes length println. statementNodes length println. self build: tempNodes sequence: periodNodes , statementNodes ]
 	)
 	
 	buildString: aString = (
@@ -200,12 +200,13 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	)
 	
 	addStatements: aCollection into: aNode = (
+		aCollection println.
 		aCollection isNil
 			ifTrue: [ ^ aNode ].
 		aCollection
 			do: [ :each | 
 				each class == PPSmalltalkToken
-					ifFalse: [ aNode addNode: each ]
+					ifFalse: [ each class println. aNode addNode: each ]
 					ifTrue: [ 
 						| receiver |
 						aNode statements isEmpty
@@ -214,11 +215,12 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 						receiver := aNode periods asOrderedCollection.
 						receiver addLast: each start.
 						aNode periods: receiver yourself ] ].
+		aNode println.
+		'b' println.
 		^ aNode
 	)
 	
 	build: aNode cascade: anArray = (
-	
 		| messages semicolons |
 		^ (anArray isNil or: [ anArray isEmpty ]) 
 			ifTrue: [ aNode ]
@@ -294,9 +296,12 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	
 	build: aTempCollection sequence: aStatementCollection = (
 		| result |
+		'dsdsadadas' println.
 		result := self
 			addStatements: aStatementCollection
 			into: RBSequenceNode new.
+		result println.
+		'asdsaa' println.
 		aTempCollection isEmpty ifFalse: [
 			result
 				leftBar: aTempCollection first start
