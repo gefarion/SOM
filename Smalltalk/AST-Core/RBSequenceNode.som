@@ -2,31 +2,44 @@ RBSequenceNode = RBProgramNode (
 	"RBSequenceNode is an AST node that represents a sequence of statements. Both RBBlockNodes and RBMethodNodes contain these.Instance Variables:	leftBar	<Integer | nil>	the position of the left | in the temporaries definition	periods	<SequenceableCollection of: Integer>	the positions of all the periods that separate the statements	rightBar	<Integer | nil>	the position of the right | in the temporaries definition	statements	<SequenceableCollection of: RBStatementNode>	the statement nodes	temporaries	<SequenceableCollection of: RBVariableNode>	the temporaries defined"
 	| leftBar rightBar statements periods temporaries |
 	
-	periods: anArray = (
-		periods := anArray
-	)
-	
-	specialCommands = ( 
-		^ SugsSuggestionFactory commandsForSource.
-	)
-	
+	periods: anArray = (periods := anArray)
+	specialCommands = (^SugsSuggestionFactory commandsForSource)
+	isSequence = (^true)
+	references: aVariableName = (^statements anySatisfy: [:each | each references: aVariableName])
+	periods = (^ periods)
+	removeTemporaryNamed: aName = (temporaries := temporaries reject: [:each | each name = aName])
+	asSequenceNode = (^self)
+	defines: aName = (^temporaries anySatisfy: [:each | each name = aName])
+	temporaries = (^temporaries)
+	directlyUses: aNode = (^false)
+	leftBar: anInteger = (leftBar := anInteger)
+	isFaulty = (^self statements anySatisfy: #isFaulty)
+	temporaryNames = (^temporaries collect: [:each | each name])
+	statements = (^statements)
+	leftBar = (^ leftBar)
+	lastIsReturn = (^statements notEmpty and: [statements last lastIsReturn])
+	rightBar: anInteger = (rightBar := anInteger)
+	acceptVisitor: aProgramNodeVisitor = (^aProgramNodeVisitor visitSequenceNode: self)
+	removeNode: aNode = (self replaceNode: aNode withNodes: #())
+	rightBar = (^ rightBar)
+	addTemporariesNamed: aCollection = (^ aCollection collect: [ :each | self addTemporaryNamed: each ])
+			
 	addNodesFirst: aCollection = (
 		aCollection do: [ :each | each parent: self ].
-		statements := statements asOrderedCollection
-			addAllFirst: aCollection;
-			yourself.
+		statements := statements asOrderedCollection. 
+		statements addAllFirst: aCollection.
 		^ aCollection
 	)
 	
 	children = (
-		^(OrderedCollection new)
-			addAll: self temporaries;
-			addAll: self statements;
-			yourself
+		| children |
+		children := OrderedCollection new.
+		children addAll: self temporaries.
+		children addAll: self statements.
+		^children
 	)
 	
 	bestNodeFor: anInterval = (
-	
 		| node |
 		node := super bestNodeFor: anInterval.
 		node == self 
@@ -36,12 +49,7 @@ RBSequenceNode = RBProgramNode (
 		^node
 	)
 	
-	isSequence = (
-		^true
-	)
-	
 	addTemporaryNamed: aString = (
-	
 		| variableNode |
 		variableNode := RBVariableNode named: aString.
 		variableNode parent: self.
@@ -50,9 +58,10 @@ RBSequenceNode = RBProgramNode (
 	)
 	
 	temporaryVariables = (
-		^(super temporaryVariables asOrderedCollection)
-			addAll: self temporaryNames;
-			yourself
+		| temps |
+		temps := super temporaryVariables asOrderedCollection.
+		temps addAll: self temporaryNames.
+		^temps
 	)
 	
 	initialize = (
@@ -62,35 +71,23 @@ RBSequenceNode = RBProgramNode (
 	
 	addNodeFirst: aNode = (
 		aNode parent: self.
-		statements := statements asOrderedCollection
-			addFirst: aNode;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements addFirst: aNode.
 		^ aNode
 	)
 	
 	statements: stmtCollection = (
-	
 		statements := stmtCollection.
 		statements do: [:each | each parent: self]
 	)
 	
-	references: aVariableName = (
-	
-		^statements anySatisfy: [:each | each references: aVariableName]
-	)
 	
 	temporaries: tempCollection = (
-	
 		temporaries := tempCollection.
 		temporaries do: [:each | each parent: self]
 	)
 	
-	periods = (
-		^ periods
-	)
-	
 	isLast: aNode = (
-	
 		| last |
 		statements isEmpty ifTrue: [^false].
 		last := statements last.
@@ -100,24 +97,13 @@ RBSequenceNode = RBProgramNode (
 							and: [last arguments anySatisfy: [:each | each isLast: aNode]]]]
 	)
 	
-	removeTemporaryNamed: aName = (
-	
-		temporaries := temporaries reject: [:each | each name = aName]
-	)
-	
-	asSequenceNode = (
-		^self
-	)
-	
 	uses: aNode = (
-	
 		statements isEmpty ifTrue: [^false].
 		aNode == statements last ifFalse: [^false].
 		^self isUsed
 	)
 	
 	replaceNode: aNode withNode: anotherNode = (
-	
 		self statements: (statements 
 					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]]).
 		self temporaries: (temporaries 
@@ -125,7 +111,6 @@ RBSequenceNode = RBProgramNode (
 	)
 	
 	replaceNode: aNode withNodes: aCollection = (
-	
 		| index newStatements |
 		self clearReplacements.
 		index := self indexOfNode: aNode.
@@ -136,11 +121,6 @@ RBSequenceNode = RBProgramNode (
 			do: [:i | newStatements add: (statements at: i)].
 		aCollection do: [:each | each parent: self].
 		statements := newStatements
-	)
-	
-	defines: aName = (
-	
-		^temporaries anySatisfy: [:each | each name = aName]
 	)
 	
 	postCopy = (
@@ -162,14 +142,11 @@ RBSequenceNode = RBProgramNode (
 						inContext: aDictionary]
 	)
 	
-	temporaries = (
-		^temporaries
-	)
-	
 	allDefinedVariables = (
-		^(self temporaryNames asOrderedCollection)
-			addAll: super allDefinedVariables;
-			yourself
+		| vars |
+		vars := self temporaryNames asOrderedCollection.
+		vars addAll: super allDefinedVariables.
+		^vars
 	)
 	
 	transformLastToReturn = (
@@ -191,29 +168,15 @@ RBSequenceNode = RBProgramNode (
 		^ node
 	)
 	
-	directlyUses: aNode = (
-	
-		^false
-	)
-	
 	addNodes: aCollection before: anotherNode = (
 		aCollection do: [ :each | self addNode: each before: anotherNode ].
 		^ aCollection
 	)
 	
 	leftBar: leftInteger temporaries: variableNodes rightBar: rightInteger = (
-	
 		leftBar := leftInteger.
 		self temporaries: variableNodes.
 		rightBar := rightInteger
-	)
-	
-	leftBar: anInteger = (
-		leftBar := anInteger
-	)
-	
-	isFaulty = (
-		^self statements anySatisfy: #isFaulty.
 	)
 	
 	addSelfReturn = (
@@ -224,33 +187,16 @@ RBSequenceNode = RBProgramNode (
 		^ self addNode: node
 	)
 	
-	temporaryNames = (
-		^temporaries collect: [:each | each name]
-	)
-	
-	statements = (
-		^statements
-	)
-	
 	start = (
 		^ leftBar 
 			ifNil: [statements isEmpty ifTrue: [1] ifFalse: [statements first start]]
 	)
 	
 	indexOfNode: aNode = (
-	
 		"Try to find the node by first looking for ==, and then for ="
 	
 		^(1 to: statements size) detect: [:each | (statements at: each) == aNode]
 			ifNone: [statements indexOf: aNode]
-	)
-	
-	leftBar = (
-		^ leftBar
-	)
-	
-	lastIsReturn = (
-		^statements notEmpty and: [statements last lastIsReturn]
 	)
 	
 	hash = (
@@ -258,15 +204,14 @@ RBSequenceNode = RBProgramNode (
 	)
 	
 	copyInContext: aDictionary = (
-	
-		^ self class new
-			temporaries: (self copyList: self temporaries inContext: aDictionary);
-			statements: (self copyList: self statements inContext: aDictionary);
-			yourself
+		| node |
+		node := self class new 
+		node temporaries: (self copyList: self temporaries inContext: aDictionary).
+		node statements: (self copyList: self statements inContext: aDictionary). 
+		^node 
 	)
 	
 	whichNodeIsContainedBy: anInterval = (
-	
 		| node |
 		node := super whichNodeIsContainedBy: anInterval.
 		node == self 
@@ -282,23 +227,22 @@ RBSequenceNode = RBProgramNode (
 	)
 	
 	allTemporaryVariables = (
-		^(self temporaryNames asOrderedCollection)
-			addAll: super allTemporaryVariables;
-			yourself
+		| tempVars |
+		tempVars := self temporaryNames asOrderedCollection
+		tempVars addAll: super allTemporaryVariables.
+		^tempVars
 	)
 	
 	addNodes: aCollection = (
 		aCollection do: [ :each | each parent: self ].
 		(statements notEmpty and: [ statements last isReturn ])
 			ifTrue: [ self error: 'Cannot add statement after return node' ].
-		statements := statements asOrderedCollection
-			addAll: aCollection;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements addAll: aCollection.
 		^ aCollection
 	)
 	
 	equalTo: anObject withMapping: aDictionary = (
-	
 		self class = anObject class ifFalse: [^false].
 		self statements size = anObject statements size ifFalse: [^false].
 		self statements
@@ -310,17 +254,12 @@ RBSequenceNode = RBProgramNode (
 		^true
 	)
 	
-	rightBar: anInteger = (
-		rightBar := anInteger
-	)
-	
 	addNode: aNode = (
 		aNode parent: self.
 		(statements notEmpty and: [ statements last isReturn ])
 			ifTrue: [ self error: 'Cannot add statement after return node' ].
-		statements := statements asOrderedCollection
-			add: aNode;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements add: aNode.
 		^ aNode
 	)
 	
@@ -329,19 +268,13 @@ RBSequenceNode = RBProgramNode (
 		index := self indexOfNode: anotherNode.
 		index = 0
 			ifTrue: [ ^ self addNode: aNode ].
-		statements := statements asOrderedCollection
-			add: aNode beforeIndex: index;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements add: aNode beforeIndex: index.
 		aNode parent: self.
 		^ aNode
 	)
 	
-	acceptVisitor: aProgramNodeVisitor = (
-	
-		^aProgramNodeVisitor visitSequenceNode: self
-	)
-	
-	= = ( anObject 
+	= anObject = (  
 		"Can't send = to the temporaries and statements collection since they might change from arrays to OCs"
 	
 		self == anObject ifTrue: [^true].
@@ -355,14 +288,6 @@ RBSequenceNode = RBProgramNode (
 			with: anObject statements
 			do: [:first :second | first = second ifFalse: [^false]].
 		^true
-	)
-	
-	removeNode: aNode = (
-		self replaceNode: aNode withNodes: #()
-	)
-	
-	rightBar = (
-		^ rightBar
 	)
 	
 	methodComments = (
@@ -387,32 +312,28 @@ RBSequenceNode = RBProgramNode (
 		super removeDeadCode
 	)
 	
-	addTemporariesNamed: aCollection = (
-		^ aCollection collect: [ :each | self addTemporaryNamed: each ]
-	)
-	
 	----------------------------------
 	
 	
 	leftBar: leftInteger temporaries: variableNodes rightBar: rightInteger = (
-	
-		^(self new)
+		| node |
+		node := self new.
+		node	
 			leftBar: leftInteger
-				temporaries: variableNodes
-				rightBar: rightInteger;
-			yourself
+			temporaries: variableNodes
+			rightBar: rightInteger.
+		^node
 	)
 	
 	temporaries: variableNodes statements: statementNodes = (
-	
-		^(self new)
-			temporaries: variableNodes;
-			statements: statementNodes;
-			yourself
+		| node |
+		node := self new.
+		node temporaries: variableNodes.
+		node statements: statementNodes.
+		^node
 	)
 	
 	statements: statementNodes = (
-	
 		^self temporaries: #() statements: statementNodes
 	)
 )
