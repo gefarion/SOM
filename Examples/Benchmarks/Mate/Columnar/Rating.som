@@ -8,7 +8,7 @@ Rating = Object (
 	rating: aRating = ( rating := aRating)
 
 	----------------------------------
-	| columnarDescriptor columnarInstanceEnvironment |
+	| columnarInstanceEnvironment size|
 	
 	movie: aMovieId rating: aRating = (
 		| rating |

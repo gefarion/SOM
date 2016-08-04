@@ -7,7 +7,6 @@ ColumnarData = (
 		1 to: columns length do: [:index | 
 			columns at: index put: (Array new: descriptor initialSize)
 		].
-		    	
     )
     
     newInstance = (
@@ -37,8 +36,8 @@ ColumnarData = (
 		^anInstance instVarAt: 1
 	)
 	
-	rowIndexFor: anInstance put: aValue= (
-		^anInstance instVarAt: 1 put: lastPosition.
+	rowIndexFor: anInstance put: aValue = (
+		^anInstance instVarAt: 1 put: aValue.
 	)
     
     ---------------------------

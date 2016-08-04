@@ -1,0 +1,9 @@
+MoviesFilter = Movies (
+    benchmark = (
+		^ratings select: [:rating | rating rating >= 3].
+    )
+    
+    verifyResult: result = (
+     	^self problemSize > result length and: [result length > 1]
+    )
+)

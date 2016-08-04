@@ -1,4 +1,4 @@
-MoviesColumnar = Movies (
+MoviesColumnarFilter = MoviesFilter (
     oneTimeSetup = (
     	| environment |
     	Rating initialize.

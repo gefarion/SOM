@@ -1,0 +1,9 @@
+MoviesMap = Movies (
+    benchmark = (
+		^ratings collect: [:rating | rating rating + 1].
+    )
+    
+    verifyResult: result = (
+     	^self problemSize = result length.
+    )
+)

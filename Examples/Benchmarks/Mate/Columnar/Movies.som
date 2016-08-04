@@ -16,19 +16,7 @@ Movies = Benchmark (
     )
     
     benchmark = (
-		| mean |
-		mean := 0.
-		ratings do: [:rating | mean := mean + rating rating].
-		mean := mean // self problemSize.
-		^mean.
-    )
-    
-    verifyResult: result = (
-     	self problemSize = 1000 ifTrue:[^result = 3.777].
-     	self problemSize = 10000 ifTrue:[^result = 3.6339].
-     	self problemSize = 50000 ifTrue:[^result = 3.58554].
-     	self problemSize = 100000 ifTrue:[^result = 3.61014].
-     	^false.
+		self subclassResponsibility.
     )
     
     loadMovies = (
@@ -45,7 +33,8 @@ Movies = Benchmark (
 	    		ratings append: rating.
 	    		i := i + 1.
 	    	]
-    	]
+    	].
+    	i println.	    			    		
     )
     
     delimitor = (^'::')
