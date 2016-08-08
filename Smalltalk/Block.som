@@ -24,7 +24,6 @@ THE SOFTWARE.
 "
 
 Block = (
-
     "For the creation of Block instances, see Universe_new_block()."
     
     "Evaluation"
@@ -45,6 +44,12 @@ Block = (
     
     "Restarting"
     restart = primitive
+    
+    cull: anArg = (
+		^self numArgs = 0 
+			ifTrue: [self value]
+			ifFalse: [self value: anArg]
+	)
     
     " Petit Parser" 
     asParser = (^ PPPluggableParser on: self)

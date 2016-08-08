@@ -31,6 +31,16 @@ Block2 = Block (
     value           = ( self value: nil )
     value: argument = primitive
     
+    "The if encapsulates a workaround for using blocks with more than 4 arguments. They are all sent inside an array.
+    See PPSmalltalkParser>>methodSequence (SOM vs. Pharo)"
+    valueWithArguments: args = (
+    	^(args length = 1) ifTrue: [
+    		self value: (args at: 1)
+    	] ifFalse: [
+    		self value: args
+    	] 
+    )
+    
     numArgs = (^1)
     
 )
