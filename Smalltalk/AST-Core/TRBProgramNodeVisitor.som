@@ -237,17 +237,6 @@ TRBProgramNodeVisitor = nil (
 		^ Smalltalk ui icons traitIcon
 	)
 	
-	spotterPreviewCodeIn: aComposite = (
-		<spotterPreview: 10>
-		aComposite pharoMethod
-			title: [self name];
-			display: #definitionForNautilus;
-			smalltalkClass: [ nil ];
-			entity: self.
-			
-		self flag: 'move "entity: self" somewhere else, maybe'
-	)
-	
 	asFullRingDefinition = (
 		"A behavior is converted to a ring class including its variables, methods, direct superclass, direct subclasses and the package in which is loaded.
 		Active methods are generated and each knows its package as well.

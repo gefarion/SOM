@@ -3,16 +3,16 @@ RBMethodNode = RBProgramNode (
 	| scope selector keywordsPositions body source arguments pragmas replacements nodeReplacements compilationContext |
 	
 	hasTemporaryNamed: aString = (
-	
 		^ self temporaries anySatisfy: [ :temp| temp name = aString ]
 	)
 	
 	children = (
-		^ OrderedCollection new
-			addAll: self arguments;
-			addAll: self pragmas;
-			add: self body;
-			yourself
+		| children |
+		children := OrderedCollection new.
+		children addAll: self arguments.
+		children addAll: self pragmas.
+		children add: self body. 
+		^children
 	)
 	
 	pragmaNamed: aSymbol ifPresent: foundBlock = (
@@ -28,13 +28,12 @@ RBMethodNode = RBProgramNode (
 	initialize = (
 		replacements := SortedCollection sortBlock: 
 						[:a :b | 
-						a startPosition < b startPosition 
-							or: [a startPosition = b startPosition and: [a stopPosition < b stopPosition]]].
+							a startPosition < b startPosition 
+								or: [a startPosition = b startPosition and: [a stopPosition < b stopPosition]]].
 		nodeReplacements := IdentityDictionary new
 	)
 	
 	properties: aMethodeProperties = (
-	
 		^self propertyAt: #methodProperties put: aMethodeProperties
 	)
 	
@@ -46,9 +45,8 @@ RBMethodNode = RBProgramNode (
 				copyFrom: (replacements
 					inject: 1
 					into: [ :sum :each | 
-						stream
-							nextPutAll: (source copyFrom: sum to: each startPosition - 1);
-							nextPutAll: (each string).
+						stream nextPutAll: (source copyFrom: sum to: each startPosition - 1).
+						stream nextPutAll: (each string).
 						each stopPosition + 1 ])
 				to: source size).
 		newSource := stream contents.
@@ -66,28 +64,23 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	renameSelector: newSelector andArguments: varNodeCollection = (
-	
 		| oldIntervals oldArguments oldSelector |
 		oldSelector := selector.
 		oldIntervals := self keywordsIntervals.
 		oldArguments := arguments.
-		self
-			arguments: varNodeCollection;
-			selector: newSelector.
+		self arguments: varNodeCollection.
+		self selector: newSelector.
 		self changeSourceSelector: oldSelector keywordsIntervals: oldIntervals arguments: oldArguments
 	)
 	
 	decompileString = ( 
-	
 		^ self formattedCode 
-	
 	)
 	
 	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
-		self 
-			arguments: valueNodes;
-			selector: aSymbol;
-			keywordsPositions: positionList.
+		self arguments: valueNodes.
+		self selector: aSymbol.
+		self keywordsPositions: positionList.
 	)
 	
 	properties = (
@@ -142,7 +135,7 @@ RBMethodNode = RBProgramNode (
 							index = 1 ifFalse: [ stream space ].
 							stream nextPutAll: part.
 							index <= arguments size
-								ifTrue: [ stream space; nextPutAll: (arguments at: index) name ] ] ])) ] ]
+								ifTrue: [ stream space. stream nextPutAll: (arguments at: index) name ] ] ])) ] ]
 			on: Error
 			do: [ :ex | ex return ]
 	)
@@ -161,7 +154,6 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	match: aNode inContext: aDictionary = (
-	
 		self class = aNode class ifFalse: [ ^ false ].
 		aDictionary at: '-source-' put: aNode source.
 		self selector = aNode selector ifFalse: [ ^ false ].
@@ -217,9 +209,10 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	allArgumentVariables = (
-		^(self argumentNames asOrderedCollection)
-			addAll: super allArgumentVariables;
-			yourself
+		| vars |
+		vars := self argumentNames asOrderedCollection.
+		vars addAll: super allArgumentVariables.
+		^vars
 	)
 	
 	source = (
@@ -227,7 +220,6 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	printOn: aStream = (
-	
 		aStream nextPutAll: self formattedCode
 	)
 	
@@ -247,13 +239,11 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	doSemanticAnalysis = (
-	
 		self compilationContext ifNil: [ self methodClass: nil class ].
 	
-		self
-			compilationContext semanticAnalyzerClass new
-			compilationContext: self compilationContext;
-			analyze: self
+		self compilationContext semanticAnalyzerClass new.
+		self compilationContext: self compilationContext.
+		self analyze: self
 	)
 	
 	doSemanticAnalysisIn: behavior = (
@@ -262,13 +252,11 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	addReplacement: aStringReplacement = (
-	
 		replacements ifNil: [^self].
 		replacements add: aStringReplacement
 	)
 	
 	acceptVisitor: aProgramNodeVisitor = (
-	
 		^aProgramNodeVisitor visitMethodNode: self
 	)
 	
@@ -287,7 +275,7 @@ RBMethodNode = RBProgramNode (
 		^ self scope
 	)
 	
-	= = ( anObject 
+	= anObject = (  
 		self == anObject ifTrue: [ ^ true ].
 		self class = anObject class ifFalse: [ ^ false ].
 		(self selector = anObject selector
@@ -316,8 +304,6 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	tempNames = (
-		"compatibility method to old MethodNode"
-		self flag: #Clean.
 		^ self argumentNames, self temporaryNames
 	)
 	
@@ -339,18 +325,17 @@ RBMethodNode = RBProgramNode (
 		| rewriter  |
 		rewriter := RBParseTreeRewriter new.
 		aContext tempNames withIndexDo: [ :tempName :index | 
-			rewriter 
-				replace: tempName, ' := ``@object'
-				with: 'ThisContext namedTempAt:', index asString,  'put: ``@object';
-				replace: tempName
+			rewriter replace: tempName, ' := ``@object'
+				with: 'ThisContext namedTempAt:', index asString,  'put: ``@object'.
+			rewriter replace: tempName
 				with: 'ThisContext namedTempAt:', index asString ].
-		^ rewriter
-			executeTree: self;
-			tree
+		rewriter executeTree: self.
+		^rewriter tree
 	)
 	
 	keywordsPositions: aPositionsList = (
-		keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ]
+		"keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ]"
+		keywordsPositions := aPositionsList ifNotNil: [:list| list asArray ]
 	)
 	
 	primitiveFromPragma = (
@@ -430,13 +415,13 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	allDefinedVariables = (
-		^(self argumentNames asOrderedCollection)
-			addAll: super allDefinedVariables;
-			yourself
+		| vars |
+		vars := self argumentNames asOrderedCollection.
+		vars addAll: super allDefinedVariables. 
+		^vars
 	)
 	
 	body: stmtsNode = (
-	
 		body := stmtsNode.
 		body parent: self
 	)
@@ -471,7 +456,6 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	hasPragmaNamed: aSymbol = (
-	
 		self pragmaNamed: aSymbol ifAbsent: [ ^ false ].
 		^ true
 	)
@@ -482,7 +466,6 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	pragmaNamed: aSymbol = (
-	
 		^ self pragmaNamed: aSymbol ifAbsent: [ KeyNotFound signalFor: aSymbol  ]
 	)
 	
@@ -523,15 +506,16 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	copyInContext: aDictionary = (
-		^ self class new
-			selector: self selector;
-			arguments: (self arguments collect: [ :each | each copyInContext: aDictionary ]);
-			pragmas: (self pragmas isEmpty
+		| node |
+		node := self class new.
+		node selector: self selector.
+		node arguments: (self arguments collect: [ :each | each copyInContext: aDictionary ]).
+		node pragmas: (self pragmas isEmpty
 				ifTrue: [ aDictionary at: '-pragmas-' ifAbsent: [ #() ] ]
-				ifFalse: [ self copyList: self pragmas inContext: aDictionary ]);
-			body: (self body copyInContext: aDictionary);
-			source: (aDictionary at: '-source-' ifAbsentPut: [ self source ]);
-			yourself
+				ifFalse: [ self copyList: self pragmas inContext: aDictionary ]).
+		node body: (self body copyInContext: aDictionary).
+		node source: (aDictionary at: '-source-' ifAbsentPut: [ self source ]).  		   
+		^node
 	)
 	
 	method = (
@@ -553,13 +537,11 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	arguments: variableNodes = (
-	
 		arguments := variableNodes.
 		arguments do: [:each | each parent: self]
 	)
 	
 	equalTo: anObject withMapping: aDictionary = (
-	
 		self class = anObject class ifFalse: [ ^ false ].
 		(self selector = anObject selector
 			and: [ self pragmas size = anObject pragmas size
@@ -612,16 +594,15 @@ RBMethodNode = RBProgramNode (
 	
 	----------------------------------
 	
-	
 	selector: aSymbol arguments: valueNodes = (
-		^(self new)
-			selector: aSymbol;
-			arguments: valueNodes;
-			yourself
+		| node |
+		node := self new. 
+		node selector: aSymbol.
+		node arguments: valueNodes.  
+		^node
 	)
 	
 	selector: aSymbol body: aSequenceNode = (
-	
 		^self 
 			selector: aSymbol
 			arguments: #()
@@ -629,36 +610,30 @@ RBMethodNode = RBProgramNode (
 	)
 	
 	errorMethodNode: selector errorMessage: messageText = (
-	
 		| message |
 		message := RBMessageNode 
 			receiver: (RBSelfNode named: 'self')
 			selector: #error: 
-			arguments: {RBLiteralNode value: messageText}.
+			arguments: (Array with: (RBLiteralNode value: messageText)).
 		^ self 
 			selector: selector 
 			arguments: ((1 to: selector numArgs) collect: [ :i | RBArgumentNode named: 't' , i asString ]) 
-			body: (RBSequenceNode statements: {message}) 
+			body: (RBSequenceNode statements: (Array with: message)) 
 	)
 	
 	selector: aSymbol arguments: variableNodes body: aSequenceNode = (
-	
-		^(self new)
-			arguments: variableNodes;
-			selector: aSymbol;
-			body: aSequenceNode;
-			yourself
+		| node |
+		node := self new.
+		node arguments: variableNodes.
+		node selector: aSymbol.
+		node body: aSequenceNode.   
+		^node
 	)
 	
 	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
-		^(self new)
-			selector: aSymbol
-				keywordsPositions: positionList 
-				arguments: valueNodes;
-			yourself.
-	)
-	
-	additionalInspectorClasses = (
-		^ super additionalInspectorClasses, { EyeSyntaxTreeInspector } 
+		| node |
+		node := self new.
+		node selector: aSymbol keywordsPositions: positionList arguments: valueNodes.
+		^node.
 	)
 )

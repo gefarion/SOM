@@ -2,61 +2,31 @@ RBLiteralNode = RBValueNode (
 	"RBLiteralNode is an AST node that represents literals.Instance Variables	start: <Integer | nil> source position for the literal's beginning	stop: <Integer | nil> source position for the literal's end"
 	| start stop |
 	
-	hash = (
-		^self value hash
-	)
-	
-	stopWithoutParentheses = (
-		^stop
-	)
-	
-	precedence = (
-		^0
-	)
+	hash = (^self value hash)
+	stopWithoutParentheses = (^stop)
+	precedence = (^0)
+	startWithoutParentheses = (^start)
+	isLiteralNode = (^true)
+	isImmediateNode = (^true)
+	stop: anInteger = (stop := anInteger)
+	value = (^self subclassResponsibility)
+	needsParenthesis = (^false)
 	
 	replaceSourceWith: aNode = (
-	
 		self addReplacement: (RBStringReplacement 
 					replaceFrom: self start
 					to: self stop
 					with: aNode formattedCode)
 	)
 	
-	startWithoutParentheses = (
-		^start
-	)
-	
-	isLiteralNode = (
-		^true
-	)
-	
-	isImmediateNode = (
-		^true
-	)
-	
-	stop: anInteger = (
-		stop := anInteger
-	)
-	
-	value = (
-		^self subclassResponsibility
-	)
-	
-	= = ( anObject 
+	= anObject = (  
 		self == anObject ifTrue: [^true].
 		^self class = anObject class
 	)
 	
-	needsParenthesis = (
-		^false
-	)
-	
-	start: anInteger = (
-		start := anInteger
-	)
+	start: anInteger = (start := anInteger)
 	
 	replaceSourceFrom: aNode = (
-	
 		self addReplacement: (RBStringReplacement 
 					replaceFrom: aNode start
 					to: aNode stop
@@ -64,10 +34,7 @@ RBLiteralNode = RBValueNode (
 	)
 	
 	----------------------------------
-	
-	
 	value: aValue = (
-	
 		^((aValue class == Array or: [aValue class == ByteArray]) 
 			ifTrue: [RBLiteralArrayNode]
 			ifFalse: [RBLiteralValueNode]) value: aValue

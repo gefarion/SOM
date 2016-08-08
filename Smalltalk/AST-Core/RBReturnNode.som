@@ -1,71 +1,35 @@
 RBReturnNode = RBProgramNode (
 	"RBReturnNode is an AST node that represents a return expression.Instance Variables:	return	<Integer>	the position of the ^ character	value	<RBValueNode>	the value that is being returned"
 	| return value |
-	
-	asReturnNode = (
-	
-	)
-	
-	hash = (
-		^self value hash
-	)
+	asReturnNode = ()
+	hash = (^self value hash)
+	containsReturn = (^true)
+	asSequenceNode = (^RBSequenceNode statements: (Array with: self))
+	children = (^Array with: value)
+	isFaulty = (^self value isFaulty.)
+	isReturn = (^true)
+	replaceNode: aNode withNode: anotherNode = (value == aNode ifTrue: [self value: anotherNode])
+	stop = (^ value stop)
+	acceptVisitor: aProgramNodeVisitor = (^aProgramNodeVisitor visitReturnNode: self)
+	stop: anInteger = (self value stop: anInteger)
+	value = (^value)
+	start = (^return)
+	return: anInteger = (return := anInteger)
+	return = (^ return)
 	
 	copyInContext: aDictionary = (
-	
-		^ self class new
-			value: (self value copyInContext: aDictionary);
-			yourself
-	)
-	
-	containsReturn = (
-		^true
-	)
-	
-	asSequenceNode = (
-		^RBSequenceNode statements: {self} 
-	)
-	
-	children = (
-		^Array with: value
-	)
-	
-	isFaulty = (
-		^self value isFaulty.
-	)
-	
-	isReturn = (
-		^true
+		| node |
+		node := self class new. 
+		node value: (self value copyInContext: aDictionary). 
+		^node
 	)
 	
 	equalTo: anObject withMapping: aDictionary = (
-	
 		^self class = anObject class 
 			and: [self value equalTo: anObject value withMapping: aDictionary]
 	)
 	
-	replaceNode: aNode withNode: anotherNode = (
-	
-		value == aNode ifTrue: [self value: anotherNode]
-	)
-	
-	stop = (
-		^ value stop
-	)
-	
-	acceptVisitor: aProgramNodeVisitor = (
-	
-		^aProgramNodeVisitor visitReturnNode: self
-	)
-	
-	stop: anInteger = (
-		self value stop: anInteger
-	)
-	
-	value = (
-		^value
-	)
-	
-	= = ( anObject 
+	= anObject = (  
 		self == anObject ifTrue: [^true].
 		self class = anObject class ifFalse: [^false].
 		^self value = anObject value
@@ -76,41 +40,24 @@ RBReturnNode = RBProgramNode (
 		self value: self value copy
 	)
 	
-	start = (
-		^return
-	)
-	
 	match: aNode inContext: aDictionary = (
-	
 		aNode class = self class ifFalse: [^false].
 		^value match: aNode value inContext: aDictionary
 	)
 	
 	value: valueNode = (
-	
 		value := valueNode.
 		value parent: self
 	)
 	
-	return: anInteger = (
-		return := anInteger
-	)
-	
-	return = (
-		^ return
-	)
-	
 	return: returnInteger value: aValueNode = (
-	
 		return := returnInteger.
 		self value: aValueNode
 	)
 	
 	----------------------------------
 	
-	
 	return: returnInteger value: aValueNode = (
-	
 		^self new return: returnInteger value: aValueNode
 	)
 	

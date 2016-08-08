@@ -1,18 +1,23 @@
 RBCascadeNode = RBValueNode (
-	"RBCascadeNode is an AST node for cascaded messages (e.g., "self print1 ; print2").Instance Variables:	messages	<SequenceableCollection of: RBMessageNode>	the messages 	semicolons	<SequenceableCollection of: Integer>	positions of the ; between messages"
+	"RBCascadeNode is an AST node for cascaded messages (e.g., 'self print1 ; print2').Instance Variables:	messages	<SequenceableCollection of: RBMessageNode>	the messages 	semicolons	<SequenceableCollection of: Integer>	positions of the ; between messages"
 	| messages semicolons |
 	
-	directlyUses: aNode = (
-	
-		^messages last = aNode and: [self isDirectlyUsed]
-	)
-	
-	stopWithoutParentheses = (
-		^messages last stop
-	)
+	directlyUses: aNode = (^messages last = aNode and: [self isDirectlyUsed])
+	stopWithoutParentheses = (^messages last stop)
+	children = (^self messages)
+	isFaulty = (^self messages anySatisfy: #isFaulty)
+	messages = (^messages)
+	semicolons: anArray = (semicolons := anArray)
+	precedence = (^4)
+	startWithoutParentheses = (^messages first start)
+	semicolons = (^ semicolons)
+	receiver = (^self messages first receiver)
+	acceptVisitor: aProgramNodeVisitor = (^aProgramNodeVisitor visitCascadeNode: self)
+	uses: aNode = (^messages last = aNode and: [self isUsed])
+	hash = (^ self hashForCollection: self messages)
+	isCascade = (^true)
 	
 	bestNodeFor: anInterval = (
-	
 		| selectedChildren |
 		(self intersectsInterval: anInterval) ifFalse: [^nil].
 		(self containedBy: anInterval) ifTrue: [^self].
@@ -24,47 +29,25 @@ RBCascadeNode = RBValueNode (
 		^selectedChildren detect: [:each | true] ifNone: [nil]
 	)
 	
-	children = (
-		^self messages
-	)
-	
-	isFaulty = (
-		^self messages anySatisfy: #isFaulty
-	)
-	
-	messages = (
-		^messages
-	)
 	
 	messages: messageNodes semicolons: integerCollection = (
-	
 		self messages: messageNodes.
 		semicolons := integerCollection
 	)
 	
-	semicolons: anArray = (
-		semicolons := anArray
-	)
-	
 	messages: messageNodeCollection = (
-	
 		messages := messageNodeCollection.
 		messages do: [:each | each parent: self]
 	)
 	
-	hash = (
-		^ self hashForCollection: self messages
-	)
-	
 	copyInContext: aDictionary = (
-	
-		^ self class new
-			messages: (self copyList: self messages inContext: aDictionary);
-			yourself
+		| node | 
+		node := self class new. 
+		node messages: (self copyList: self messages inContext: aDictionary).
+		^node
 	)
 	
 	whichNodeIsContainedBy: anInterval = (
-	
 		| selectedChildren |
 		(self intersectsInterval: anInterval) ifFalse: [^nil].
 		(self containedBy: anInterval) ifTrue: [^self].
@@ -76,34 +59,9 @@ RBCascadeNode = RBValueNode (
 		^selectedChildren detect: [:each | true] ifNone: [nil]
 	)
 	
-	precedence = (
-		^4
-	)
 	
-	startWithoutParentheses = (
-		^messages first start
-	)
-	
-	semicolons = (
-		^ semicolons
-	)
-	
-	receiver = (
-		^self messages first receiver
-	)
-	
-	acceptVisitor: aProgramNodeVisitor = (
-	
-		^aProgramNodeVisitor visitCascadeNode: self
-	)
-	
-	uses: aNode = (
-	
-		^messages last = aNode and: [self isUsed]
-	)
 	
 	equalTo: anObject withMapping: aDictionary = (
-	
 		self class = anObject class ifFalse: [^false].
 		self messages size = anObject messages size ifFalse: [^false].
 		self messages
@@ -113,12 +71,11 @@ RBCascadeNode = RBValueNode (
 	)
 	
 	replaceNode: aNode withNode: anotherNode = (
-	
 		self messages: (messages 
 					collect: [:each | each == aNode ifTrue: [anotherNode] ifFalse: [each]])
 	)
 	
-	= = ( anObject 
+	= anObject = (  
 		self == anObject ifTrue: [^true].
 		self class = anObject class ifFalse: [^false].
 		self messages size = anObject messages size ifFalse: [^false].
@@ -132,7 +89,6 @@ RBCascadeNode = RBValueNode (
 	)
 	
 	match: aNode inContext: aDictionary = (
-	
 		aNode class = self class ifFalse: [^false].
 		^self 
 			matchList: messages
@@ -144,10 +100,6 @@ RBCascadeNode = RBValueNode (
 		^parent 
 			ifNil: [false]
 			ifNotNil: [self precedence > parent precedence]
-	)
-	
-	isCascade = (
-		^true
 	)
 	
 	statementComments = (
@@ -163,14 +115,9 @@ RBCascadeNode = RBValueNode (
 	
 	----------------------------------
 	
-	
-	messages: messageNodes = (
-	
-		^self new messages: messageNodes
-	)
+	messages: messageNodes = (^self new messages: messageNodes)
 	
 	messages: messageNodes semicolons: integerCollection = (
-	
 		^self new messages: messageNodes semicolons: integerCollection
 	)
 )

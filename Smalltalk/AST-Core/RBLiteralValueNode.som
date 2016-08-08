@@ -2,27 +2,19 @@ RBLiteralValueNode = RBLiteralNode (
 	"RBLiteralNode is an AST node that represents literal values (e.g., #foo, true, 1, etc.), but not literal arrays.Instance Variables	value	<Numeric | Symbol | String  | Character>	the literal value I represent"
 	| value sourceText |
 	
-	value = (
-		^ value
-	)
+	value = (^ value)
+	isFaulty = (^false.)
+	acceptVisitor: aProgramNodeVisitor = (^aProgramNodeVisitor visitLiteralNode: self)
+	copyInContext: aDictionary = (^ self class value: self value)
+	specialCommands = (^ SugsSuggestionFactory commandsFoLiteralNode)
 	
-	= = ( anObject 
+	= anObject = (  
 		^ super = anObject 
 			and: [ self value = anObject value 
 			and: [ self value species = anObject value species ] ]
 	)
 	
-	copyInContext: aDictionary = (
-		^ self class value: self value
-	)
-	
-	specialCommands = ( 
-		^ SugsSuggestionFactory commandsFoLiteralNode.
-	)
-	
 	value: aValue start: aPosition stop: anotherPosition source: aString = (
-	
-	
 		self value: aValue start: aPosition stop: anotherPosition.
 		sourceText := aString.
 	)
@@ -39,34 +31,23 @@ RBLiteralValueNode = RBLiteralNode (
 					ifFalse: [ 
 						value class == Character 
 							ifTrue: 
-								[aStream nextPut: $$;	nextPut: value]
+								[aStream nextPut: $$. stream nextPut: value]
 							ifFalse: [ value storeOn: aStream ]]] ]
 	)
 	
-	isFaulty = (
-		^false.
-	)
-	
 	value: aValue start: aPosition stop: anotherPosition = (
-	
 		value := aValue.
 		start := aPosition. 
 		stop := anotherPosition.
 	)
 	
-	acceptVisitor: aProgramNodeVisitor = (
-	
-		^aProgramNodeVisitor visitLiteralNode: self
-	)
-	
 	----------------------------------
 	
-	
 	value: aValue start: aPosition stop: anotherPosition = (
-	
-	 	^ self new
-			value: aValue start: aPosition stop: anotherPosition;
-			yourself.
+	 	| node |
+	 	node := self new.
+	 	node value: aValue start: aPosition stop: anotherPosition.  
+	 	^node
 	)
 	
 	value: aValue = (
@@ -74,9 +55,9 @@ RBLiteralValueNode = RBLiteralNode (
 	)
 	
 	value: aValue start: aPosition stop: anotherPosition  source: aString = (
-	
-	 	^ self new
-			value: aValue start: aPosition stop: anotherPosition source: aString;
-			yourself.
+	 	| node |
+	 	node := self new.
+	 	node value: aValue start: aPosition stop: anotherPosition source: aString.
+	 	^node.
 	)
 )

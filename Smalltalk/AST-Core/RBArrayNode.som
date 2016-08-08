@@ -2,50 +2,37 @@ RBArrayNode = RBValueNode (
 	"A RBArrayNode is an AST node for runtime arrays.Instance Variables	left:	 <Integer | nil> position of {	periods: <SequenceableCollection of: Integer> the positions of all the periods that separate the statements	right: <Integer | nil> position of }	statements: <SequenceableCollection of: RBStatementNode> the statement nodes"
 	| left right statements periods |
 	
-	isArray = (
-		^ true
-	)
-	
-	periods: anArray = (
-		periods := anArray
-	)
-	
-	stopWithoutParentheses = ( 
-		^ right
-	)
+	isArray = (^ true)
+	periods: anArray = (periods := anArray)
+	stopWithoutParentheses = (^ right)
+	left: anInteger = (left := anInteger)
+	needsParenthesis = (^ false)
+	statementComments = (^self comments)
+	right: anInteger = (right := anInteger)
+	left = (^ left)
+	children = (^ self statements)
+	isFaulty = (^self statements anySatisfy: #isFaulty)
+	right = (^ right)
+	statements = (^statements)
+	references: aVariableName = (^ statements anySatisfy: [ :each | each references: aVariableName ])
+	acceptVisitor: aProgramNodeVisitor = (^ aProgramNodeVisitor visitArrayNode: self)
+	startWithoutParentheses = ( ^ left)
+	periods = (^ periods)
+	hash = (^ self hashForCollection: self statements)
+	copyInContext: aDictionary = (^ self class statements: (self copyList: self statements inContext: aDictionary))
+	precedence = (^0)
+	uses: aNode = (^ (statements anySatisfy: [ :each | each == aNode ]) or: [ self isUsed ])
 	
 	addNodesFirst: aCollection = (
-		statements := statements asOrderedCollection
-			addAllFirst: aCollection;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements asOrderedCollection addAllFirst: aCollection.
 		aCollection do: [ :each | each parent: self ].
 		^ aCollection
 	)
 	
-	right: anInteger = (
-		right := anInteger
-	)
-	
 	addNodes: aCollection before: anotherNode = (
-	
 		aCollection do: [ :each | self addNode: each before: anotherNode ].
 		^ aCollection
-	)
-	
-	left = (
-		^ left
-	)
-	
-	children = (
-		^ self statements
-	)
-	
-	isFaulty = (
-		^self statements anySatisfy: #isFaulty
-	)
-	
-	right = (
-		^ right
 	)
 	
 	initialize = (
@@ -54,62 +41,27 @@ RBArrayNode = RBValueNode (
 	)
 	
 	addNodeFirst: aNode = (
-		statements := statements asOrderedCollection
-			addFirst: aNode;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements addFirst: aNode.
 		aNode parent: self.
 		^ aNode
 	)
 	
-	statements = (
-		^statements
-	)
-	
 	statements: statements0 = (
-	
 		statements := statements0.
 		statements do: [:statement | statement parent: self]
 	)
 	
 	indexOfNode: aNode = (
-	
 		"Try to find the node by first looking for ==, and then for ="
-	
 		^ (1 to: statements size) 
 			detect: [ :each | (statements at: each) == aNode ]
 			ifNone: [ statements indexOf: aNode ]
 	)
 	
-	references: aVariableName = (
-	
-		^ statements anySatisfy: [ :each | each references: aVariableName ]
-	)
-	
 	lastIsReturn = (
 		statements isEmpty ifTrue:[ ^false ].
 		^statements last lastIsReturn
-	)
-	
-	periods = (
-		^ periods
-	)
-	
-	hash = (
-		^ self hashForCollection: self statements
-	)
-	
-	copyInContext: aDictionary = (
-	
-		^ self class statements: (self copyList: self statements inContext: aDictionary)
-	)
-	
-	precedence = (
-		^0
-	)
-	
-	uses: aNode = (
-	
-		^ (statements anySatisfy: [ :each | each == aNode ]) or: [ self isUsed ]
 	)
 	
 	replaceNode: oldNode  withNode: newNode = (
@@ -120,45 +72,32 @@ RBArrayNode = RBValueNode (
 	)
 	
 	addNode: aNode before: anotherNode = (
-	
 		| index |
 		aNode isReturn 
 			ifTrue: [ self error: 'Cannot add return node' ].
 		index := self indexOfNode: anotherNode.
 		index = 0 ifTrue: [ ^ self addNode: aNode ].
-		statements := statements asOrderedCollection
-			add: aNode beforeIndex: index;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements add: aNode beforeIndex: index.
 		aNode parent: self.
 		^ aNode
 	)
 	
 	addNodes: aCollection = (
-		statements := statements asOrderedCollection
-			addAll: aCollection;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements addAll: aCollection.
 		aCollection do: [ :each | each parent: self ].
 		^ aCollection
 	)
 	
-	acceptVisitor: aProgramNodeVisitor = (
-		^ aProgramNodeVisitor visitArrayNode: self
-	)
-	
 	addNode: aNode = (
-		statements := statements asOrderedCollection
-			add: aNode;
-			yourself.
+		statements := statements asOrderedCollection.
+		statements add: aNode.
 		aNode parent: self.
 		^ aNode
 	)
 	
-	startWithoutParentheses = ( 
-		^ left
-	)
-	
 	equalTo: anObject withMapping: aDictionary = (
-	
 		self class = anObject class 
 			ifFalse: [ ^ false ].
 		self statements size = anObject statements size 
@@ -171,7 +110,7 @@ RBArrayNode = RBValueNode (
 		^ true
 	)
 	
-	= = ( anObject 
+	= anObject = (  
 		self == anObject ifTrue: [ ^ true ].
 		self class = anObject class ifFalse: [ ^ false ].
 		self statements size = anObject statements size ifFalse: [ ^ false ].
@@ -185,27 +124,11 @@ RBArrayNode = RBValueNode (
 	)
 	
 	match: aNode inContext: aDictionary = (
-	
 		aNode class = self class ifFalse: [ ^ false ].
 		^ self matchList: statements against: aNode statements inContext: aDictionary
 	)
 	
-	left: anInteger = (
-		left := anInteger
-	)
-	
-	needsParenthesis = (
-		^ false
-	)
-	
-	statementComments = (
-		^self comments
-	)
-	
 	----------------------------------
 	
-	
-	statements: statements = (
-		^ self new statements: statements
-	)
+	statements: statements = (^ self new statements: statements)
 )

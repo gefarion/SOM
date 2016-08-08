@@ -1,13 +1,10 @@
 RBConfigurableFormatter = RBProgramNodeVisitor (
-	"RBConfigurableFormatter formats the Refactoring Browser's parse trees. It has many more formatting options than the default formatter used by the RB. To change the RB to use this formatter, execute "RBProgramNode formatterClass: RBConfigurableFormatter". For some refactorings the RB must reformat the code after the change, so it is good to have a formatter configured to your tastes.Instance Variables:	codeStream	<PositionableStream>	the stream we are writing our output to	indent	<Integer>	how many times are we indenting a new line -- indents are normally tabs but could be any whitespace string	lineStart	<Integer>	the position of the character that started the current line. This is used for calculating the line length.	lookaheadCode	<Dictionary key: RBProgramNode value: String>	sometimes we need to lookahead while formatting, this dictionary contains the nodes that have already been formatted by lookahead	originalSource	<String>	the original source before we started formatting. This is used to extract the comments from the original source."
+	"RBConfigurableFormatter formats the Refactoring Browser's parse trees. It has many more formatting options than the default formatter used by the RB. To change the RB to use this formatter, execute 'RBProgramNode formatterClass: RBConfigurableFormatter'. For some refactorings the RB must reformat the code after the change, so it is good to have a formatter configured to your tastes.Instance Variables:	codeStream	<PositionableStream>	the stream we are writing our output to	indent	<Integer>	how many times are we indenting a new line -- indents are normally tabs but could be any whitespace string	lineStart	<Integer>	the position of the character that started the current line. This is used for calculating the line length.	lookaheadCode	<Dictionary key: RBProgramNode value: String>	sometimes we need to lookahead while formatting, this dictionary contains the nodes that have already been formatted by lookahead	originalSource	<String>	the original source before we started formatting. This is used to extract the comments from the original source."
 	| codeStream indent lookaheadCode originalSource lineStart |
 	
-	indent: anInteger = (
-		indent := anInteger
-	)
+	indent: anInteger = (indent := anInteger)
 	
 	visitCascadeNode: aCascadeNode = (
-	
 		self visitNode: aCascadeNode receiver.
 		self indentAround: 
 				[NewLineBeforeFirstCascade ifTrue: [self newLine] ifFalse: [self space].
@@ -26,7 +23,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	visitPatternBlockNode: aRBPatternBlockNode = (
-	
 		codeStream nextPut: $`.
 		self 
 			bracketWith: '{}' 
@@ -52,13 +48,15 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 			ifTrue: [ ^ self isLineTooLong: aMessageNode selector ].
 		messageStream := WriteStream on: (String new: 100).
 		self  with: aMessageNode selectorParts and: aMessageNode arguments 
-			do: [ :selector :arg | messageStream nextPutAll: selector; space; nextPutAll: (self formattedSourceFor: arg) ]
+			do: [ :selector :arg | 
+				messageStream nextPutAll: selector.
+				messageStream space. 
+				messageStream nextPutAll: (self formattedSourceFor: arg) ]
 			separatedBy: [ messageStream space ].
 		^ self isLineTooLong: messageStream contents
 	)
 	
 	formatMethodBodyFor: aMethodNode = (
-	
 		self
 			indentAround: 
 				[self newLines: NewLinesAfterMethodPattern.
@@ -83,12 +81,10 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	indentAround: aBlock = (
-	
 		self indent: 1 around: aBlock
 	)
 	
 	isLineTooLong: aString = (
-	
 		^ self currentLineLength + (aString indexOf: Character cr ifAbsent: [ aString size ]) >= MaxLineLength
 	)
 	
@@ -97,7 +93,7 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 		lineStart := 0.
 		indent := 0.
 		lookaheadCode := IdentityDictionary new.
-		codeStream := WriteStream on: (String new: 256)
+		codeStream := WriteStream on: (Vector new: 256)
 	)
 	
 	visitPragmaNode: aPragmaNode = (
@@ -112,24 +108,20 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	formatCommentsFor: aNode = (
-	
 		originalSource isNil ifTrue: [^self].
 		aNode comments do: 
 				[:each | 
-				codeStream
-					space;
-					nextPutAll: (originalSource copyFrom: each start to: each stop)]
+				codeStream space.
+				codeStream nextPutAll: (originalSource copyFrom: each start to: each stop)]
 	)
 	
 	visitSequenceNode: aSequenceNode = (
-	
 		self formatTemporariesFor: aSequenceNode.
 		self formatSequenceCommentsFor: aSequenceNode.
 		self formatSequenceNodeStatementsFor: aSequenceNode
 	)
 	
 	newLinesBeforeStartingAt: anIndex = (
-	
 		| count cr lf index char |
 		originalSource ifNil: [^0].
 		(anIndex isNil or: [anIndex > originalSource size]) ifTrue: [^0].
@@ -168,7 +160,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	formatSequenceNodeStatementsFor: aSequenceNode = (
-	
 		| statements |
 		statements := aSequenceNode statements.
 		statements isEmpty ifTrue: [^self].
@@ -191,14 +182,14 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	visitAssignmentNode: anAssignmentNode = (
-	
 		self visitNode: anAssignmentNode variable.
-		codeStream space; nextPutAll: anAssignmentNode assignmentOperator; space.
+		codeStream space.
+		codeStream nextPutAll: anAssignmentNode assignmentOperator.
+		codeStream space.
 		self visitNode: anAssignmentNode value
 	)
 	
 	indent: anInteger around: aBlock = (
-	
 		indent := indent + anInteger.
 		^aBlock ensure: [indent := indent - anInteger]
 	)
@@ -220,9 +211,8 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 								codeStream nextPutAll: selector.
 								(KeepBlockInMessage and: [ argument isBlock ])
 									ifTrue: [ 
-										self
-											space;
-											visitNode: argument ]
+										self space.
+										self visitNode: argument ]
 									ifFalse: [ 
 										((self willBeMultiline: argument) or: [ self isLineTooLong: (self formattedSourceFor: argument) ])
 											ifTrue: [ self newLine ]
@@ -237,10 +227,8 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	visitReturnNode: aReturnNode = (
-	
-		codeStream
-			nextPut: $^;
-			nextPutAll: StringFollowingReturn.
+		codeStream nextPut: $^.
+		codeStream nextPutAll: StringFollowingReturn.
 		self visitNode: aReturnNode value
 	)
 	
@@ -250,7 +238,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	precedenceOf: parentSelector greaterThan: childSelector = (
-	
 		"Put parenthesis around things that are preceived to have 'lower' precedence. For example, 'a + b * c' 
 		-> '(a + b) * c' but 'a * b + c' -> 'a * b + c'"
 	
@@ -267,12 +254,9 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 		^childIndex < parentIndex
 	)
 	
-	currentLineLength = (
-		^codeStream position - lineStart
-	)
+	currentLineLength = (^codeStream position - lineStart)
 	
 	with: firstCollection and: secondCollection do: aBlock separatedBy: separatorBlock = (
-	
 		firstCollection isEmpty ifTrue: [^self].
 		aBlock
 			value: firstCollection first
@@ -288,15 +272,11 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	visitMessageNode: aMessageNode = (
-	
 		self visitNode: aMessageNode receiver.
 		self formatSelectorAndArguments: aMessageNode
 	)
 	
-	willBeMultiline: aNode = (
-	
-		^(self formattedSourceFor: aNode) includes: Character cr
-	)
+	willBeMultiline: aNode = (^(self formattedSourceFor: aNode) includes: Character cr)
 	
 	formatMethodCommentFor: aMethodNode = (
 		originalSource isNil ifTrue: [^self].
@@ -314,13 +294,11 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	visitMethodNode: aMethodNode = (
-	
 		self formatMethodPatternFor: aMethodNode.
 		self formatMethodBodyFor: aMethodNode
 	)
 	
 	visitVariableNode: aVariableNode = (
-	
 		codeStream nextPutAll: aVariableNode name
 	)
 	
@@ -350,7 +328,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	visitLiteralArrayNode: aRBArrayLiteralNode = (
-	
 		| brackets |
 		codeStream nextPut: $#.
 		brackets := aRBArrayLiteralNode isForByteArray 
@@ -363,7 +340,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	writeString: aString = (
-	
 		| index |
 		index := aString lastIndexOf: Character cr ifAbsent: [0].
 		codeStream nextPutAll: aString.
@@ -380,7 +356,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	newLines: anInteger = (
-	
 		anInteger + IndentString size = 0 ifTrue: [codeStream space].
 		anInteger timesRepeat: [codeStream cr].
 		lineStart := codeStream position.
@@ -400,23 +375,18 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 				self newLine]
 	)
 	
-	formatPragmasFor: aMethodNode = (
-		aMethodNode pragmas do: [ :each | self visitNode: each; newLine ]
-	)
 	
 	handleLineForSelector: selector withSeparatorBlock: aBlock = (
-	
 		^ (self isLineTooLong: selector)
 			ifTrue: [ self newLine ]
 			ifFalse: [ aBlock value ]
 	)
 	
-	newLine = (
-		self newLines: 1
-	)
+	formatPragmasFor: aMethodNode = (aMethodNode pragmas do: [ :each | self visitNode: each. self newLine ])
+	newLine = (self newLines: 1)
+	space = (codeStream space)
 	
 	addNewLinesBeforeStatementStartingAt: anInteger = (
-	
 		| newLines |
 		newLines := MinimumNewLinesBetweenStatements 
 					max: (RetainBlankLinesBetweenStatements 
@@ -425,12 +395,7 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 		newLines = 0 ifTrue: [self space] ifFalse: [self newLines: newLines]
 	)
 	
-	space = (
-		codeStream space
-	)
-	
 	format: aParseTree = (
-	
 		originalSource := aParseTree source.
 		self visitNode: aParseTree.
 		^codeStream contents
@@ -450,7 +415,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	formattedSourceFor: aNode = (
-	
 		^lookaheadCode at: aNode
 			ifAbsentPut: [self class format: aNode withIndents: indent]
 	)
@@ -469,7 +433,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	bracketWith: bracketString around: aBlock = (
-	
 		bracketString isEmpty ifTrue: [^aBlock value].
 		codeStream nextPut: bracketString first.
 		^aBlock ensure: [codeStream nextPut: bracketString last]
@@ -487,12 +450,10 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 				RetainBlankLinesBeforeComments & (count > 0)
 					ifTrue: [ self newLines: count ]
 					ifFalse: [ codeStream tab ].
-	
 				codeStream nextPutAll: (originalSource copyFrom: each start to: each stop) ]
 	)
 	
 	formatMethodPatternFor: aMethodNode = (
-	
 		aMethodNode arguments isEmpty
 			ifTrue: [codeStream nextPutAll: aMethodNode selector]
 			ifFalse: 
@@ -511,7 +472,6 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	needsParenthesisFor: aNode = (
-	
 		| parent grandparent |
 		aNode ifNil: [ ^ false ].
 		aNode isValue ifFalse: [ ^ false ].
@@ -533,39 +493,72 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 	)
 	
 	----------------------------------
+	| CascadedMessageInsideParentheses FormatCommentWithStatements FormatOnAccept FormatOnDisplay IndentString IndentsForKeywords KeepBlockInMessage LineUpBlockBrackets 
+	MaxLineLength MethodSignatureOnMultipleLines MinimumNewLinesBetweenStatements MultiLineMessages NewLineAfterCascade NewLineBeforeFirstCascade NewLineBeforeFirstKeyword 
+	NewLinesAfterMethodComment NewLinesAfterMethodPattern NewLinesAfterTemporaries NumberOfArgumentsForMultiLine OneLineMessages PeriodsAtEndOfBlock PeriodsAtEndOfMethod 
+	RetainBlankLinesBeforeComments RetainBlankLinesBetweenStatements StringFollowingReturn StringInsideBlocks StringInsideParentheses TraditionalBinaryPrecedence 
+	UseTraditionalBinaryPrecedenceForParentheses |
 	
-	
-	oneLineMessages = (
-		^ OneLineMessages printString
-	)
-	
-	formatOnDisplay = (
-		^FormatOnDisplay ifNil:[false]
-	)
-	
-	keepBlockInMessage: aBoolean = (
-		KeepBlockInMessage := aBoolean
-	)
-	
-	minimumNewLinesBetweenStatements = (
-		^ MinimumNewLinesBetweenStatements
-	)
-	
-	stringFollowingReturn: aString = (
-		StringFollowingReturn := aString
-	)
-	
-	lineUpBlockBrackets = (
-		^ LineUpBlockBrackets
-	)
-	
-	retainBlankLinesBeforeComments = (
-		^ RetainBlankLinesBeforeComments
-	)
-	
-	useTraditionalBinaryPrecedenceForParentheses = (
-		^ UseTraditionalBinaryPrecedenceForParentheses
-	)
+	oneLineMessages = (^ OneLineMessages printString)
+	formatOnDisplay = (^FormatOnDisplay ifNil:[false])
+	keepBlockInMessage: aBoolean = (KeepBlockInMessage := aBoolean)
+	minimumNewLinesBetweenStatements = (^ MinimumNewLinesBetweenStatements)
+	stringFollowingReturn: aString = (StringFollowingReturn := aString)
+	lineUpBlockBrackets = (^ LineUpBlockBrackets)
+	retainBlankLinesBeforeComments = (^ RetainBlankLinesBeforeComments)
+	useTraditionalBinaryPrecedenceForParentheses = (^ UseTraditionalBinaryPrecedenceForParentheses)
+	useTraditionalBinaryPrecedenceForParentheses: aBoolean = (UseTraditionalBinaryPrecedenceForParentheses := aBoolean)
+	keepBlockInMessage = (^ KeepBlockInMessage)
+	multiLineMessages = (^ MultiLineMessages printString)
+	retainBlankLinesBetweenStatements: aBoolean = (RetainBlankLinesBetweenStatements := aBoolean)
+	traditionalBinaryPrecedence: aString = (TraditionalBinaryPrecedence := self compiler evaluate: aString)
+	newLineAfterCascade = (^ NewLineAfterCascade)
+	newLineAfterCascade: aBoolean = (NewLineAfterCascade := aBoolean)
+	periodsAtEndOfMethod = (^ PeriodsAtEndOfMethod)
+	formatOnAccept = (^FormatOnAccept ifNil:[false])
+	newLineBeforeFirstCascade = (^ NewLineBeforeFirstCascade)
+	stringFollowingReturn = (^ StringFollowingReturn)
+	maxLineLength = (^ MaxLineLength)
+	methodSignatureOnMultipleLines: aBoolean = (MethodSignatureOnMultipleLines := aBoolean)
+	indentsForKeywords = (^ IndentsForKeywords)
+	newLinesAfterMethodComment: anInteger = (NewLinesAfterMethodComment := anInteger)
+	periodsAsTerminators = (^ PeriodsAtEndOfBlock and: [ PeriodsAtEndOfMethod ])
+	format: aParseTree = (^self format: aParseTree withIndents: 0)
+	maxLineLength: anInteger = (MaxLineLength := anInteger)
+	newLineBeforeFirstCascade: aBoolean = (NewLineBeforeFirstCascade := aBoolean)
+	periodsAtEndOfBlock = (^ PeriodsAtEndOfBlock)
+	numberOfArgumentsForMultiLine: anInteger = (NumberOfArgumentsForMultiLine := anInteger)
+	lineUpBlockBrackets: aBoolean = (LineUpBlockBrackets := aBoolean)
+	retainBlankLinesBetweenStatements = (^ RetainBlankLinesBetweenStatements)
+	newLinesAfterMethodPattern = (^ NewLinesAfterMethodPattern)
+	periodsAtEndOfBlock: aBoolean = (PeriodsAtEndOfBlock := aBoolean)
+	periodsAtEndOfMethod: aBoolean = (PeriodsAtEndOfMethod := aBoolean)
+	multiLineMessages: aString = (MultiLineMessages := self compiler evaluate: aString)
+	stringInsideParentheses: aString = (StringInsideParentheses := aString)
+	newLinesAfterMethodPattern: anInteger = (NewLinesAfterMethodPattern := anInteger)
+	indentsForKeywords: anInteger = (IndentsForKeywords := anInteger)
+	stringInsideBlocks: aString = (StringInsideBlocks := aString)
+	oneLineMessages: aString = (OneLineMessages := self compiler evaluate: aString)
+	newLinesAfterTemporaries = (^ NewLinesAfterTemporaries)
+	formatOnAccept: aBoolean = (FormatOnAccept := aBoolean)
+	numberOfArgumentsForMultiLine = (^ NumberOfArgumentsForMultiLine)
+	newLinesAfterMethodComment = (^ NewLinesAfterMethodComment)
+	formatOnDisplay: aBoolean = ( FormatOnDisplay := aBoolean)
+	newLineBeforeFirstKeyword = (^ NewLineBeforeFirstKeyword)
+	stringInsideBlocks = (^ StringInsideBlocks)
+	formatCommentWithStatements: aBoolean = (FormatCommentWithStatements := aBoolean)
+	cascadedMessageInsideParentheses: aBoolean = (CascadedMessageInsideParentheses := aBoolean)
+	retainBlankLinesBeforeComments: aBoolean = (RetainBlankLinesBeforeComments := aBoolean)
+	formatCommentWithStatements = (^ FormatCommentWithStatements)
+	cascadedMessageInsideParentheses = (^ CascadedMessageInsideParentheses)
+	indentString: aString = (IndentString := aString)
+	indentString = (^ IndentString)
+	newLineBeforeFirstKeyword: aBoolean = (NewLineBeforeFirstKeyword := aBoolean)
+	newLinesAfterTemporaries: anInteger = (NewLinesAfterTemporaries := anInteger)
+	stringInsideParentheses = (^ StringInsideParentheses)
+	traditionalBinaryPrecedence = (^ TraditionalBinaryPrecedence printString)
+	methodSignatureOnMultipleLines = (^ MethodSignatureOnMultipleLines)
+	minimumNewLinesBetweenStatements: anInteger = (MinimumNewLinesBetweenStatements := anInteger)
 	
 	initialize = (
 		CascadedMessageInsideParentheses := false.
@@ -599,132 +592,27 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 		FormatOnDisplay := false
 	)
 	
-	multiLineMessages: aString = (
-		MultiLineMessages := self compiler evaluate: aString
-	)
-	
-	stringInsideParentheses: aString = (
-		StringInsideParentheses := aString
-	)
-	
-	newLinesAfterMethodPattern: anInteger = (
-		NewLinesAfterMethodPattern := anInteger
-	)
-	
-	indentsForKeywords: anInteger = (
-		IndentsForKeywords := anInteger
-	)
-	
-	stringInsideBlocks: aString = (
-		StringInsideBlocks := aString
-	)
-	
-	oneLineMessages: aString = (
-		OneLineMessages := self compiler evaluate: aString
-	)
-	
-	newLinesAfterTemporaries = (
-		^ NewLinesAfterTemporaries
-	)
-	
-	formatOnAccept:aBoolean
-	 = (
-	FormatOnAccept :=aBoolean
-	)
-	
-	numberOfArgumentsForMultiLine = (
-		^ NumberOfArgumentsForMultiLine
-	)
-	
-	newLinesAfterMethodComment = (
-		^ NewLinesAfterMethodComment
-	)
-	
-	formatOnDisplay:aBoolean
-	 = (
-	FormatOnDisplay :=aBoolean
-	)
-	
 	format: aParseTree withIndents: anInteger = (
-	
-		^ self new
-			indent: anInteger;
-			format: aParseTree
+		| formater |
+		formater := self new.
+		formater indent: anInteger.
+		^formater
 	)
 	
-	newLineBeforeFirstKeyword = (
-		^ NewLineBeforeFirstKeyword
-	)
-	
-	stringInsideBlocks = (
-		^ StringInsideBlocks
-	)
-	
-	formatCommentWithStatements: aBoolean = (
-		FormatCommentWithStatements := aBoolean
-	)
-	
-	cascadedMessageInsideParentheses: aBoolean = (
-		CascadedMessageInsideParentheses := aBoolean
-	)
-	
-	retainBlankLinesBeforeComments: aBoolean = (
-		RetainBlankLinesBeforeComments := aBoolean
-	)
-	
-	formatCommentWithStatements = (
-		^ FormatCommentWithStatements
-	)
-	
-	cascadedMessageInsideParentheses = (
-		^ CascadedMessageInsideParentheses
-	)
-	
-	indentString: aString = (
-		IndentString := aString
-	)
-	
-	indentString = (
-		^ IndentString
-	)
-	
-	newLineBeforeFirstKeyword: aBoolean = (
-		NewLineBeforeFirstKeyword := aBoolean
-	)
-	
-	newLinesAfterTemporaries: anInteger = (
-		NewLinesAfterTemporaries := anInteger
-	)
 	
 	periodsAsTerminators: aBoolean = (
 		PeriodsAtEndOfBlock := aBoolean.
 		PeriodsAtEndOfMethod := aBoolean
 	)
 	
-	stringInsideParentheses = (
-		^ StringInsideParentheses
-	)
-	
-	traditionalBinaryPrecedence = (
-		^ TraditionalBinaryPrecedence printString
-	)
-	
-	methodSignatureOnMultipleLines = (
-		^ MethodSignatureOnMultipleLines
-	)
-	
-	minimumNewLinesBetweenStatements: anInteger = (
-		MinimumNewLinesBetweenStatements := anInteger
-	)
-	
-	settingsOn: aBuilder = (
+	"settingsOn: aBuilder = (
 		<systemsettings>
-		(aBuilder group: #configurableFormatter)
-			target: self;
-			parent: #codeBrowsing;
-			label: 'Pretty Printing';
-			description: 'Settings related to the formatter';
-			with: [ 
+		builder := aBuilder group: #configurableFormatter.
+		builder target: self.
+		builder parent: #codeBrowsing.
+		builder label: 'Pretty Printing'.
+		builder description: 'Settings related to the formatter'.
+		builder	with: [ 
 						(aBuilder setting: #cascadedMessageInsideParentheses) label: 'Cascaded message inside parentheses'.
 						(aBuilder setting: #formatCommentWithStatements) label: 'Format comment with statements'.
 						(aBuilder setting: #indentString) label: 'Indent string'.
@@ -756,110 +644,5 @@ RBConfigurableFormatter = RBProgramNodeVisitor (
 							label: 'Use traditional binary precedence for parentheses'.
 						(aBuilder setting: #formatOnDisplay) label: 'Format methods on display'.
 						(aBuilder setting: #formatOnAccept) label: 'Format methods on accept' ]
-	)
-	
-	useTraditionalBinaryPrecedenceForParentheses: aBoolean = (
-		UseTraditionalBinaryPrecedenceForParentheses := aBoolean
-	)
-	
-	keepBlockInMessage = (
-		^ KeepBlockInMessage
-	)
-	
-	multiLineMessages = (
-		^ MultiLineMessages printString
-	)
-	
-	retainBlankLinesBetweenStatements: aBoolean = (
-		RetainBlankLinesBetweenStatements := aBoolean
-	)
-	
-	traditionalBinaryPrecedence: aString = (
-		TraditionalBinaryPrecedence := self compiler evaluate: aString
-	)
-	
-	newLineAfterCascade = (
-		^ NewLineAfterCascade
-	)
-	
-	newLineAfterCascade: aBoolean = (
-		NewLineAfterCascade := aBoolean
-	)
-	
-	periodsAtEndOfMethod = (
-		^ PeriodsAtEndOfMethod
-	)
-	
-	formatOnAccept = (
-		^FormatOnAccept ifNil:[false]
-	)
-	
-	newLineBeforeFirstCascade = (
-		^ NewLineBeforeFirstCascade
-	)
-	
-	stringFollowingReturn = (
-		^ StringFollowingReturn
-	)
-	
-	maxLineLength = (
-		^ MaxLineLength
-	)
-	
-	methodSignatureOnMultipleLines: aBoolean = (
-		MethodSignatureOnMultipleLines := aBoolean
-	)
-	
-	indentsForKeywords = (
-		^ IndentsForKeywords
-	)
-	
-	newLinesAfterMethodComment: anInteger = (
-		NewLinesAfterMethodComment := anInteger
-	)
-	
-	periodsAsTerminators = (
-		^ PeriodsAtEndOfBlock and: [ PeriodsAtEndOfMethod ]
-	)
-	
-	format: aParseTree = (
-	
-		^self format: aParseTree withIndents: 0
-	)
-	
-	maxLineLength: anInteger = (
-		MaxLineLength := anInteger
-	)
-	
-	newLineBeforeFirstCascade: aBoolean = (
-		NewLineBeforeFirstCascade := aBoolean
-	)
-	
-	periodsAtEndOfBlock = (
-		^ PeriodsAtEndOfBlock
-	)
-	
-	numberOfArgumentsForMultiLine: anInteger = (
-		NumberOfArgumentsForMultiLine := anInteger
-	)
-	
-	lineUpBlockBrackets: aBoolean = (
-		LineUpBlockBrackets := aBoolean
-	)
-	
-	retainBlankLinesBetweenStatements = (
-		^ RetainBlankLinesBetweenStatements
-	)
-	
-	newLinesAfterMethodPattern = (
-		^ NewLinesAfterMethodPattern
-	)
-	
-	periodsAtEndOfBlock: aBoolean = (
-		PeriodsAtEndOfBlock := aBoolean
-	)
-	
-	periodsAtEndOfMethod: aBoolean = (
-		PeriodsAtEndOfMethod := aBoolean
-	)
+	)"
 )

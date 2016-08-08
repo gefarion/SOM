@@ -2,41 +2,23 @@ RBToken = Object (
 	"RBToken is the abstract superclass of all of the RB tokens. These tokens (unlike the standard parser's) remember where they came from in the original source code.Subclasses must implement the following messages:	accessing		lengthInstance Variables:	sourcePointer	<Integer>	The position in the original source code where this token began."
 	| sourcePointer comments |
 	
-	comments = (
-		^comments
-	)
+	isIdentifier = (^false)
+	isKeyword = (^false)
+	isPatternVariable = (^false)
+	isLiteralArrayToken = (^false)
+	isBinary = (^false)
+	isSpecial = (^false)
+	isAssignment = (^false)
+	isLiteralToken = (^false)
+	isPatternBlock = (^false)
+	isError = (^false)
 	
-	isIdentifier = (
-		^false
-	)
-	
-	removePositions = (
-		sourcePointer := nil
-	)
-	
-	isKeyword = (
-		^false
-	)
-	
-	isPatternVariable = (
-		^false
-	)
-	
-	isLiteralArrayToken = (
-		^false
-	)
-	
-	isBinary = (
-		^false
-	)
-	
-	isSpecial = (
-		^false
-	)
-	
-	comments: anObject = (
-		comments := anObject
-	)
+	removePositions = (sourcePointer := nil)
+	start = (^ sourcePointer ifNil: [ 0 ])
+	start: anInteger = (sourcePointer := anInteger)
+	length = (^self subclassResponsibility)
+	comments = (^comments)
+	comments: anObject = (comments := anObject)
 	
 	stop = (
 		^ sourcePointer 
@@ -44,47 +26,12 @@ RBToken = Object (
 			ifNotNil: [ self start + self length - 1 ]
 	)
 	
-	isAssignment = (
-		^false
-	)
-	
-	isLiteralToken = (
-		^false
-	)
-	
 	printOn: aStream = (
-	
-		aStream
-			nextPut: $ ;
-			nextPutAll: self class name
-	)
-	
-	isPatternBlock = (
-		^false
-	)
-	
-	start = (
-		^ sourcePointer ifNil: [ 0 ]
-	)
-	
-	length = (
-		^self subclassResponsibility
-	)
-	
-	start: anInteger = (
-	
-		sourcePointer := anInteger
-	)
-	
-	isError = (
-		^false
+		aStream nextPut: $ .
+		aStream	nextPutAll: self class name
 	)
 	
 	----------------------------------
 	
-	
-	start: anInterval = (
-	
-		^self new start: anInterval
-	)
+	start: anInterval = (^self new start: anInterval)
 )

@@ -9,24 +9,28 @@ RBPragmaNode = RBProgramNode (
 		^ absentBlock value
 	)
 	
-	selector = (
-		^ selector
-	)
-	
-	isKeyword = (
-		^(selector indexOf: $:) ~= 0.
-	)
-	
-	right: anInteger = (
-		right := anInteger
-	)
-	
-	left = (
-		^ left
-	)
+	selector = (^ selector)
+	isKeyword = (^(selector indexOf: $:) ~= 0.)
+	right: anInteger = (right := anInteger)
+	left = (^ left)
+	selectorParts = (^ selector keywords collect: [:keyword| keyword asSymbol ])
+	arguments = (^ arguments ifNil: [ #() ])
+	isUnary = (^ arguments isEmpty)
+	right = (^ right)
+	isPragma = (^ true)
+	asPragma = (^ Pragma keyword: selector arguments: (arguments collect: [ :each | each value ]) asArray)
+	keywordsPositions = (^keywordsPositions ifNil: [ (selector keywords collect: [:char| 0 ]) asIntegerArray ])
+	start = (^ left)
+	isCompilerOption = (^ self selector = #compilerOptions:)
+	hash = (^ self selector hash bitXor: (self hashForCollection: self arguments))
+	children = (^ self arguments)
+	isFaulty = (^self arguments anySatisfy: #isFaulty.)
+	isBinary = (^ (self isUnary or: [self isKeyword]) not)
+	isPrimitiveError = (^ #( primitive:error: primitive:module:error: primitive:error:module:) includes: self selector)
+	stop = (^ right)
 	
 	asPrimitive = (
-		| args module name spec  |
+		| args module name spec primitive |
 		args := (self arguments collect: [ :each | each value ]) asArray.
 		self isPrimitive
 			ifFalse: [ IRPrimitive null ].
@@ -34,28 +38,17 @@ RBPragmaNode = RBProgramNode (
 			ifTrue: [ 
 				name := args first.
 				module := self argumentAt: #module: ifAbsent: [ nil ].
-				spec := {(module ifNotNil: [ module value asSymbol ]). (name asSymbol). 0. 0}.
-				^ IRPrimitive new
-					num: 117;
-					spec: spec;
-					yourself ]
-			ifFalse: [ 
-				^ IRPrimitive new
-					num: args first;
-					spec: nil;
-					yourself ]
-	)
-	
-	children = (
-		^ self arguments
-	)
-	
-	isFaulty = (
-		^self arguments anySatisfy: #isFaulty.
-	)
-	
-	isBinary = (
-		^ (self isUnary or: [self isKeyword]) not
+				spec := Array with: (module ifNotNil: [ module value asSymbol ]) with: name asSymbol with: 0 with: 0.
+				primitive := IRPrimitive new.
+				primitive num: 117.
+				primitive spec: spec.
+				^primitive 
+			] ifFalse: [ 
+				primitive := IRPrimitive new.
+				primitive num: args first.
+				primitive spec: nil.
+				^primitive 
+			]
 	)
 	
 	argumentAt: keywordSelector = (
@@ -65,71 +58,25 @@ RBPragmaNode = RBProgramNode (
 	)
 	
 	keywordsPositions: aPositionsList = (
-		keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ].
-	)
-	
-	right = (
-		^ right
-	)
-	
-	isPragma = (
-		^ true
-	)
-	
-	asPragma = (
-		^ Pragma keyword: selector arguments: (arguments collect: [ :each | each value ]) asArray
-	)
-	
-	keywordsPositions = (
-		^keywordsPositions ifNil: [ (selector keywords collect: [:char| 0 ]) asIntegerArray ]
-	)
-	
-	start = (
-		^ left
-	)
-	
-	isCompilerOption = (
-		^ self selector = #compilerOptions:
+		"keywordsPositions := aPositionsList ifNotNil: [:list| list asIntegerArray ]."
+		keywordsPositions := aPositionsList ifNotNil: [:list| list ].
 	)
 	
 	sentMessages = (
-		^ super sentMessages
-			add: self selector;
-			yourself
+		| msgs | 
+		msgs := super sentMessages.
+		msgs add: self selector. 
+		^msgs
 	)
 	
-	hash = (
-		^ self selector hash bitXor: (self hashForCollection: self arguments)
-	)
 	
 	copyInContext: aDictionary = (
-	
 		^ self class
 			selector: self selector
 			arguments: (self arguments collect: [ :each | each copyInContext: aDictionary ])
 	)
 	
-	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
-		aSymbol numArgs == valueNodes size
-			ifFalse: 
-				[self error: 'Attempting to assign selector with wrong number of arguments.'].
-	
-		self 
-			arguments: valueNodes;
-			selector: aSymbol;
-			keywordsPositions: positionList.
-	)
-	
-	isPrimitiveError = (
-		^ #( primitive:error: primitive:module:error: primitive:error:module:) includes: self selector
-	)
-	
-	stop = (
-		^ right
-	)
-	
 	replaceNode: aNode withNode: anotherNode = (
-	
 		self arguments: (arguments collect: [ :each | 
 			each == aNode 
 				ifTrue: [ anotherNode ]
@@ -137,18 +84,13 @@ RBPragmaNode = RBProgramNode (
 	)
 	
 	arguments: aLiteralCollection = (
-	
 		arguments := aLiteralCollection.
 		arguments do: [ :each | each parent: self ]
 	)
 	
-	acceptVisitor: aProgramNodeVisitor = (
-	
-		^ aProgramNodeVisitor visitPragmaNode: self
-	)
+	acceptVisitor: aProgramNodeVisitor = (^ aProgramNodeVisitor visitPragmaNode: self)
 	
 	equalTo: anObject withMapping: aDictionary = (
-	
 		self class = anObject class ifFalse: [ ^ false ].
 		self selector = anObject selector ifFalse: [ ^ false ].
 		self arguments size = anObject arguments size ifFalse: [ ^ false ].
@@ -159,16 +101,22 @@ RBPragmaNode = RBProgramNode (
 	)
 	
 	selector: aSelector = (
-	
 		keywordsPositions := nil.
 		selector := aSelector asSymbol.
 	)
 	
-	isPrimitive = (
-		^ #(primitive: primitive:error: primitive:error:module: primitive:module: primitive:module:error:) includes: self selector
+	selector: aSymbol keywordsPositions: positionList arguments: valueNodes = (
+		aSymbol numArgs == valueNodes length
+			ifFalse: 
+				[self error: 'Attempting to assign selector with wrong number of arguments.'].
+		self arguments: valueNodes.
+		self selector: aSymbol.
+		self keywordsPositions: positionList
 	)
 	
-	= = ( anObject 
+	isPrimitive = (^ #(primitive: primitive:error: primitive:error:module: primitive:module: primitive:module:error:) includes: self selector)
+	
+	= anObject = ( 
 		self == anObject ifTrue: [^true].
 		self class = anObject class ifFalse: [^false].
 		self selector = anObject selector ifFalse: [^false].
@@ -184,12 +132,9 @@ RBPragmaNode = RBProgramNode (
 		self arguments: (self arguments collect: [ :each | each copy ])
 	)
 	
-	numArgs = (
-		^ self selector numArgs
-	)
+	numArgs = (^ self selector numArgs)
 	
 	match: aNode inContext: aDictionary = (
-	
 		aNode class = self class
 			ifFalse: [ ^ false ].
 		self selector = aNode selector
@@ -200,9 +145,7 @@ RBPragmaNode = RBProgramNode (
 		^ true
 	)
 	
-	left: anInteger = (
-		left := anInteger
-	)
+	left: anInteger = (left := anInteger)
 	
 	keywordsIntervals = (
 		^selector keywords
@@ -210,20 +153,7 @@ RBPragmaNode = RBProgramNode (
 			collect: [:keyword :start| start to: (start = 0 ifTrue: [ -1 ] ifFalse: [ start + keyword size - 1]) ].
 	)
 	
-	selectorParts = (
-		^ selector keywords collect: [:keyword| keyword asSymbol ].
-	)
-	
-	arguments = (
-		^ arguments ifNil: [ #() ]
-	)
-	
-	isUnary = (
-		^ arguments isEmpty
-	)
-	
 	----------------------------------
-	
 	
 	selector: aSymbol arguments: valueNodes = (
 		^ self selector: aSymbol keywordsPositions: nil arguments: valueNodes 
