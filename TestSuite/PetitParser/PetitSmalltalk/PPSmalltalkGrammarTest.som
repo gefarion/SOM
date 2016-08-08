@@ -72,7 +72,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testArrayLiteral8 = (
 		self 
-			parse: '#(\'\'baz\'\')'
+			parse: '#(\'baz\')'
 			rule: #arrayLiteral
 	)
 	

@@ -43,6 +43,7 @@ Integer = (
     
     exp: aNumber = (
     	| value |
+    	aNumber = 0 ifTrue: [^1].
     	value := self.
     	1 to: aNumber abs - 1 do: [:i | value := value * self].
     	^aNumber negative ifTrue: [1 // value] ifFalse: [value]

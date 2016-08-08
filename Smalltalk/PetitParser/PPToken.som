@@ -20,27 +20,13 @@ PPToken = Object (
 		 ^ start - position
 	)
 	
-	hash = (
-		^ self inputValue hash
-	)
-	
-	parsedValue = (
-		"Answer the parsed value of this token."
-	
-		^ value
-	)
-	
-	size = (
-		"Answer the size of this token in the underlying collection."
-	
-		^ stop - start + 1
-	)
-	
-	stop = (
-		"Answer the stop position of this token in the underlying collection."
-		
-		^ stop
-	)
+	hash = (^ self inputValue hash)
+	parsedValue = (^ value)
+	size = (^ stop - start + 1)
+	stop = (^ stop)
+	start = (^ start)
+	collection = (^ collection)
+	inputValue = (^ collection copyFrom: start to: stop)
 	
 	line = (
 		"Answer the line number of this token in the underlying collection."
@@ -56,14 +42,7 @@ PPToken = Object (
 		^ line
 	)
 	
-	= anObject = (
-		^ self class = anObject class and: [ self inputValue = anObject inputValue ]
-	)
-	
-	value = (
-		self notify: 'Token>>#value is no longer supported. Instead use Token>>#inputValue'.
-		^ self inputValue
-	)
+	= anObject = (^ self class = anObject class and: [ self inputValue = anObject inputValue ])
 	
 	printOn: aStream = (
 		super printOn: aStream.
@@ -75,24 +54,6 @@ PPToken = Object (
 		aStream nextPut: '('.
 		aStream print: self inputValue.
 		aStream	nextPut: ')'.
-	)
-	
-	start = (
-		"Answer the start position of this token in the underlying collection."
-	
-		^ start
-	)
-	
-	collection = (
-		"Answer the underlying collection of this token."
-	
-		^ collection
-	)
-	
-	inputValue = (
-		"Answer the consumed input of this token."
-	
-		^ collection copyFrom: start to: stop
 	)
 	
 	initializeOn: aSequenceableCollection start: aStartInteger stop: aStopInteger value: anObject = (

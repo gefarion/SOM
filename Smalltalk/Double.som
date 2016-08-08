@@ -38,7 +38,7 @@ Double = (
     asInteger   = primitive
     cos         = primitive
     sin         = primitive
-    / arg = (self printLastMethods: 5)
+    floor		= primitive
     
     "Comparing"
     =  argument = primitive
@@ -54,7 +54,7 @@ Double = (
     "Converting"
     asString = primitive
     asFloat  = (^self) 
-    
+
     "Iterating"
     to: limit do: block = (
         | i |
