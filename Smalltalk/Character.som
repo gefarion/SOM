@@ -28,7 +28,6 @@ Character = (
     asInteger 	   = primitive
     asString 	   = primitive
     asDigit 	   = primitive
-    isCharacter	   = (^true)
     isDigit	  	   = primitive
     isLetter  	   = primitive
     isAlphaNumeric = primitive
@@ -36,17 +35,14 @@ Character = (
     asLowercase	   = primitive
     isUppercase	   = primitive
     isLowercase	   = primitive
+    isCharacter	   = (^true)
+    isSpecial = (^'+-/\*~<>=@,%|&?!' includes: self)
+    between: min and: max = (^self >= min and: [self <= max])
     compareWith: anotherChar	   = primitive
     asSymbol = (^self asString asSymbol)
-    
-    
-    isVowel = (
-		^'AEIOU' includes: self asUppercase
-	)
+    isVowel = (^'AEIOU' includes: self asUppercase)
 	
-	between: min and: max = (^self >= min and: [self <= max])
-    
-    isSeparator = (
+	isSeparator = (
 		| value |
 		"Answer whether the receiver is one of the separator characters--space, 
 		cr, tab, line feed, or form feed."
@@ -57,6 +53,11 @@ Character = (
 		value = 10 ifTrue: [^true].	"line feed"
 		value = 12 ifTrue: [^true].	"form feed"
 		^false
+	)
+	
+	tokenish = (
+		"Answer whether the receiver is a valid token-character -- letter, digit, underscore, or colon."
+		^ self isLetter or: [ self isDigit or: [ self = $_ or: [ self = $: ] ] ]
 	)
 	
 	"Petit Parser"

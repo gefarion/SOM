@@ -57,6 +57,7 @@ Vector = (
     
     first = ( ^ (self size > 0) ifTrue: [storage at: 1] ifFalse: [nil] )
     second = (^ self at: 2)
+    third = (^ self at: 3)
     last = (^ self at: self size)
     
     "Iterating"
@@ -386,12 +387,20 @@ Vector = (
     "Allocation"
     new              = ( ^ self new: 50 )
     new: initialSize = ( ^ super new initialize: initialSize )
+    newFrom: aCollection = (^ self withAll: aCollection)
     
     with: elem = (
         | newVector |
         newVector := self new: 1.
         newVector append: elem.
         ^ newVector
+    )
+    
+    withAll: aCollection = (
+    	| collection |
+    	collection := self new: aCollection length. 
+    	collection addAll: aCollection.
+    	^collection
     )
     
     streamContents: blockWithArg = (

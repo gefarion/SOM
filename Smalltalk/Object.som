@@ -29,6 +29,7 @@ Object = nil (
     copy = (^self shallowCopy postCopy)
     shallowCopy = primitive
     postCopy = (^ self) 
+
     "Comparing"
 
     " If you override =, you MUST override hashcode as well.  The rule
@@ -43,6 +44,9 @@ Object = nil (
     hash 		= (^self identityHash)
     identityHash = primitive
     
+    isSymbol = ( ^false )
+    isFloat  = ( ^true )
+    
     "Accessing"
     species = (^self class)
     isKindOf: aClass = (
@@ -52,6 +56,7 @@ Object = nil (
     
     "Converting"
     asString  = ( ^'instance of ' + (self class) )
+    as: aSimilarClass = (^ aSimilarClass newFrom: self)
     , element = ( ^(Vector new append: self) append: element )
     hashcode  = primitive
     

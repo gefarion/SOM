@@ -1,11 +1,11 @@
 OrderedCollection = Vector (
-    add: elem = (
-        ^ self append: elem
-    )
-    
-    addLast: elem = (
-        ^ self append: elem
-    )
+    asOrderedCollection = (
+    	self species == OrderedCollection ifTrue: [ ^self ].
+		^super asOrderedCollection
+	)
+	
+	add: elem = (^ self append: elem)
+    addLast: elem = (^ self append: elem)
     
     addAll: aCollection = (
     	aCollection do: [:each | self add: each].

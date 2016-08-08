@@ -49,6 +49,7 @@ Double = (
     negative    = ( ^self < 0.0 )
     between: a and: b = ( ^(self > a) and: [ self < b ] )
     isZero = (^self = 0)
+    isFloat = (^true)
     
     "Converting"
     asString = primitive

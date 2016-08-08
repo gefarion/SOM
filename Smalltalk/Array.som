@@ -24,24 +24,34 @@ THE SOFTWARE.
 "
 
 Array = (
-
+	size = (self printLastMethods:5)
     "Accessing"
     at: index            = primitive
     at: index put: value = primitive
     length               = primitive
     isEmpty				 = (^self length = 0)
+    notEmpty 		     = (^ self isEmpty not)
     putAll: block        = ( self doIndexes: [ :i |
                                 self at: i put: block value ] )
     first  = ( ^ self at: 1 )
     second = ( ^ self at: 2 )
+    third = ( ^ self at: 3 )
     last   = ( ^ self at: self length )
     asArray = (^ self)
+    asOrderedCollection = (^ self as: OrderedCollection)
+    isCollection = (^true)
     
     "Comparing"
     = otherCollection = (
 	    self == otherCollection ifTrue: [^ true].
 		self species == otherCollection species ifFalse: [^ false].
 		^ self hasEqualElements: otherCollection
+	)
+	
+	, otherCollection = (
+		^ self copyReplaceFrom: self length + 1
+		  to: self length
+		  with: otherCollection
 	)
 	
 	hasEqualElements: otherCollection = (	
@@ -94,6 +104,38 @@ Array = (
 		^newIC
 	)
     
+    copyReplaceFrom: start to: stop with: replacementCollection = (
+		"Answer a copy of the receiver satisfying the following conditions: If 
+		stop is less than start, then this is an insertion; stop should be exactly 
+		start-1, start = 1 means insert before the first character, start = size+1 
+		means append after last character. Otherwise, this is a replacement; start 
+		and stop have to be within the receiver's bounds."
+
+		| newSequenceableCollection newSize endReplacement |
+		newSize := self length - (stop - start + 1) + replacementCollection length.
+		endReplacement := start - 1 + replacementCollection length.
+		newSequenceableCollection := self species new: newSize.
+		start > 1 ifTrue:[
+			newSequenceableCollection
+				replaceFrom: 1
+				to: start - 1
+				with: self
+				startingAt: 1].
+		start <= endReplacement ifTrue:[
+			newSequenceableCollection
+				replaceFrom: start
+				to: endReplacement
+				with: replacementCollection
+				startingAt: 1].
+		endReplacement < newSize ifTrue:[
+			newSequenceableCollection
+				replaceFrom: endReplacement + 1
+				to: newSize
+				with: self
+				startingAt: stop + 1].
+		^newSequenceableCollection
+	)
+	
     replaceFrom: start to: stop with: replacement startingAt: repStart = (
         "This destructively replaces elements from start to stop in the
         receiver starting at index, repStart, in the sequenceable collection,
@@ -169,7 +211,12 @@ Array = (
 			twoArgBlock value: (self at: index)
 					value: (otherCollection at: index)]
 	)
-    
+
+	ifEmpty: emptyBlock ifNotEmpty: notEmptyBlock = (
+		self isEmpty ifTrue: [ ^emptyBlock value ].
+		^notEmptyBlock cull: self
+	)
+        
     "Files / Pharo Compatibility"
     asString = (
     	^self inject: '' into: [:res :elm | res + elm asString].
@@ -218,7 +265,8 @@ Array = (
 		1 to: size do: [:i | result at: i put: (self at: size - (i - 1))].
 		^ result
 	)
-    
+	
+	
     ----------------------------
     
     "Allocation"

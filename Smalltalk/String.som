@@ -25,8 +25,8 @@ THE SOFTWARE.
 
 String = (
     "Strings are immutable"
-
-    "Concatenate: returns a new string object"
+	
+	"Concatenate: returns a new string object"
     concatenate: argument = primitive
     + argument            = ( ^self concatenate: argument asString )
     , argument            = ( ^self concatenate: argument asString )
@@ -44,6 +44,8 @@ String = (
     isEmptyOrNil = (^self isEmpty)
     isString = (^true)
     first = (^self at: 1)
+    second = (^self at: 2)
+    last = (^ self at: self length)
     
     "Comparing"   
     = argument = primitive
@@ -166,13 +168,83 @@ String = (
 		^self substringFrom: anIndex to: anotherIndex.
 	)
 	
+	copyReplaceAll: oldSubCollection with: newCollection = (
+		"Answer a copy of the receiver in which all occurrences of
+		oldSubCollection have been replaced by newCollection "
+		| aString startSearch currentIndex endIndex |
+		
+		aString := self.
+		startSearch := 1.
+		[(currentIndex := aString indexOfSubCollection: oldSubCollection startingAt: startSearch) > 0]
+			whileTrue: [
+				endIndex := currentIndex + oldSubCollection length - 1.
+				aString := aString
+						copyReplaceFrom: currentIndex
+						to: endIndex
+						with: newCollection.
+				startSearch := currentIndex + newCollection length].
+		^ aString
+	)
+	
+	copyReplaceFrom: start to: stop with: replacementCollection = ( 
+		| newSequenceableCollection newSize endReplacement |
+		newSize := self length - (stop - start + 1) + replacementCollection length.
+		endReplacement := start - 1 + replacementCollection length.
+		newSequenceableCollection := self species new: newSize.
+		start > 1 ifTrue:[
+			newSequenceableCollection
+				replaceFrom: 1
+				to: start - 1
+				with: self
+				startingAt: 1].
+		start <= endReplacement ifTrue:[
+			newSequenceableCollection
+				replaceFrom: start
+				to: endReplacement
+				with: replacementCollection
+				startingAt: 1].
+		endReplacement < newSize ifTrue:[
+			newSequenceableCollection
+				replaceFrom: endReplacement + 1
+				to: newSize
+				with: self
+				startingAt: stop + 1].
+		^newSequenceableCollection
+	)
+	
 	do: aBlock = (
 		"Refer to the comment in Collection|do:."
 		1 to: self length do:
 			[:index | aBlock value: (self at: index)]
 	)
 	
-		
+	numArgs = ( 
+		"Answer either the number of arguments that the receiver would take if considered a selector.  Answer -1 if it couldn't be a selector. It is intended mostly for the assistance of spelling correction."
+	
+		| firstChar numColons start ix |
+		self length = 0 ifTrue: [^ -1].
+		firstChar := self at: 1.
+		(firstChar isLetter or: [ firstChar = $_]) ifTrue:
+			["Fast reject if any chars are non-alphanumeric
+			NOTE: fast only for Byte things - Broken for Wide"
+			self class isBytes
+				ifTrue: [(self findSubstring: '~' in: self startingAt: 1 matchTable: Tokenish) > 0 ifTrue: [^ -1]]
+				ifFalse: [2 to: self length do: [:i | (self at: i) tokenish ifFalse: [^ -1]]].
+			"Fast colon count"
+			numColons := 0.  start := 1.
+			[(ix := self indexOf: $: startingAt: start) > 0]
+				whileTrue:
+					[(ix = start or: [(self at: start) isDigit]) ifTrue: [^-1].
+					numColons := numColons + 1.
+					start := ix + 1].
+			numColons = 0 ifTrue: [^ 0].
+			(self at: self length) = $:
+				ifTrue: [^ numColons]
+				ifFalse: [^ -1]].
+		"Test case of binary selector, if self allSatisfy: #isSpecial (inlined for speed)"
+		1 to: self length do: [:i | (self at: i) isSpecial ifFalse: [^ -1]].
+		^1
+	)		
 	"FileSystem"
 	asVmPathName = (^self)
 	readStream = (^ ReadStream on: self)
@@ -200,7 +272,7 @@ String = (
 	streamContents: blockWithArg = (
 		^ self new: 100 streamContents: blockWithArg
 	)
-	
+	new: a = (self printLastMethods:5)
 	new: newSize streamContents: blockWithArg = (
 		| stream |
 		stream := WriteStream on: (Vector new: newSize).
