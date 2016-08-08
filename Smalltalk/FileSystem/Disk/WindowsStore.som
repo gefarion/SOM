@@ -59,20 +59,8 @@ WindowsStore = DiskStore (
 	
 	----------------------------------
 	
-	maxFileNameLength = (
-		self flag: 'TODO: more tests needed here!'.
-		^ 255
-	)
-	
-	separator = ( 
-		^ '\'
-	)
-	
-	delimiter = (
-		^ '\'
-	)
-	
-	isCaseSensitive = (
-		^ false
-	)
+	maxFileNameLength = (^ 255)
+	separator = (^ '\')
+	delimiter = (^ '\')
+	isCaseSensitive = (^ false)
 )

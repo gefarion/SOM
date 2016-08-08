@@ -54,7 +54,7 @@ PlatformResolver = FileSystemResolver (
 	
 	primitiveGetUntrustedUserDirectory = (
 		self primitiveFailed.
-		self flag: 'use a more decent way to get a path in the users home directory'
+		"self flag: 'use a more decent way to get a path in the users home directory'"
 	)
 	
 	platformName = (
