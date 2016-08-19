@@ -35,7 +35,7 @@ MethodCascadeTest = TestCase (
   )
 
   testExpCall = (
-    | obj |
+    | obj|
   	obj := ClassD new.
     obj set: 0.
     
@@ -54,4 +54,26 @@ MethodCascadeTest = TestCase (
     self assert: 3 equals: obj get.
   )
 
+  testUnaryPrimitive = (
+    1 to: 100 do: [ :x | self assert: (false not; not) ].
+  )
+
+  testBinaryPrimitive = (
+    1 to: 100 do: [ :x | self assert: (true and: false; and: true) ].
+  )
+
+  testTerminaryPrimitive = (
+    | a |
+    a := Array new: 3.
+    1 to: 100 do: [ :x | a at: 1 put: x; at: 2 put: x*10; at: 3 put: x*100].
+    self assert: 100 equals: (a at: 1).
+    self assert: 1000 equals: (a at: 2).
+    self assert: 10000 equals: (a at: 3).
+  )
+
+  testQuaternaryPrimitive = (
+    | a |
+    a := Array new: 3.
+    1 to: 100 do: [ :x | 1 to: x by: 1 do: [:y | true ]; to: x by: 1 do: [:y | true ]].
+  )
 )
