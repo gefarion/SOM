@@ -9,6 +9,11 @@ ClassD = (
     c := c + 1.
     ^nil.
   )
+  
+  incSelf = (
+ 	c := c + 1.
+	^self.
+  )
 
   get = (
     ^c.
