@@ -1,0 +1,18 @@
+LocalVarAccess = (
+ 
+ foo = (
+    | a b |
+    b := a.
+    a := 1.
+    ^b isNil ifTrue: [1] ifFalse: [0].
+ )
+ 
+ ----------------------
+ 
+ test = (
+  | instance |
+  instance := LocalVarAccess new.
+  instance foo. 
+  ^instance foo.
+ )
+)
