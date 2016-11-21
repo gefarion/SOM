@@ -70,9 +70,6 @@ PPSmalltalkClassesTest = PPCompositeParserTest (
 		self verifyClass: True.
 		self verifyClass: False.
 		self verifyClass: Character
-	
-	
-	
 	)
 	
 	testParseMethod = (

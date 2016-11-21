@@ -42,12 +42,12 @@ StringTest = TestCase (
   testCharAt = (
     | str |
     str := 'foobar'.
-    self assert: 'f' equals: (str charAt: 1).
-    self assert: 'o' equals: (str charAt: 2).
-    self assert: 'o' equals: (str charAt: 3).
-    self assert: 'b' equals: (str charAt: 4).
-    self assert: 'a' equals: (str charAt: 5).
-    self assert: 'r' equals: (str charAt: 6).
+    self assert: $f equals: (str at: 1).
+    self assert: $o equals: (str at: 2).
+    self assert: $o equals: (str at: 3).
+    self assert: $b equals: (str at: 4).
+    self assert: $a equals: (str at: 5).
+    self assert: $r equals: (str at: 6).
   )
   
   testPrimSubstringFrom = (
