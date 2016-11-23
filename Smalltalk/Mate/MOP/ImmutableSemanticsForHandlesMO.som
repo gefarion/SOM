@@ -24,6 +24,6 @@ THE SOFTWARE.
 "
 
 ImmutableSemanticsForHandlesMO = OperationalSemanticsMO (
-    read: anIndex = (^(self target instVarAt: anIndex + 1) readOnly)
+    read: anIndex = (^((self instVarNamed: #target) instVarAt: anIndex + 1) readOnly)
     write: anIndex value: aValue = (^aValue)
 )

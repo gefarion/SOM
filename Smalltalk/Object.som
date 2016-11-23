@@ -138,10 +138,9 @@ Object = nil (
     instVarAt: anIndex myself: anObject = (^self instVarAt: anIndex)
     
     "Extension for the MOP"
-	readOnly = ( ^Handle targetBaseeeeee: self )
+	readOnly = ( ^Handle targetSPECIAL: self )
 	changeShape: aShape = primitive
 	shape = primitive
-	target = (^self)
 	
 	"Debugging Stuff"
 	printLastMethods: aNumber = (

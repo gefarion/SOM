@@ -35,7 +35,7 @@ Pair = (
     value: aValue = ( value := aValue )
     
     "Comparing"
-    =aPair = (
+    = aPair = (
     	^(self key = aPair key) and: [self value = aPair value]
     )
     
@@ -47,6 +47,8 @@ Pair = (
     print = ( '[' print. key print. '=>' print. value print. ']' print )
     println = ( self print. '' println )
     
+    "Only need for Mate immutability testing"
+    changeKeyOf: aPair to: aValue = (aPair key: 1)
     ----
     
     withKey: aKey andValue: aValue = (

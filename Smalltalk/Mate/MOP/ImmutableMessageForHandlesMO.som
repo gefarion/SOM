@@ -1,14 +1,8 @@
-ImmutableMessageForHandlesMO = MessageMO (
+ImmutableMessageForHandlesMO = MessageLookupMO (
     find: aSymbol since: aClass = (	
-		| class target |
-		target := self target.
-		class := aSymbol = #== ifTrue: [aClass] ifFalse: [target class].
-		"class := target isNil ifTrue: [aClass] ifFalse: [target class]."
-		[class isNil or: [(class hasMethod: aSymbol)]] whileFalse: [
-			class := class superclass.
-		].
-		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
-		^self doesNotUnderstand: aSymbol arguments: nil. 
+		| class | 
+		class := aSymbol = #equalsSPECIAL: ifTrue: [aClass] ifFalse: [(self instVarNamed: #target) class].
+		^super find: aSymbol since: class
 	)
 	
     "activate: aMethod withArguments: arguments = (

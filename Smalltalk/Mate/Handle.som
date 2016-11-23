@@ -26,9 +26,10 @@ THE SOFTWARE.
 Handle = (
 	| target |
     "Accessing"
-    target 				= ( ^target )
-    target: anObject 	= ( target := anObject )
-    == other 			= (^target == other)
+    targetSPECIAL: anObject = ( target := anObject )
+    = other 				= (^self equalsSPECIAL: other)
+    equalsSPECIAL: other 	= (^target = other)
+    
     ----------------------------
     
     | semantics |
@@ -49,7 +50,10 @@ Handle = (
 		self updateShapeForInstancesWith: (shape installEnvironment: self semantics).
 	)
     
-    targetBaseeeeee: anObject = (
-    	^(self basicNew target: anObject) "installEnvironment: self semantics"
+    targetSPECIAL: anObject = (
+    	| object |
+    	object := self basicNew.
+    	object targetSPECIAL: anObject. 
+    	^object
     )
  )

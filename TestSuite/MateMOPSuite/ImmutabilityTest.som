@@ -69,7 +69,7 @@ ImmutabilityTest = TestCase (
 		self assert: aReference equals: aPair.
 		self assert: aReference key equals: 2.
 		paramToTest := Pair withKey: 5 andValue: 5.
-		aReference asa: paramToTest.
+		aReference changeKeyOf: paramToTest to: 1.
 		self assert: paramToTest key equals: 1.
 	)
 )
