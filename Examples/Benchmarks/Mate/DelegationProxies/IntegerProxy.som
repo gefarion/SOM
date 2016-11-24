@@ -29,12 +29,20 @@ IntegerProxy = Proxy (
     	self plus: anInteger myself: self
     )
     
+    * anInteger = (
+    	self product: anInteger myself: self
+    )
+    
     equal: aValue myself: slf = (
-       	^handler handleMessage: #equal:myself: withArguments: (Array with: aValue with: slf) myself: slf target: target
+       	^handler handleMessage: #= withArguments: (Array with: aValue with: slf) myself: slf target: target
     )
     
     plus: anInteger myself: slf = (
-    	^handler handleMessage: #plus:myself: withArguments: (Array with: anInteger with: slf) myself: slf target: target
+    	^handler handleMessage: #+ withArguments: (Array with: anInteger with: slf) myself: slf target: target
+    )
+    
+    product: anInteger myself: slf = (
+    	^handler handleMessage: #* withArguments: (Array with: anInteger with: slf) myself: slf target: target
     )
     
     "Printing"

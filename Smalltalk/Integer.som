@@ -134,9 +134,7 @@ Integer = (
     
     "Delegation Proxies"
     proxyClass = (^IntegerProxy)
-    equal: anInteger myself: slf = (^self = anInteger)
-    plus: anInteger myself: slf = (^self + anInteger)
-	
+    
 	"Readonly"
 	readOnly = (^self)
 	

@@ -35,6 +35,12 @@ PairProxy = Proxy (
     keyMyself: slf = ( ^handler handleReadField: #key myself: slf target: target )
     valueMyself: slf = ( ^handler handleReadField: #value myself: slf target: target )
     
+    changeKeyOf: aPair to: aValue = (^self changeKeyOf: aPair to: aValue myself: self)
+    changeKeyOf: aPair to: aValue myself: slf = (
+    	^handler handleMessage: #changeKeyOf:to: withArguments: 
+    		(Array with: aPair with: aValue) myself: slf target: target
+    )
+    
     key: aKey = ( ^self writeKey: aKey myself: self )
     value: aValue = ( ^self writeValue: aValue myself: self)
     
@@ -51,6 +57,7 @@ PairProxy = Proxy (
     )
     
     key: aValue innerPropagation: anIndex all: aSetOfPairs myself: slf = (
-    	^handler handleMessage: #key:innerPropagation:all:myself: withArguments: (Array with: aValue with: anIndex with: aSetOfPairs with: slf) myself: slf target: target
+    	^handler handleMessage: #key:innerPropagation:all:myself: withArguments: 
+    		(Array with: aValue with: anIndex with: aSetOfPairs with: slf) myself: slf target: target
     )
 )
