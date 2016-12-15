@@ -1,0 +1,44 @@
+HashBasedLayout = Benchmark (
+    | people shape environment |
+    
+    oneTimeSetup = (
+		people := Array new: 20.
+		1 to: 20 do: [:i | | person |
+			person := Person new.
+			person ssn: 3055.
+			person address: 'home'.
+			person tel: 1234.
+			people at: i put: person.
+		].
+		shape := Shape newWithFieldsCount: 6.
+		shape := shape installClass: Person.
+		environment := EnvironmentMO 
+			operationalSemantics: nil  
+			message: nil 
+			layout: HashFieldsSemanticsMO new.
+   	)
+    
+    benchmark = (
+		11 to: 20 do: [:i | | oldPerson newPerson | 
+			newPerson := (people at: i).
+			oldPerson := (people at: i) copy.
+			newPerson changeShape: shape.
+			1 to: 6 do: [:i | newPerson instVarAt: i put: nil].
+			newPerson installEnvironment: environment.
+			1 to: oldPerson class fields length do: [:i | 
+				(oldPerson instVarAt: i) isNil ifFalse: 
+					[newPerson instVarAt: i put: (oldPerson instVarAt: i)]
+			].
+		].
+		^people
+    )
+    
+    verifyResult: result = (
+      1 to: 20 do: [:i | | person | 
+      	person := result at: i.
+      	self assert: person ssn equals: 3055.
+      	self assert: person address equals: 'home'.
+      	self assert: person tel equals: 1234.
+      ]
+    )
+)
