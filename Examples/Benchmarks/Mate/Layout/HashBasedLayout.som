@@ -39,6 +39,9 @@ HashBasedLayout = Benchmark (
       	self assert: person ssn equals: 3055.
       	self assert: person address equals: 'home'.
       	self assert: person tel equals: 1234.
-      ]
+      	self assert: person class fields length equals: 10.
+      	i > 10 ifTrue: [self assert: person shape fieldsCount equals: 6]
+      ].
+      ^true.
     )
 )

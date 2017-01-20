@@ -35,7 +35,6 @@ String = (
     asString = ( ^self )
     asSymbol = primitive
     asNumber = primitive
-    hashcode = primitive
     
     "Info"
     length = primitive
