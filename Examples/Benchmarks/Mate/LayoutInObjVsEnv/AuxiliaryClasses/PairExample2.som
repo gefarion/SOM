@@ -1,1 +1,1 @@
-PairExample1 = Pair ()
+PairExample2 = PairExample ()
