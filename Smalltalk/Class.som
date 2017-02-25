@@ -40,6 +40,11 @@ Class = (
     fields     = primitive
     methods    = primitive
     selectors  = ( ^self methods collect: [:inv | inv signature ] )
+    >> aSymbol = ( self methods do: [ :method |
+            method signature = aSymbol ifTrue: [ ^method ]
+        ].
+		^nil.
+    )
     
     allInstVarNames = (
 	    ^self fields copy.
