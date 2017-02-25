@@ -1,0 +1,27 @@
+RawAccumulator = Benchmark (
+    | problemSize points |
+    
+    oneTimeSetup = (
+    	| shape keyAndshape |
+    	points := Vector new.
+    	1 to: self problemSize do: [:index | points append: OneDimensionalPoint new].
+    	self sumXField.
+    )
+    
+    benchmark = (
+    	^self sumXField.
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: self problemSize
+    )
+    
+    sumXField = (
+    	| accumulator |
+    	accumulator := 0.
+    	^points inject: accumulator into: [:accum :point | point x + accum].
+    )
+    
+    problemSize = (^100)
+    problemSize: aNumber = (problemSize := aNumber)
+)    
