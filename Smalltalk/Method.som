@@ -26,12 +26,15 @@ THE SOFTWARE.
 Method = (
 
     "Meta Information"
-    signature = primitive
-    holder    = primitive
+    signature 	= primitive
+    holder    	= primitive
     
     "Printing"
     asString = ( ^self holder asString + '>>' + self signature asString )
 
     invokeOn: obj with: args = primitive
+    
+    "Mate MOP"
+    compilation = primitive
     
 )

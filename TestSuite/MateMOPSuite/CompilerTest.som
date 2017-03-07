@@ -1,0 +1,21 @@
+CompilerTest = TestCase (
+
+	testCompiler = (
+		| ast messageSend obj obj2 |
+		ast := (CompilerTest>>#exampleMethod:) compilation.
+		messageSend := (ast messageSendNode: #exampleMethod) first.
+		self assert: messageSend dispatchChain size = 0.
+		obj := Pair withKey: 'key' andValue: 'value'.
+		obj2 := HashEntry newKey: 'key2' value: 'value2' next: nil.
+		self exampleMethod: obj.
+		self assert: messageSend dispatchChain size equals: 1.
+		self exampleMethod: obj.
+		self assert: messageSend dispatchChain size equals: 1
+		self exampleMethod: obj2.
+		self assert: messageSend dispatchChain size equals: 2.
+    )
+    
+    exampleMethod: param = (
+    	^param key
+	)
+ )
