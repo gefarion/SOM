@@ -1,5 +1,13 @@
 ASTNode = (
     | |
     
-    messageSendNode: aSelector = primitive
+    messageSendNodes: aSelector = primitive
+    filterNodesByClassname: aString = primitive
+    
+    messageSendsWithSelector: aSelector = (
+    	| messageSends | 
+    	messageSends := (self filterNodesByClassname: 
+    		'som.interpreter.nodes.MessageSendNode$AbstractMessageSendNode').
+		^messageSends select: [:node | node selector = aSelector].
+	)
 )
