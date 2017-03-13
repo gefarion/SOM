@@ -10,4 +10,11 @@ ASTNode = (
     		'som.interpreter.nodes.MessageSendNode$AbstractMessageSendNode').
 		^messageSends select: [:node | node selector = aSelector].
 	)
+	
+	fieldReadsWithName: aSelector = (
+    	| messageSends | 
+    	messageSends := (self filterNodesByClassname: 
+    		'som.interpreter.objectstorage.FieldAccessorNode$ReadFieldNode').
+		^nodes select: [:node | node fieldName = fieldName].
+	)
 )
