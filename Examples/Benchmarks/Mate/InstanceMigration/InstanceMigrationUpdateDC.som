@@ -1,0 +1,12 @@
+InstanceMigrationUpdateDC = InstanceMigration (
+    oneTimeSetup = (
+    	| dispatchChain |
+    	super oneTimeSetup. 
+    	dispatchChain := self dispatchChainOfFieldReading.
+    	self fixDispatchChain: dispatchChain.
+    )
+    
+    fixDispatchChain = (
+    	dispatchChain firstActiveSpecialization remove.
+    )
+)    

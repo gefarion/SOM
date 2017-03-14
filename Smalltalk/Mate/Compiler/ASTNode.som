@@ -1,0 +1,20 @@
+ASTNode = (
+    filterNodesByClassname: aString as: aKindOfNode = primitive
+    dispatchChain = primitive
+    isMateNode = primitive
+    
+    messageSendsWithSelector: aSelector = (
+    	| messageSends | 
+    	messageSends := self filterNodesByClassname: 
+    		'som.interpreter.nodes.MessageSendNode$AbstractMessageSendNode' as: MessageSendNode.
+		^messageSends select: [:node | node selector = aSelector].
+	)
+	
+	fieldReadsWithIndex: anIndex = (
+    	| fieldReads | 
+    	fieldReads := self filterNodesByClassname: 
+    		'som.interpreter.objectstorage.FieldAccessorNode$ReadFieldNode' as: FieldReadNode.
+    	^fieldReads select: [:node | node fieldIndex = anIndex and: 
+    							[node isMateNode not]].
+	)
+)

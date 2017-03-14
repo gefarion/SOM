@@ -2,11 +2,13 @@ RawAccumulator = Benchmark (
     | problemSize points |
     
     oneTimeSetup = (
-    	| shape keyAndshape |
+    	| shape |
+    	DispatchChain initialize.
+		Specialization initialize.
     	points := Vector new.
     	1 to: self problemSize do: [:index | points append: OneDimensionalPoint new].
     	self sumXField.
-    	self assert: self dispatchChainSize
+    	self assert: self dispatchChainOfFieldReading length equals: 1
     )
     
     benchmark = (
@@ -26,10 +28,10 @@ RawAccumulator = Benchmark (
     problemSize = (^100)
     problemSize: aNumber = (problemSize := aNumber)
     
-    dipatchChainOfFieldReading = (
-    	| ast nodes |
-    	ast := (RawAccumulator>>x) compilation.
-    	node := (ast fieldReadsWithName: 'x') first.
+    dispatchChainOfFieldReading = (
+    	| ast nodes node |
+    	ast := (OneDimensionalPoint>>#x) compilation.
+    	node := (ast fieldReadsWithIndex: 0) first.
     	^node dispatchChain.
     )
 )    

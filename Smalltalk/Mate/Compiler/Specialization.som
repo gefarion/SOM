@@ -1,0 +1,6 @@
+Specialization = (
+	| name active instances |
+	
+	isActive = (^active)
+	instances = (^instances) 
+)

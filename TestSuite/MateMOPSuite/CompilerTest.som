@@ -1,28 +1,32 @@
 CompilerTest = TestCase (
-
+	setUp = (
+		DispatchChain initialize.
+		Specialization initialize.	
+	)
+	
 	testCompiler = (
 		| ast messageSends obj obj2 keySends dispatchChain |
 		ast := (CompilerTest>>#exampleMethod:) compilation.
 		keySends := ast messageSendsWithSelector: #key.
 		self assert: keySends length equals: 1.
-		dispatchChain := keySends first filterNodesByClassname: 'som.interpreter.nodes.dispatch.AbstractDispatchNode'. 
+		dispatchChain := keySends first dispatchChain activeNodes. 
 		self assert: dispatchChain length equals: 0.
-
+		
 		obj := Pair withKey: 'key' andValue: 'value'.
 		obj2 := HashEntry newKey: 'key2' value: 'value2' next: nil.
 		self exampleMethod: obj.
-		dispatchChain := (ast messageSendsWithSelector: #key) first 
-			filterNodesByClassname: 'som.interpreter.nodes.dispatch.AbstractDispatchNode'.
-		"Once initialized, the chain should have two nodes, 
+		
+		"Once initialized, the chain should have two nodes,
 		one for the cached value and one for an eventual initialized value"
+		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain activeNodes.
 		self assert: dispatchChain length equals: 2.
+		
 		self exampleMethod: obj.
-		dispatchChain := (ast messageSendsWithSelector: #key) first 
-			filterNodesByClassname: 'som.interpreter.nodes.dispatch.AbstractDispatchNode'.
+		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain activeNodes.
 		self assert: dispatchChain length equals: 2.
+		
 		self exampleMethod: obj2.
-		dispatchChain := (ast messageSendsWithSelector: #key) first 
-			filterNodesByClassname: 'som.interpreter.nodes.dispatch.AbstractDispatchNode'.
+		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain activeNodes.
 		self assert: dispatchChain length equals: 3.
     )
     

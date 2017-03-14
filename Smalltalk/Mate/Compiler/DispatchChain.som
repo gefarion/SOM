@@ -1,0 +1,15 @@
+DispatchChain = (
+	| nodes |
+	
+	countOfSpecializations = (^nodes length)
+ 	
+ 	length = (
+ 		| count |
+ 		count := 0.
+ 		self activeSpecializations do: [:specialization | 
+ 			count := count + specialization instances]
+ 		^count
+ 	)
+ 	
+	activeSpecializations = (^nodes select: [:specialization | specialization isActive]) 
+)
