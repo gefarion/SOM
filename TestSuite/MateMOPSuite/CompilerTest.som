@@ -1,7 +1,7 @@
 CompilerTest = TestCase (
 	setUp = (
 		DispatchChain initialize.
-		Specialization initialize.	
+		SpecializationInfo initialize.	
 	)
 	
 	testCompiler = (
@@ -9,25 +9,23 @@ CompilerTest = TestCase (
 		ast := (CompilerTest>>#exampleMethod:) compilation.
 		keySends := ast messageSendsWithSelector: #key.
 		self assert: keySends length equals: 1.
-		dispatchChain := keySends first dispatchChain activeNodes. 
+		dispatchChain := keySends first dispatchChain. 
 		self assert: dispatchChain length equals: 0.
 		
 		obj := Pair withKey: 'key' andValue: 'value'.
 		obj2 := HashEntry newKey: 'key2' value: 'value2' next: nil.
 		self exampleMethod: obj.
 		
-		"Once initialized, the chain should have two nodes,
-		one for the cached value and one for an eventual initialized value"
-		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain activeNodes.
-		self assert: dispatchChain length equals: 2.
+		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain.
+		self assert: dispatchChain length equals: 1.
 		
 		self exampleMethod: obj.
-		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain activeNodes.
-		self assert: dispatchChain length equals: 2.
+		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain.
+		self assert: dispatchChain length equals: 1.
 		
 		self exampleMethod: obj2.
-		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain activeNodes.
-		self assert: dispatchChain length equals: 3.
+		dispatchChain := (ast messageSendsWithSelector: #key) first dispatchChain.
+		self assert: dispatchChain length equals: 2.
     )
     
     exampleMethod: param = (

@@ -1,0 +1,7 @@
+InstanceMigrationResetDC = InstanceMigrationUpdateDC (
+    fixDispatchChain: dispatchChain = (
+    	dispatchChain reset.
+    )
+    
+    sizeAfterFix = (^0)
+)    

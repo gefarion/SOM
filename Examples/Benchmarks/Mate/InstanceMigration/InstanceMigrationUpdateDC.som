@@ -4,9 +4,15 @@ InstanceMigrationUpdateDC = InstanceMigration (
     	super oneTimeSetup. 
     	dispatchChain := self dispatchChainOfFieldReading.
     	self fixDispatchChain: dispatchChain.
+    	self assert: dispatchChain length equals: self sizeAfterFix
     )
     
-    fixDispatchChain = (
-    	dispatchChain firstActiveSpecialization remove.
+    fixDispatchChain: dispatchChain = (
+    	| specializationInfo | 
+    	specializationInfo := (dispatchChain specializations select: 
+    		[:specialization |specialization name = 'readSetField']) first.
+		dispatchChain remove: specializationInfo firstInstance.
     )
+    
+    sizeAfterFix = (^1)
 )    

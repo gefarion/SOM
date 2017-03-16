@@ -3,8 +3,6 @@ RawAccumulator = Benchmark (
     
     oneTimeSetup = (
     	| shape |
-    	DispatchChain initialize.
-		Specialization initialize.
     	points := Vector new.
     	1 to: self problemSize do: [:index | points append: OneDimensionalPoint new].
     	self sumXField.

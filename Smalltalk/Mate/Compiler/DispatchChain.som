@@ -1,7 +1,32 @@
 DispatchChain = (
-	| nodes |
+	| specializations parent |
 	
-	countOfSpecializations = (^nodes length)
+	basicRemove: aSpecialization = primitive
+
+	remove: aSpecialization = (
+		(self basicRemove: aSpecialization) ifTrue: [
+			specializations do: [:specializationInfo |
+				| instances |
+				instances := specializationInfo specializations.
+				(instances contains: aSpecialization) ifTrue: [
+					instances remove: aSpecialization.
+				].
+			]
+		].
+	)
+	
+	reset = (
+		self activeSpecializations do: [:specializationInfo |
+			specializationInfo specializations do: [:specialization |
+				self remove: specialization.
+			]			
+		]
+	)
+	
+	countOfSpecializations = (^specializations length)
+ 	reset = (self specializations do: [:specialization | specialization removeAllInstances])
+ 	specializations = (^specializations)
+ 	parent = (^parent)
  	
  	length = (
  		| count |
@@ -11,5 +36,7 @@ DispatchChain = (
  		^count
  	)
  	
-	activeSpecializations = (^nodes select: [:specialization | specialization isActive]) 
+	activeSpecializations = (^specializations select: [:specialization | specialization isActive])
+	
+	 
 )
