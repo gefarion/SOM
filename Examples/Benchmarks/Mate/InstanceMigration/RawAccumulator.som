@@ -6,7 +6,7 @@ RawAccumulator = Benchmark (
     	points := Vector new.
     	1 to: self problemSize do: [:index | points append: OneDimensionalPoint new].
     	self sumXField.
-    	self assert: self dispatchChainOfFieldReading length equals: 1
+    	"self assert: self dispatchChainOfFieldReading length equals: 1" 
     )
     
     benchmark = (
