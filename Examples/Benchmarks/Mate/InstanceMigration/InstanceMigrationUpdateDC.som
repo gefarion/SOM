@@ -11,7 +11,7 @@ InstanceMigrationUpdateDC = InstanceMigration (
     	| specializationInfo | 
     	specializationInfo := (dispatchChain specializations select: 
     		[:specialization |specialization name = 'readSetField']) first.
-		dispatchChain remove: specializationInfo firstInstance.
+		dispatchChain remove: specializationInfo specializations second.
     )
     
     sizeAfterFix = (^1)

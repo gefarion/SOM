@@ -1,17 +1,24 @@
 RawAccumulator = Benchmark (
-    | problemSize points |
+    | problemSize points i |
     
     oneTimeSetup = (
     	| shape |
-    	points := Vector new.
-    	1 to: self problemSize do: [:index | points append: OneDimensionalPoint new].
-    	self sumXField.
-    	"self assert: self dispatchChainOfFieldReading length equals: 1" 
+    	points := Array new: self problemSize.
+    	1 to: self problemSize do: [:index | points at: index put: OneDimensionalPoint new].
+    	i := 1.
+    	self benchmark.
     )
     
     benchmark = (
-    	^self sumXField.
+    	| value |
+    	value := self sumXField.
+    	"Uncomment for testing that not weird automatic splitting is invalidating the experiment"
+    	"i > 2 ifTrue: [self iterationTwo]"  
+    	^value.
     )
+    
+    iterationOne = ()
+    iterationTwo = ()
     
     verifyResult: result = (
       ^self assert: result equals: self problemSize
@@ -20,10 +27,11 @@ RawAccumulator = Benchmark (
     sumXField = (
     	| accumulator |
     	accumulator := 0.
-    	^points inject: accumulator into: [:accum :point | point x + accum].
+    	points do: [:point | accumulator := accumulator + point x]
+    	^accumulator.
     )
     
-    problemSize = (^100)
+    problemSize = (^10000)
     problemSize: aNumber = (problemSize := aNumber)
     
     dispatchChainOfFieldReading = (
