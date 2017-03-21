@@ -1,0 +1,17 @@
+EphemeralInstanceMigration = RawAccumulator (
+    oneTimeSetup = (
+    	| shape keyAndShape dispatchChain |
+    	super oneTimeSetup.
+		shape := points first shape.
+		self assert: shape fieldsCount equals: 1.
+		keyAndShape := shape define: 2 final: false hidden: false.
+		(points at: 1) changeShape: (keyAndShape at: 2).
+		self benchmark.
+		self assert: self dispatchChainOfFieldReading length equals: 2.
+		(points at: 1) changeShape: shape.
+    )
+    
+    iterationTwo = (
+    	self assert: self dispatchChainOfFieldReading length equals: 2.
+    )
+)    

@@ -1,0 +1,23 @@
+EphemeralInstanceMigrationUpdateDC = EphemeralInstanceMigration (
+    oneTimeSetup = (
+    	| dispatchChain |
+    	super oneTimeSetup. 
+    	dispatchChain := self dispatchChainOfFieldReading.
+    	dispatchChain length println.
+    	self fixDispatchChain: dispatchChain.
+    	self assert: dispatchChain length equals: self sizeAfterFix
+    )
+    
+    fixDispatchChain: dispatchChain = (
+    	| specializationInfo | 
+    	specializationInfo := (dispatchChain specializations select: 
+    		[:specialization |specialization name = 'readSetField']) first.
+		dispatchChain remove: specializationInfo specializations first.
+    )
+    
+    sizeAfterFix = (^1)
+    iterationTwo = (
+    	self assert: self dispatchChainOfFieldReading length equals: 1.
+    )
+    
+)    
