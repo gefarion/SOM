@@ -1,9 +1,8 @@
 EphemeralInstanceMigrationUpdateDC = EphemeralInstanceMigration (
-    oneTimeSetup = (
+    iterationTwo = (
     	| dispatchChain |
-    	super oneTimeSetup. 
+    	super iterationTwo.
     	dispatchChain := self dispatchChainOfFieldReading.
-    	dispatchChain length println.
     	self fixDispatchChain: dispatchChain.
     	self assert: dispatchChain length equals: self sizeAfterFix
     )
@@ -16,7 +15,8 @@ EphemeralInstanceMigrationUpdateDC = EphemeralInstanceMigration (
     )
     
     sizeAfterFix = (^1)
-    iterationTwo = (
+    
+    iterationGreaterThanTwo = (
     	self assert: self dispatchChainOfFieldReading length equals: 1.
     )
     

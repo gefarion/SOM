@@ -6,20 +6,25 @@ RawAccumulator = Benchmark (
     	points := Array new: self problemSize.
     	1 to: self problemSize do: [:index | points at: index put: OneDimensionalPoint new].
     	i := 1.
-    	self benchmark.
     )
     
     benchmark = (
-    	| value |
-    	value := self sumXField.
+    	| value accumulator i |
+    	accumulator := 0.
+    	1 to: self problemSize do:[:index | accumulator := accumulator + (points at: index) x].
+    	"points do: [:point | accumulator := accumulator + point x]."
+    	"This test needs a couple of iterations of warming up"
+    	i = 1 ifTrue: [self iterationOne].
+    	i = 2 ifTrue: [self iterationTwo].
     	"Uncomment for testing that not weird automatic splitting is invalidating the experiment"
-    	"i > 2 ifTrue: [self iterationTwo]."
+    	"i > 20 ifTrue: [self iterationGreaterThanTwo]."
     	i := i + 1.  
-    	^value.
+    	^accumulator
     )
     
     iterationOne = ()
     iterationTwo = ()
+    iterationGreaterThanTwo = ()
     
     verifyResult: result = (
       ^self assert: result equals: self problemSize

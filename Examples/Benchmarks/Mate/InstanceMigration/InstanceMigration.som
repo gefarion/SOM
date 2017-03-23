@@ -1,5 +1,5 @@
 InstanceMigration = RawAccumulator (
-    oneTimeSetup = (
+    iterationOne = (
     	| shape keyAndShape dispatchChain |
     	"shape := OneDimensionalPoint getShapeForInstances."
 		super oneTimeSetup.
@@ -7,11 +7,9 @@ InstanceMigration = RawAccumulator (
 		self assert: shape fieldsCount equals: 1.
 		keyAndShape := shape define: 2 final: false hidden: false.
 		points do: [:point | point changeShape: (keyAndShape at: 2)].
-		self benchmark.
-		self iterationTwo.
     )
     
-    iterationTwo = (
+    iterationGreaterThanwo = (
     	self assert: self dispatchChainOfFieldReading length equals: 2.
     )
 )    
