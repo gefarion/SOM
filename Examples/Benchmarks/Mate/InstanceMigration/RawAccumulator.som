@@ -9,9 +9,9 @@ RawAccumulator = Benchmark (
     )
     
     benchmark = (
-    	| value accumulator i |
+    	| value accumulator |
     	accumulator := 0.
-    	1 to: self problemSize do:[:index | accumulator := accumulator + (points at: index) x].
+    	1 to: self problemSize do: [:index | accumulator := accumulator + (points at: index) x].
     	"points do: [:point | accumulator := accumulator + point x]."
     	"This test needs a couple of iterations of warming up"
     	i = 1 ifTrue: [self iterationOne].

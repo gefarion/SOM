@@ -10,8 +10,8 @@ EphemeralInstanceMigration = RawAccumulator (
     
     iterationTwo = (
     	| shape |
-    	"self assert: self dispatchChainOfFieldReading length equals: 2."
-    	self dispatchChainOfFieldReading specializations first specializations println.
+    	self assert: self dispatchChainOfFieldReading length equals: 2.
+    	"self dispatchChainOfFieldReading specializations first specializations println."
     	shape := points second shape.
     	(points at: 1) changeShape: shape.
     	"self dispatchChainOfFieldReading specializations first specializations first hashcode println.
@@ -20,5 +20,14 @@ EphemeralInstanceMigration = RawAccumulator (
     
     iterationGreaterThanTwo = (
     	self assert: self dispatchChainOfFieldReading length equals: 2.
+    )
+    
+    dispatchChainOfFieldReading = (
+    	| ast send target read |
+    	ast := (RawAccumulator>>#benchmark) compilation.
+    	send := (ast messageSendsWithSelector: 'x') first.
+    	target := send dispatchChain activeSpecializations first firstInstance targetNode.
+    	read := (target fieldReadsWithIndex: 0) first.
+    	^read dispatchChain.
     )
 )    

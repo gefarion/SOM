@@ -1,0 +1,4 @@
+CachedDispatchNode = Specialization (
+	| |
+	targetNode = primitive
+)
