@@ -1,0 +1,17 @@
+PairTest = Pair (
+    testLocalVar = (
+    	| local |
+    	local := 1.
+    	^local
+    )
+    
+    testLocalVarWrite: value = (
+    	| local |
+    	local := value.
+    	^local
+    )
+    
+    testArgRead: anArg = (
+    	^anArg
+    )
+)    

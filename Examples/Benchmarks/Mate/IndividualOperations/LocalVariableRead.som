@@ -1,0 +1,16 @@
+LocalVariableRead = Benchmark (
+    | object |
+    
+    oneTimeSetup = (
+    	object := PairTest new.
+    	object key: 1.
+    )
+    
+    benchmark = (
+    	^object testLocalVar.
+    )
+    
+    verifyResult: result = (
+      ^result = 1
+    )
+)    

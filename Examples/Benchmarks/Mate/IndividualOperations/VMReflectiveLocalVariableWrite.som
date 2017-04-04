@@ -1,0 +1,11 @@
+VMReflectiveLocalVariableWrite = LocalVariableWrite (
+    oneTimeSetup = (
+    	| environment |
+    	super oneTimeSetup.
+    	environment := EnvironmentMO 
+							operationalSemantics: LocalVarWriteSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+)

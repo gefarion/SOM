@@ -1,0 +1,5 @@
+LocalVarWriteSemanticsMO = LayoutMO (
+	writeLocal: anIdentifier inFrame: aFrame value: aValue = (
+    	^aFrame localAt: anIdentifier put: aValue
+    )
+)

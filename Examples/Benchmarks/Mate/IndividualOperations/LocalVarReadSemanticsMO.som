@@ -1,0 +1,5 @@
+LocalVarReadSemanticsMO = LayoutMO (
+	readLocal: anIdentifier inFrame: aFrame = (
+    	^aFrame localAt: anIdentifier
+    )
+)
