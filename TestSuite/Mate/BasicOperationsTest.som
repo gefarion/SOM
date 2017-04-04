@@ -1,0 +1,72 @@
+BasicOperationsTest = TestCase (
+	setUp = (self class initialize)
+	
+	testLocalVarRead = (
+		| localVar |
+		localVar := 1.
+		self assert: localVar equals: 1.
+		self installLocalsMetaobject.
+		self assert: localVar equals: 2.
+		self uninstallMetaobject.
+		self assert: localVar equals: 1.
+    )
+    
+    testLocalVarWrite = (
+		| localVar |
+		localVar := 1.
+		self assert: localVar equals: 1.
+		self installLocalsMetaobject.
+		localVar := 2.
+		self uninstallMetaobject.
+		self assert: localVar equals: 3.
+		localVar := 2.
+		self assert: localVar equals: 2.
+    )
+    
+    testArgumentRead = (
+		| argValue |
+		argValue := self argsTest: 1.
+		self assert: argValue equals: 1.
+		self installArgumentsMetaobject.
+		argValue := self argsTest: 1.
+		self uninstallMetaobject.
+		self assert: argValue equals: 2.
+		argValue := self argsTest: 1.
+		self assert: argValue equals: 1.
+    )
+    
+    argsTest: aValue = (
+    	^aValue
+    )
+    
+    installLocalsMetaobject = (
+    	self installEnvironment: self class localMetaobject.
+	)
+	
+	installArgumentsMetaobject = (
+    	self installEnvironment: self class argumentsMetaobject.
+	)
+	
+	uninstallMetaobject = (
+    	self installEnvironment: nil.
+	)
+	
+	------------------------------
+	
+	| localMetaobject argumentsMetaobject |
+	
+	localMetaobject = (^localMetaobject)
+	argumentsMetaobject = (^argumentsMetaobject)
+	
+	initialize = (
+		localMetaobject := (EnvironmentMO 
+				operationalSemantics: OperationalSemanticsForTestingLocals new 
+				message: "MessageSemanticsForTest new" nil
+				layout: nil).
+				
+		argumentsMetaobject	:= (EnvironmentMO 
+				operationalSemantics: OperationalSemanticsForTestingArguments new 
+				message: "MessageSemanticsForTest new" nil
+				layout: nil)	
+	)
+ )

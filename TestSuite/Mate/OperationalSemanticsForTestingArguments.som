@@ -1,0 +1,7 @@
+OperationalSemanticsForTestingArguments = OperationalSemanticsMO (
+    readLocalArgument: anIndex inFrame: aFrame = (
+    	anIndex = 0
+    		ifTrue: [^(aFrame argAt: anIndex)] 
+    		ifFalse: [^(aFrame argAt: anIndex) + 1]
+    )
+)
