@@ -1,4 +1,9 @@
 BasicOperationsTest = TestCase (
+	"
+		Message Sends/Activations are tested in ImmutabilityTest.
+	 	Layout operations are tested in LayoutTest
+	"
+	
 	setUp = (self class initialize)
 	
 	testLocalVarRead = (
@@ -35,9 +40,21 @@ BasicOperationsTest = TestCase (
 		self assert: argValue equals: 1.
     )
     
+    testReturn = (
+    	| value |
+    	self assert: self returnTest equals: 1.
+    	self installEnvironment: self class returnMetaobject.
+    	value := self returnTest.
+    	self uninstallMetaobject.
+    	self assert: value equals: 2.
+		self assert: self returnTest equals: 1.
+    )
+    
     argsTest: aValue = (
     	^aValue
     )
+    
+    returnTest = (^1)
     
     installLocalsMetaobject = (
     	self installEnvironment: self class localMetaobject.
@@ -53,10 +70,11 @@ BasicOperationsTest = TestCase (
 	
 	------------------------------
 	
-	| localMetaobject argumentsMetaobject |
+	| localMetaobject argumentsMetaobject returnMetaobject |
 	
 	localMetaobject = (^localMetaobject)
 	argumentsMetaobject = (^argumentsMetaobject)
+	returnMetaobject = (^returnMetaobject)
 	
 	initialize = (
 		localMetaobject := (EnvironmentMO 
@@ -67,6 +85,11 @@ BasicOperationsTest = TestCase (
 		argumentsMetaobject	:= (EnvironmentMO 
 				operationalSemantics: OperationalSemanticsForTestingArguments new 
 				message: "MessageSemanticsForTest new" nil
-				layout: nil)	
+				layout: nil).
+		
+		returnMetaobject := (EnvironmentMO 
+				operationalSemantics: OperationalSemanticsForTestingReturn new 
+				message: "MessageSemanticsForTest new" nil
+				layout: nil)			
 	)
  )
