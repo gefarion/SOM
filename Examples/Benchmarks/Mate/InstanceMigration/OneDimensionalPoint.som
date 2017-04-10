@@ -1,7 +1,13 @@
 OneDimensionalPoint = Object (
-    | xCord |
+    | xCord yCord |
 	
-	initialize = (self x: 1)
+	initialize = (
+		self x: 1.
+		self y: 1)
+	
 	x = (^xCord)
-	x: aValue = (xCord := aValue)    
+	x: aValue = (xCord := aValue)
+	
+	y = (^yCord)
+	y: aValue = (yCord := aValue)    
 )    

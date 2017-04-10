@@ -1,0 +1,38 @@
+BasicToDo = Benchmark (
+    | problemSize points points2 |
+    
+    oneTimeSetup = (
+    	| shape |
+    	points := self collectionClass1 new: self problemSize.
+    	points2 := self collectionClass2 new: self problemSize.
+    	1 to: self problemSize do: [:index | 
+    		points at: index put: OneDimensionalPoint new.
+    		points2 at: index put: OneDimensionalPoint new
+    	].
+    )
+    
+    benchmark = (
+    	| accumulator |
+    	accumulator := 0.
+    	(points collect: [:point | point x]) do: [:x | accumulator := accumulator + x].
+    	points2 collect: [:point | point y].
+    	^accumulator
+    )
+    
+    verifyResult: result = (
+      ^self assert: result equals: self problemSize
+    )
+    
+    collectionClass1 = (^Vector)
+    collectionClass2 = (^Vector)
+    
+    problemSize = (^10000)
+    problemSize: aNumber = (problemSize := aNumber)
+    
+    dispatchChainOfFieldReading = (
+    	| ast nodes node |
+    	ast := (OneDimensionalPoint>>#x) compilation.
+    	node := (ast fieldReadsWithIndex: 0) first.
+    	^node dispatchChain.
+    )
+)    

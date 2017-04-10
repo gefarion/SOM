@@ -1,0 +1,4 @@
+BasicToDoSplit = BasicToDo (
+    collectionClass1 = (^Vector)
+    collectionClass2 = (^Vector2)
+)    

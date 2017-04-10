@@ -1,0 +1,6 @@
+Vector2 = Vector (
+    "Iterating"
+    do: block = (
+        first to: last - 1 do: [ :i | block value: (storage at: i) ]
+    )
+)
