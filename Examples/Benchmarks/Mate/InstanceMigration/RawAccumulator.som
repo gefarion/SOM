@@ -17,7 +17,7 @@ RawAccumulator = Benchmark (
     	i = 1 ifTrue: [self iterationOne].
     	i = 2 ifTrue: [self iterationTwo].
     	"Uncomment for testing that not weird automatic splitting is invalidating the experiment"
-    	"i > 20 ifTrue: [self iterationGreaterThanTwo]."
+    	"i > 2 ifTrue: [self iterationGreaterThanTwo]."
     	i := i + 1.  
     	^accumulator
     )

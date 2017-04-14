@@ -1,4 +1,4 @@
-EphemeralInstanceMigrationResetDC = InstanceMigrationUpdateDC (
+EphemeralInstanceMigrationResetDC = EphemeralInstanceMigrationUpdateDC (
     fixDispatchChain: dispatchChain = (
     	dispatchChain reset.
     )
