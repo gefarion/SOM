@@ -26,13 +26,6 @@ BasicToDo = Benchmark (
     collectionClass1 = (^Vector)
     collectionClass2 = (^Vector)
     
-    problemSize = (^10000)
+    problemSize = (^5000)
     problemSize: aNumber = (problemSize := aNumber)
-    
-    dispatchChainOfFieldReading = (
-    	| ast nodes node |
-    	ast := (OneDimensionalPoint>>#x) compilation.
-    	node := (ast fieldReadsWithIndex: 0) first.
-    	^node dispatchChain.
-    )
 )    
