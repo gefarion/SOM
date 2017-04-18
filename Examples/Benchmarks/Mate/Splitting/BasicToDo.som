@@ -3,8 +3,8 @@ BasicToDo = Benchmark (
     
     oneTimeSetup = (
     	| shape |
-    	points := self collectionClass1 new: self problemSize.
-    	points2 := self collectionClass2 new: self problemSize.
+    	points := Vector new: self problemSize.
+    	points2 := Vector new: self problemSize.
     	1 to: self problemSize do: [:index | 
     		points at: index put: OneDimensionalPoint new.
     		points2 at: index put: OneDimensionalPoint new
