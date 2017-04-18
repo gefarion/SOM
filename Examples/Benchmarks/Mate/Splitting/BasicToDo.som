@@ -23,7 +23,7 @@ BasicToDo = Benchmark (
     	^accumulator
     )
     
-    iterationOne = (self collectCallSite)
+    iterationOne = ()
     
     collectCallSite = (
     	| ast send target read |
@@ -35,9 +35,6 @@ BasicToDo = Benchmark (
     verifyResult: result = (
       ^self assert: result equals: self problemSize * 1
     )
-    
-    collectionClass1 = (^Vector)
-    collectionClass2 = (^Vector)
     
     problemSize = (^1000)
     problemSize: aNumber = (problemSize := aNumber)

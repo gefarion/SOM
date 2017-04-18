@@ -1,0 +1,3 @@
+BasicToDoMate = BasicToDo (
+    iterationOne = (self collectCallSite)
+)    

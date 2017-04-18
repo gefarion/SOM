@@ -1,0 +1,5 @@
+RawAccumulatorMate = RawAccumulator (
+    iterationOne = (self assert: self dispatchChainOfFieldReading length equals: 1.)
+    iterationTwo = ()
+    iterationGreaterThanTwo = ()
+)    

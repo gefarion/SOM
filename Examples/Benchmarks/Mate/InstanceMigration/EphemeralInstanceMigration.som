@@ -1,4 +1,4 @@
-EphemeralInstanceMigration = RawAccumulator (
+EphemeralInstanceMigration = RawAccumulatorMate (
     iterationOne = (
     	| shape keyAndShape dispatchChain |
     	shape := points first shape.
