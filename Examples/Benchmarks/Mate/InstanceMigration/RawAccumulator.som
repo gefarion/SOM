@@ -22,7 +22,7 @@ RawAccumulator = Benchmark (
     	^accumulator
     )
     
-    iterationOne = ()
+    iterationOne = (self assert: self dispatchChainOfFieldReading length equals: 1.)
     iterationTwo = ()
     iterationGreaterThanTwo = ()
     
@@ -41,9 +41,11 @@ RawAccumulator = Benchmark (
     problemSize: aNumber = (problemSize := aNumber)
     
     dispatchChainOfFieldReading = (
-    	| ast nodes node |
-    	ast := (OneDimensionalPoint>>#x) compilation.
-    	node := (ast fieldReadsWithIndex: 0) first.
-    	^node dispatchChain.
+    	| ast send target read |
+    	ast := (RawAccumulator>>#benchmark) compilation.
+    	send := (ast messageSendsWithSelector: 'x') first.
+    	target := send dispatchChain activeSpecializations first firstInstance targetNode.
+    	read := (target fieldReadsWithIndex: 0) first.
+    	^read dispatchChain.
     )
 )    

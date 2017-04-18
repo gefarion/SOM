@@ -1,4 +1,5 @@
 BasicToDoSplit = BasicToDo (
-    collectionClass1 = (^Vector)
-    collectionClass2 = (^Vector2)
+    iterationOne = (
+    	self collectCallSite split.
+    )
 )    

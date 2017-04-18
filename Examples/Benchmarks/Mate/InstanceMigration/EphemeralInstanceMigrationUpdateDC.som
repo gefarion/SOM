@@ -10,7 +10,7 @@ EphemeralInstanceMigrationUpdateDC = EphemeralInstanceMigration (
     fixDispatchChain: dispatchChain = (
     	| specializationInfo | 
     	specializationInfo := (dispatchChain specializations select: 
-    		[:specialization |specialization name = 'readSetField']) first.
+    		[:specialization | specialization name = 'readSetField']) first.
 		dispatchChain remove: specializationInfo specializations first.
     )
     

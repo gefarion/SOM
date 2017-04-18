@@ -1,8 +1,0 @@
-Vector2 = Vector (
-    collect: aBlock = (
-        | newCollection |
-        newCollection := self species new: self size.
-        self do: [ :each | newCollection append: (aBlock value: each) ].
-        ^newCollection
-    )
-)

@@ -22,13 +22,4 @@ EphemeralInstanceMigration = RawAccumulator (
     iterationGreaterThanTwo = (
     	self assert: self dispatchChainOfFieldReading length equals: 2.
     )
-    
-    dispatchChainOfFieldReading = (
-    	| ast send target read |
-    	ast := (RawAccumulator>>#benchmark) compilation.
-    	send := (ast messageSendsWithSelector: 'x') first.
-    	target := send dispatchChain activeSpecializations first firstInstance targetNode.
-    	read := (target fieldReadsWithIndex: 0) first.
-    	^read dispatchChain.
-    )
 )    
