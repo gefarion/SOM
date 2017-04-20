@@ -22,7 +22,7 @@ RawAccumulator = Benchmark (
     	^accumulator
     )
     
-    iterationOne = ()
+    iterationOne = (self dispatchChainOfFieldReading)
     iterationTwo = ()
     iterationGreaterThanTwo = ()
     
