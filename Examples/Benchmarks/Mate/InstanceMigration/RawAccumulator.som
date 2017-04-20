@@ -4,7 +4,7 @@ RawAccumulator = Benchmark (
     oneTimeSetup = (
     	| shape |
     	points := Array new: self problemSize.
-    	1 to: self problemSize do: [:index | points at: index put: OneDimensionalPoint new].
+    	1 to: self problemSize do: [:index | points at: index put: Point new].
     	i := 1.
     )
     
@@ -22,7 +22,7 @@ RawAccumulator = Benchmark (
     	^accumulator
     )
     
-    iterationOne = (self dispatchChainOfFieldReading)
+    iterationOne = ()
     iterationTwo = ()
     iterationGreaterThanTwo = ()
     

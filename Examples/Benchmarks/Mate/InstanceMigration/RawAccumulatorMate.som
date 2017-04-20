@@ -1,5 +1,8 @@
 RawAccumulatorMate = RawAccumulator (
     iterationOne = (self assert: self dispatchChainOfFieldReading length equals: 1.)
-    iterationTwo = ()
+    iterationTwo = (
+    	shape := points first shape.
+    	(points at: 1) changeShape: shape.
+    )
     iterationGreaterThanTwo = ()
 )    

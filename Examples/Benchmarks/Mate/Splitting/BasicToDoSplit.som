@@ -1,5 +1,3 @@
 BasicToDoSplit = BasicToDo (
-    iterationOne = (
-    	self collectCallSite split.
-    )
+    iterationOne = (self collectCallSite split)
 )    

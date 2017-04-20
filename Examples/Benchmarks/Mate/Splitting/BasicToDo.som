@@ -6,8 +6,8 @@ BasicToDo = Benchmark (
     	points := Vector new: self problemSize.
     	points2 := Vector new: self problemSize.
     	1 to: self problemSize do: [:index | 
-    		points at: index put: OneDimensionalPoint new.
-    		points2 at: index put: OneDimensionalPoint new
+    		points at: index put: Point new.
+    		points2 at: index put: Point new
     	].
     	i := 1.
     )

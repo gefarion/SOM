@@ -1,9 +1,10 @@
-OneDimensionalPoint = Object (
+Point = Object (
     | xCord yCord |
 	
 	initialize = (
 		self x: 1.
-		self y: 1)
+		self y: 1
+	)
 	
 	x = (^xCord)
 	x: aValue = (xCord := aValue)
