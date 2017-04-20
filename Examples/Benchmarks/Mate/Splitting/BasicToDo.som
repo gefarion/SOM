@@ -1,5 +1,5 @@
 BasicToDo = Benchmark (
-    | problemSize points points2 i |
+    | problemSize points points2 |
     
     oneTimeSetup = (
     	| shape |
@@ -9,31 +9,24 @@ BasicToDo = Benchmark (
     		points at: index put: Point new.
     		points2 at: index put: Point new
     	].
-    	i := 1.
+    	self benchmark.
+    	self iterationOne.
     )
     
     benchmark = (
-    	| accumulator xs ys |
+    	| accumulator xs ys rs |
     	accumulator := 0.
     	xs := points collect: [:point | point x].
     	ys := points2 collect: [:point | point y].
-    	i = 1 ifTrue: [self iterationOne].
     	xs do: [:x | accumulator := accumulator + x].
-    	i := i + 1.
+    	ys do: [:y | accumulator := accumulator + y].
     	^accumulator
     )
     
     iterationOne = ()
     
-    collectCallSite = (
-    	| ast send target read |
-    	ast := (BasicToDo>>#benchmark) compilation.
-    	send := (ast messageSendsWithSelector: 'collect:') second.
-    	^send dispatchChain activeSpecializations first firstInstance.
-    )
-    
     verifyResult: result = (
-      ^self assert: result equals: self problemSize * 1
+    	^self assert: result equals: self problemSize * 2
     )
     
     problemSize = (^1000)

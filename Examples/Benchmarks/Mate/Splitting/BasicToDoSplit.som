@@ -1,3 +1,9 @@
 BasicToDoSplit = BasicToDo (
-    iterationOne = (self collectCallSite split)
+    iterationOne = (
+    	| ast send target read |
+    	ast := (BasicToDo>>#benchmark) compilation.
+    	send := (ast messageSendsWithSelector: 'collect:').
+    	send first dispatchChain activeSpecializations first firstInstance split.
+    	send second dispatchChain activeSpecializations first firstInstance split.
+    )
 )    

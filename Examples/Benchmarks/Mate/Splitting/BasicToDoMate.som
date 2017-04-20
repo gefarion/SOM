@@ -1,3 +1,10 @@
 BasicToDoMate = BasicToDo (
-    iterationOne = (self collectCallSite)
+    iterationOne = (self compileSplit)
+    
+    compileSplit = (
+    	| ast send target read |
+    	ast := (BasicToDo>>#oneTimeSetup) compilation.
+    	send := (ast messageSendsWithSelector: 'problemSize') first.
+    	send dispatchChain activeSpecializations first firstInstance split. 
+    )
 )    
