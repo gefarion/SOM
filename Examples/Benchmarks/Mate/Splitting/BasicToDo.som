@@ -1,5 +1,5 @@
 BasicToDo = Benchmark (
-    | problemSize points points2 |
+    | problemSize points points2 i |
     
     oneTimeSetup = (
     	| shape |
@@ -14,21 +14,24 @@ BasicToDo = Benchmark (
     )
     
     benchmark = (
-    	| accumulator xs ys rs |
+    	| accumulator |
     	accumulator := 0.
-    	xs := points collect: [:point | point x].
-    	ys := points2 collect: [:point | point y].
-    	xs do: [:x | accumulator := accumulator + x].
-    	ys do: [:y | accumulator := accumulator + y].
+    	points collect: [:point | point x + point hash].
+    	points collect: [:point | point y + (point isNil ifTrue: [0] ifFalse: [1])].
+    	points collect: [:point | point x + point value y].
+    	points collect: [:point | accumulator := accumulator + point y].
+    	points collect: [:point | accumulator := accumulator + point x].
+    	points collect: [:point | point x].
+    	points collect: [:point | point y].
     	^accumulator
     )
     
     iterationOne = ()
     
     verifyResult: result = (
-    	^self assert: result equals: self problemSize * 2
+    	^self assert: result equals: (self problemSize * 2)
     )
     
-    problemSize = (^1000)
+    problemSize = (^100)
     problemSize: aNumber = (problemSize := aNumber)
 )    

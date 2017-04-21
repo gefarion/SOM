@@ -24,7 +24,6 @@ DispatchChain = (
 	)
 	
 	countOfSpecializations = (^specializations length)
- 	reset = (self activeSpecializations do: [:specialization | specialization removeAllInstances])
  	specializations = (^specializations)
  	parent = (^parent)
  	
