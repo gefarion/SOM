@@ -3,7 +3,12 @@ BasicToDoSplit = BasicToDo (
     	| ast send target read |
     	ast := (BasicToDo>>#benchmark) compilation.
     	send := (ast messageSendsWithSelector: 'collect:').
-    	send first dispatchChain activeSpecializations first firstInstance split.
-    	send second dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 1) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 2) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 3) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 4) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 5) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 6) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 7) dispatchChain activeSpecializations first firstInstance split.
     )
 )    
