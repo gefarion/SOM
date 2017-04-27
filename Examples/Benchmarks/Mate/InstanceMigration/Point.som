@@ -10,5 +10,14 @@ Point = Object (
 	x: aValue = (xCord := aValue)
 	
 	y = (^yCord)
-	y: aValue = (yCord := aValue)    
+	y: aValue = (yCord := aValue)
+	
+	---------------------
+	x: xValue y: yValue = (
+		| point |
+		point := self new.
+		point x: xValue.
+		point y: yValue.
+		^point  
+	)    
 )    

@@ -1,11 +1,13 @@
 BasicToDo = Benchmark (
-    | problemSize points |
+    | problemSize points points2 |
     
     oneTimeSetup = (
     	points := Vector new: self problemSize.
+    	points2 := Vector2 new: 1.
     	1 to: self problemSize do: [:index | 
-    		points at: index put: Point new.
+    		points at: index put: (Point x: index y: index).
     	].
+    	points2 at: 1 put: (Point x: 1 y: 1).
     	self benchmark.
     	self iterationOne.
     )
@@ -13,20 +15,15 @@ BasicToDo = Benchmark (
     benchmark = (
     	| accumulator |
     	accumulator := 0.
-    	points collect: [:point | point x + point hash].
-    	points collect: [:point | point y + (point isNil ifTrue: [0] ifFalse: [1])].
-    	points collect: [:point | point x + point value y].
-    	points collect: [:point | accumulator := accumulator + point y].
     	points collect: [:point | accumulator := accumulator + point x].
-    	points collect: [:point | point x].
-    	points collect: [:point | point y].
+    	points2 collect: [:point |accumulator := accumulator + point y]. 
     	^accumulator
     )
     
     iterationOne = ()
     
     verifyResult: result = (
-    	^self assert: result equals: (self problemSize * 2)
+    	^self assert: result equals: ((self problemSize * (self problemSize + 1)) / 2) + 1
     )
     
     problemSize = (^100)
