@@ -87,7 +87,7 @@ String = (
     
     at: index = primitive
     "Just needed to run Json cross-language benchmark"
-    charAt: index = (^self at: index)
+    charAt: index = (^(self at: index) asString)
     
     "Printing"
     print    = ( system printString: self )
