@@ -85,7 +85,9 @@ String = (
         ^ Integer fromString: self
     )
     
-    at = primitive
+    at: index = primitive
+    "Just needed to run Json cross-language benchmark"
+    charAt: index = (^self at: index)
     
     "Printing"
     print    = ( system printString: self )
