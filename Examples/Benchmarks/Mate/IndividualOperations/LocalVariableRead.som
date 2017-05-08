@@ -11,6 +11,6 @@ LocalVariableRead = Benchmark (
     )
     
     verifyResult: result = (
-      ^result = 1
+      ^object key = result
     )
 )    

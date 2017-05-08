@@ -7,5 +7,6 @@ VMReflectiveLocalVariableWrite = LocalVariableWrite (
 							message: nil 
 							layout: nil.
 		object installEnvironment: environment.
+		value := 2.
     )
 )
