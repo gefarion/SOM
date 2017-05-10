@@ -2,6 +2,7 @@ Handle = (
 	| target |
     "Accessing"
     targetSPECIAL: anObject = ( target := anObject )
+    targetSPECIAL = ( ^target )
     = other 				= (^self equalsSPECIAL: other)
     equalsSPECIAL: other 	= (^target = other)
     
