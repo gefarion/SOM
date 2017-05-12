@@ -16,6 +16,6 @@ JsonBig = Json (
     )
     
     filename = (
-    	^'core-lib/Examples/Benchmarks/Mate/Tracing/AllSets-xCleaned.json'
+    	^'Mate/Tracing/AllSets-xCleaned.json'
     )
 )
