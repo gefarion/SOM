@@ -41,16 +41,16 @@ TestHarness = (
           GlobalTest,
           HashTest,
           IntegerTest,
-          MethodCascadeTest,
           PreliminaryTest,
           ReflectionTest,
           SelfBlockTest,
           SetTest,
-          StringTest,
+          StringTest, 
           SuperTest,
           SymbolTest, 
           SystemTest,
-          VectorTest          
+          VectorTest,
+          BasicOperationsTest
     )
     
     

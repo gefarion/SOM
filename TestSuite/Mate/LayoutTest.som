@@ -1,0 +1,36 @@
+LayoutTest = TestCase (
+    
+	testChangeLayout = (
+		| shape person person2 usedSlots |
+		shape := Shape newWithFieldsCount: 6.
+		shape := shape installClass: Person.
+		person := Person new. 
+		person ssn: 3055.
+		person address: 'casa'.
+		person tel: 1234.
+		self assert: person ssn equals: 3055.
+		self assert: person class fields length equals: 10.
+		self assert: person shape fieldsCount equals: 3.
+		person2 := Person new.
+		person2 changeShape: shape. 
+		1 to: 6 do: [:i | person2 instVarAt: i put: nil].
+		person2 installEnvironment: self environment.
+		person2 address: 'casa'.
+		person2 tel: 1234.
+		person2 cel: 4321.
+		self assert: person2 tel equals: 1234.
+		self assert: person2 class fields length equals: 10.
+		self assert: person2 shape fieldsCount equals: 6.
+		usedSlots := 0.
+		1 to: 10 do: [:index | (person2 instVarAt: index) ifNotNil:[usedSlots := usedSlots + 1]].
+		self assert: usedSlots equals: 3.
+		self assert: person2 shape fieldsCount equals: 6.
+    )
+    
+    environment = (
+    	^EnvironmentMO 
+			operationalSemantics: nil  
+			message: nil 
+			layout: HashFieldsSemanticsMO new.
+	)
+ )
