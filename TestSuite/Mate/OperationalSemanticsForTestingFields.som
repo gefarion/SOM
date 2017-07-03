@@ -1,0 +1,9 @@
+OperationalSemanticsForTestingFields = OperationalSemanticsMO (
+    read: anIdentifier = (
+    	^(self instVarNamed: anIdentifier) + 1
+    )
+
+    write: anIdentifier value: aValue = (
+    	^self instVarNamed: anIdentifier put: (aValue + 1)
+    )
+)

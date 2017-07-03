@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 MateTestHarness = TestHarness (
     tests = ( "Now ordered by alphabetical order to improve maintainability"
-        ^ ImmutabilityTest    
+        ^ ImmutabilityTest,
+          LayoutTest,  
     )
 )

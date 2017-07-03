@@ -1,95 +1,166 @@
 BasicOperationsTest = TestCase (
-	"
-		Message Sends/Activations are tested in ImmutabilityTest.
-	 	Layout operations are tested in LayoutTest
-	"
-	
-	setUp = (self class initialize)
-	
-	testLocalVarRead = (
-		| localVar |
-		localVar := 1.
-		self assert: localVar equals: 1.
-		self installLocalsMetaobject.
-		self assert: localVar equals: 2.
-		self uninstallMetaobject.
-		self assert: localVar equals: 1.
+    "
+        Message Sends/Activations are tested in ImmutabilityTest.
+        Layout operations are tested in LayoutTest
+    "
+    | testField |
+
+    setUp = (self class initialize)
+
+    testLocalVarRead = (
+        | localVar |
+        localVar := 1.
+        self assert: 1 equals: localVar.
+        self installLocalsMetaobject.
+        self assert: 2 equals: localVar.
+        self uninstallMetaobject.
+        self assert: 1 equals: localVar.
     )
-    
+
     testLocalVarWrite = (
-		| localVar |
-		localVar := 1.
-		self assert: localVar equals: 1.
-		self installLocalsMetaobject.
-		localVar := 2.
-		self uninstallMetaobject.
-		self assert: localVar equals: 3.
-		localVar := 2.
-		self assert: localVar equals: 2.
+        | localVar |
+        localVar := 1.
+        self assert: 1 equals: localVar.
+        self installLocalsMetaobject.
+        localVar := 2.
+        self uninstallMetaobject.
+        self assert: 3 equals: localVar.
+        localVar := 2.
+        self assert: 2 equals: localVar.
     )
-    
+
     testArgumentRead = (
-		| argValue |
-		argValue := self argsTest: 1.
-		self assert: argValue equals: 1.
-		self installArgumentsMetaobject.
-		argValue := self argsTest: 1.
-		self uninstallMetaobject.
-		self assert: argValue equals: 2.
-		argValue := self argsTest: 1.
-		self assert: argValue equals: 1.
+        | argValue |
+        argValue := self argsTest: 1.
+        self assert: 1 equals: argValue.
+        self installArgumentsMetaobject.
+        argValue := self argsTest: 1.
+        self uninstallMetaobject.
+        self assert: 2 equals: argValue.
+        argValue := self argsTest: 1.
+        self assert: 1 equals: argValue.
     )
-    
+
+    testFieldRead = (
+        testField := 1.
+        self assert: 1 equals: testField.
+        self installFieldsMetaobject.
+        self assert: 2 equals: testField.
+        self uninstallMetaobject.
+        self assert: 1 equals: testField.
+    )
+
+    testFieldWrite = (
+        testField := 1.
+        self assert: 1 equals: testField.
+        self installFieldsMetaobject.
+        testField := 1.
+        self uninstallMetaobject.
+        self assert: 2 equals: testField.
+    )
+
     testReturn = (
-    	| value |
-    	self assert: self returnTest equals: 1.
-    	self installEnvironment: self class returnMetaobject.
-    	value := self returnTest.
-    	self uninstallMetaobject.
-    	self assert: value equals: 2.
-		self assert: self returnTest equals: 1.
+        | value |
+
+        self assert: self returnTest equals: 1.
+        self installEnvironment: self class returnMetaobject.
+        value := self returnTest.
+        self uninstallMetaobject.
+        self assert: 2 equals: value.
+        self assert: 1 equals: self returnTest.
     )
-    
+
+    testMethodActivacion = (
+        | messageMO |
+
+        testField := 0.
+
+        messageMO := MessageSemanticsForTestingMethodActivation new.
+        self installEnvironment: (EnvironmentMO operationalSemantics: nil message: messageMO layout: nil).
+
+        self assert: 1 equals: self returnTest.
+        self assert: 1 equals: self returnTest.
+        self assert: 1 equals: self returnTest.
+
+        self uninstallMetaobject.
+
+        self assert: 7 equals: testField.
+    )
+
+    testMessageLookup = (
+        testField := 0.
+
+        self installMessageLookupMetaobject.
+
+        self assert: 1 equals: self returnTest.
+        self assert: 1 equals: self returnTest.
+        self assert: 1 equals: self returnTest.
+
+        self uninstallMetaobject.
+
+        self assert: 14 equals: testField.
+    )
+
     argsTest: aValue = (
-    	^aValue
+        ^aValue
     )
-    
+
     returnTest = (^1)
-    
+
     installLocalsMetaobject = (
-    	self installEnvironment: self class localMetaobject.
-	)
-	
-	installArgumentsMetaobject = (
-    	self installEnvironment: self class argumentsMetaobject.
-	)
-	
-	uninstallMetaobject = (
-    	self installEnvironment: nil.
-	)
-	
-	------------------------------
-	
-	| localMetaobject argumentsMetaobject returnMetaobject |
-	
-	localMetaobject = (^localMetaobject)
-	argumentsMetaobject = (^argumentsMetaobject)
-	returnMetaobject = (^returnMetaobject)
-	
-	initialize = (
-		localMetaobject := (EnvironmentMO 
-				operationalSemantics: OperationalSemanticsForTestingLocals new 
-				message: "MessageSemanticsForTest new" nil
-				layout: nil).
-				
-		argumentsMetaobject	:= (EnvironmentMO 
-				operationalSemantics: OperationalSemanticsForTestingArguments new 
-				message: "MessageSemanticsForTest new" nil
-				layout: nil).
-		
-		returnMetaobject := (EnvironmentMO 
-				operationalSemantics: OperationalSemanticsForTestingReturn new 
-				message: "MessageSemanticsForTest new" nil
-				layout: nil)			
-	)
+        self installEnvironment: self class localMetaobject.
+    )
+
+    installArgumentsMetaobject = (
+        self installEnvironment: self class argumentsMetaobject.
+    )
+
+    installFieldsMetaobject = (
+        self installEnvironment: self class fieldsMetaobject.
+    )
+
+    installMessageLookupMetaobject = (
+        self installEnvironment: self class messageLookupMetaobject.
+    )
+
+    uninstallMetaobject = (
+        self installEnvironment: nil.
+    )
+
+    ------------------------------
+
+    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject |
+
+    localMetaobject = (^localMetaobject)
+    argumentsMetaobject = (^argumentsMetaobject)
+    returnMetaobject = (^returnMetaobject)
+    fieldsMetaobject = (^fieldsMetaobject)
+    messageLookupMetaobject = (^messageLookupMetaobject)
+
+    initialize = (
+        localMetaobject := (EnvironmentMO
+                operationalSemantics: OperationalSemanticsForTestingLocals new
+                message: "MessageSemanticsForTest new" nil
+                layout: nil).
+
+        argumentsMetaobject := (EnvironmentMO
+                operationalSemantics: OperationalSemanticsForTestingArguments new
+                message: "MessageSemanticsForTest new" nil
+                layout: nil).
+
+        returnMetaobject := (EnvironmentMO
+                operationalSemantics: OperationalSemanticsForTestingReturn new
+                message: "MessageSemanticsForTest new" nil
+                layout: nil).
+
+        fieldsMetaobject := (EnvironmentMO
+                operationalSemantics: OperationalSemanticsForTestingFields new
+                message: "MessageSemanticsForTest new" nil
+                layout: nil).
+
+        messageLookupMetaobject := (EnvironmentMO
+                operationalSemantics: nil
+                message: MessageSemanticsForTestingMessageLookupMO new
+                layout: nil).
+    )
  )

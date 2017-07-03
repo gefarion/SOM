@@ -46,11 +46,12 @@ TestHarness = (
           ReflectionTest,
           SelfBlockTest,
           SetTest,
-          StringTest,
+          StringTest, 
           SuperTest,
           SymbolTest, 
           SystemTest,
-          VectorTest          
+          VectorTest,
+          BasicOperationsTest
     )
     
     
