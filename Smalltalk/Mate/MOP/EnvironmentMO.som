@@ -24,7 +24,6 @@ THE SOFTWARE.
 "
 
 EnvironmentMO = (
-
     | operationalSemantics layout message |
     
     "Accessing"
@@ -47,6 +46,4 @@ EnvironmentMO = (
     	env layout: aLayoutMO.
     	^env 
     )
-    
-    "new = primitive"
 )
