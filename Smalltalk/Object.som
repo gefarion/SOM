@@ -58,7 +58,7 @@ Object = nil (
     asString  = ( ^'instance of ' + (self class) )
     as: aSimilarClass = (^ aSimilarClass newFrom: self)
     , element = ( ^(Vector new append: self) append: element )
-    hashcode  = primitive
+    hashcode  = (^self hash)
     
     "Evaluating"
     value     = ( ^self )

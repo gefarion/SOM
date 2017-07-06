@@ -1,0 +1,3 @@
+PairExample = Pair (
+	absolutValue = (^self key + self value)
+)

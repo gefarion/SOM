@@ -1,0 +1,12 @@
+SpecializationInfo = (
+	| name active cachedData specializations |
+	
+	name = (^name)
+	isActive = (^active)
+	cachedData = (^cachedData) 
+	specializations = (^specializations)
+	
+	firstInstance = (^specializations first) 
+	
+	instances = (^specializations length)
+)

@@ -88,6 +88,9 @@ System = (
     "Force Garbage Collection"
     fullGC = primitive
     
+    "Export Global Symbols"
+    export: aMethod as: aString = primitive
+    
     ----------------------------------
     
     "Allocation"

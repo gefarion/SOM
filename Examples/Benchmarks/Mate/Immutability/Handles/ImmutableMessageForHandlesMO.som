@@ -1,0 +1,5 @@
+ImmutableMessageForHandlesMO = MessageLookupMO (
+    find: aSymbol since: aClass = (	
+		^super find: aSymbol since: self targetSPECIAL class
+	)
+)

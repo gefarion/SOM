@@ -1,0 +1,7 @@
+EphemeralInstanceMigrationResetDC = EphemeralInstanceMigrationUpdateDC (
+    fixDispatchChain: dispatchChain = (
+    	dispatchChain reset.
+    )
+    
+    sizeAfterFix = (^0)
+)    

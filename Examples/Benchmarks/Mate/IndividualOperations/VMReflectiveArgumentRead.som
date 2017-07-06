@@ -1,0 +1,11 @@
+VMReflectiveArgumentRead = ArgumentRead (
+    oneTimeSetup = (
+    	| environment |
+    	super oneTimeSetup.
+    	environment := EnvironmentMO 
+							operationalSemantics: ArgumentReadSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+)

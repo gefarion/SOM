@@ -1,0 +1,11 @@
+VMReflectiveLocalVariableRead = LocalVariableRead (
+    oneTimeSetup = (
+    	| environment |
+    	super oneTimeSetup.
+    	environment := EnvironmentMO 
+							operationalSemantics: LocalVarReadSemanticsMO new 
+							message: nil 
+							layout: nil.
+		object installEnvironment: environment.
+    )
+)

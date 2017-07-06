@@ -1,0 +1,35 @@
+Handle = (
+	| target |
+    "Accessing"
+    targetSPECIAL: anObject = ( target := anObject )
+    targetSPECIAL = ( ^target )
+    = other 				= (^self equalsSPECIAL: other)
+    equalsSPECIAL: other 	= (^target = other)
+    
+    ----------------------------
+    
+    | semantics |
+    
+    "Accessing"
+    semantics = ( ^semantics )
+    semantics: anObject	= ( semantics := anObject ) 
+    
+    initialize = (
+		| shape |
+		shape := self getShapeForInstances.
+		self semantics: 
+					(EnvironmentMO 
+							operationalSemantics: ImmutableSemanticsForHandlesMO new 
+							message: ImmutableMessageForHandlesMO new
+							layout: nil
+					).
+		self updateShapeForInstancesWith: (shape installEnvironment: self semantics).
+	)
+    
+    targetSPECIAL: anObject = (
+    	| object |
+    	object := self basicNew.
+    	object targetSPECIAL: anObject. 
+    	^object
+    )
+ )
