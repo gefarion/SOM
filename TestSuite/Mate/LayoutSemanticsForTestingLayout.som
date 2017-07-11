@@ -1,0 +1,9 @@
+LayoutSemanticsForTestingLayout = LayoutMO (
+    read: aIndex = (
+    	^(self instVarAt: aIndex) + 1
+    )
+
+    write: aIndex value: aValue = (
+    	^self instVarAt: aIndex put: (aValue + 1)
+    )
+)
