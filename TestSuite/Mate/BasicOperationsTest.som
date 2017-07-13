@@ -70,6 +70,17 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self returnTest.
     )
 
+    testImplicitReturn = (
+        | value |
+
+        self assert: self implicitReturnTest returnTest equals: 1.
+        self installEnvironment: self class implicitReturnMetaobject.
+        value := self implicitReturnTest.
+        self uninstallMetaobject.
+        self assert: 2 equals: value.
+        self assert: 1 equals: self implicitReturnTest returnTest.
+    )
+
     testMethodActivacion = (
         | messageMO |
 
@@ -106,6 +117,7 @@ BasicOperationsTest = TestCase (
     )
 
     returnTest = (^1)
+    implicitReturnTest = ()
 
     installLocalsMetaobject = (
         self installEnvironment: self class localMetaobject.
@@ -129,11 +141,12 @@ BasicOperationsTest = TestCase (
 
     ------------------------------
 
-    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject |
+    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject implicitReturnMetaobject |
 
     localMetaobject = (^localMetaobject)
     argumentsMetaobject = (^argumentsMetaobject)
     returnMetaobject = (^returnMetaobject)
+    implicitReturnMetaobject = (^implicitReturnMetaobject)
     fieldsMetaobject = (^fieldsMetaobject)
     messageLookupMetaobject = (^messageLookupMetaobject)
 
@@ -150,6 +163,11 @@ BasicOperationsTest = TestCase (
 
         returnMetaobject := (EnvironmentMO
                 operationalSemantics: OperationalSemanticsForTestingReturn new
+                message: "MessageSemanticsForTest new" nil
+                layout: nil).
+
+        implicitReturnMetaobject := (EnvironmentMO
+                operationalSemantics: OperationalSemanticsForTestingImplicitReturn new
                 message: "MessageSemanticsForTest new" nil
                 layout: nil).
 
