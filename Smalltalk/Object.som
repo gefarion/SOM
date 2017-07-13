@@ -129,9 +129,10 @@ Object = nil (
     perform: aSymbol inSuperclass: cls = primitive
     perform: aSymbol withArguments: args inSuperclass: cls = primitive
     
-    instVarAt: idx          = primitive
-    instVarAt: idx put: obj = primitive
-    instVarNamed: sym       = primitive
+    instVarAt: idx             = primitive
+    instVarAt: idx put: obj    = primitive
+    instVarNamed: sym          = primitive
+    instVarNamed: sym put: obj = primitive
     
     "Delegation Proxies"
     instVarNamed: sym myself: anObject = (^self instVarNamed: sym)
