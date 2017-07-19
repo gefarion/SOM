@@ -70,11 +70,33 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self returnTest.
     )
 
+    testMessageLookup = (
+        testField := 0.
+
+        self installMessageLookupMetaobject.
+
+        "Note that assert:equals: call assert:description. 
+        But the lookup for the assert:description within that method is done only the first time because the lookup
+        share the same behavior of the lookup at vm-side, if the receiver holds the lookup caches the value.
+        uninstallMetaobject sums 2 lookups"
+        	
+        self assert: 1 equals: self returnTest.
+        self assert: 1 equals: self returnTest.
+        self assert: 1 equals: self returnTest.
+
+        self uninstallMetaobject.
+
+        self assert: 9 equals: testField.
+    )
+    
     testMethodActivacion = (
         | messageMO |
 
         testField := 0.
 
+        "Disimilar to the lookup, the method activation is not cached and is done always. That 
+        is the reason for the two extra values in the expected result (11 vs 9)"
+         
         messageMO := MessageSemanticsForTestingMethodActivation new.
         self installEnvironment: (EnvironmentMO operationalSemantics: nil message: messageMO layout: nil).
 
@@ -84,24 +106,10 @@ BasicOperationsTest = TestCase (
 
         self uninstallMetaobject.
 
-        self assert: 7 equals: testField.
+        self assert: 11 equals: testField.
     )
 
-    testMessageLookup = (
-        testField := 0.
-
-        self installMessageLookupMetaobject.
-
-        self assert: 1 equals: self returnTest.
-        self assert: 1 equals: self returnTest.
-        self assert: 1 equals: self returnTest.
-
-        self uninstallMetaobject.
-
-        self assert: 14 equals: testField.
-    )
-
-    testLayoutRead = (
+    "testLayoutRead = (
         testField := 1.
         self assert: 1 equals: testField.
         self installLayoutMetaobject.
@@ -117,7 +125,7 @@ BasicOperationsTest = TestCase (
         testField := 1.
         self uninstallMetaobject.
         self assert: 2 equals: testField.
-    )
+    )"
 
     argsTest: aValue = (
         ^aValue

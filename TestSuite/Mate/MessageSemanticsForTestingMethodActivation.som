@@ -1,7 +1,16 @@
 MessageSemanticsForTestingMethodActivation = MessageMO (
-
+	find: aSymbol since: aClass = (	
+		| class |
+		class := aClass.
+		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
+			class := class superclass.
+		].
+		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
+		^nil.
+	)
+	
 	activate: method withArguments: arguments = (
-		self instVarNamed: 'testField' put: ((self instVarNamed: 'testField') + 1).
-		^method invokeOn: self with: arguments
+		self instVarNamed: #testField put: ((self instVarNamed: #testField) + 1).
+		^arguments
 	)
 )
