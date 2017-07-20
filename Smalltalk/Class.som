@@ -97,4 +97,17 @@ Class = (
 				aSuperclass := aSuperclass superclass].
 		^false
 	)
+	
+	"Sources"
+	sourceCodeAt: aSelector = (
+		| method |
+		method := (self methods select: [:mthd | mthd signature = aSelector]) first.
+		^method sourceCode. 
+	)
+	
+	parseTreeFor: aSelector = (
+		| method |
+		method := (self methods select: [:mthd | mthd signature = aSelector]) first.
+		^method compilation. 
+	)
 )

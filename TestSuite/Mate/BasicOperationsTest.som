@@ -109,7 +109,7 @@ BasicOperationsTest = TestCase (
         self assert: 11 equals: testField.
     )
 
-    "testLayoutRead = (
+    testLayoutRead = (
         testField := 1.
         self assert: 1 equals: testField.
         self installLayoutMetaobject.
@@ -125,7 +125,7 @@ BasicOperationsTest = TestCase (
         testField := 1.
         self uninstallMetaobject.
         self assert: 2 equals: testField.
-    )"
+    )
 
     argsTest: aValue = (
         ^aValue
@@ -148,6 +148,10 @@ BasicOperationsTest = TestCase (
     installMessageLookupMetaobject = (
         self installEnvironment: self class messageLookupMetaobject.
     )
+    
+    installLayoutMetaobject = (
+        self installEnvironment: self class layoutMetaobject.
+    )
 
     installLayoutMetaobject = (
         self installEnvironment: self class layoutMetaobject.
@@ -156,7 +160,7 @@ BasicOperationsTest = TestCase (
     uninstallMetaobject = (
         self installEnvironment: nil.
     )
-
+    
     ------------------------------
 
     | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject layoutMetaobject|
@@ -193,10 +197,10 @@ BasicOperationsTest = TestCase (
                 operationalSemantics: nil
                 message: MessageSemanticsForTestingMessageLookupMO new
                 layout: nil).
-
+                
         layoutMetaobject := (EnvironmentMO
                 operationalSemantics: nil
                 message: nil
-                layout: LayoutSemanticsForTestingLayout new).
+                layout: LayoutSemanticsForTestingLayout new).        
     )
  )

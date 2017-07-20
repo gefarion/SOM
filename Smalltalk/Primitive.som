@@ -29,5 +29,7 @@ Primitive = (
     holder    = primitive
 
     invokeOn: obj with: args = primitive
+    
+    sourceCode = (^nil)
 
 )
