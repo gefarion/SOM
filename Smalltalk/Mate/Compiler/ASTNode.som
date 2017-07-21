@@ -17,4 +17,9 @@ ASTNode = (
     	^fieldReads select: [:node | node fieldIndex = anIndex and: 
     							[node isMateNode not]].
 	)
+	
+	isEquivalentTo: anRBAST = (
+		"TODO"
+		^true.
+	)
 )
