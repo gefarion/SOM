@@ -38,7 +38,7 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	)
 	
 	methodSequence = (
-		^ super methodSequence map: [:arrayOfArguments |
+		^ super methodSequence ==> [:arrayOfArguments |
 			Array
 				with: (arrayOfArguments at: 2) , (arrayOfArguments at: 6)
 				with: (self build: (arrayOfArguments at: 4) sequence: (arrayOfArguments at: 1) , (arrayOfArguments at: 3) , 
@@ -185,10 +185,11 @@ PPSmalltalkParser = PPSmalltalkGrammar (
 	)
 	
 	method = (
-		^ super method map: [ :methodNode :bodyNode | 
+		^ super method map: [ :methodNode :bodyNode| 
+			|method|
 			methodNode pragmas: bodyNode first.
 			methodNode body: bodyNode second.
-			self buildMethod: methodNode ]
+			self buildMethod: methodNode]
 	)
 	
 	nilLiteral = (
