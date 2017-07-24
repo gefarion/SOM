@@ -23,7 +23,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: 1 bar: 2 baz: #b>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9 16 24).		
+		self assert: result pragmas first keywordsPositions equals: #(12 19 27).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -101,7 +101,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: false>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -154,7 +154,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).
+		self assert: result pragmas first keywordsPositions equals: #(12).
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -203,8 +203,8 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 	testPragma5 = (
 		super testPragma5.
 		"self assert: result pragmas format: #('<foo>' '<bar>')."
-		self assert: result pragmas first keywordsPositions equals: #(9).
-		self assert: result pragmas second keywordsPositions equals: #(21).	
+		self assert: result pragmas first keywordsPositions equals: #(12).
+		self assert: result pragmas second keywordsPositions equals: #(24).	
 		self assert: result body temporaries length equals: 1.
 		self assert: result body statements isEmpty
 	)
@@ -336,8 +336,8 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo>' '<bar>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).
-		self assert: result pragmas second keywordsPositions equals: #(15).		
+		self assert: result pragmas first keywordsPositions equals: #(12).
+		self assert: result pragmas second keywordsPositions equals: #(18).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -405,7 +405,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: 1>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -447,7 +447,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: #()>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -477,7 +477,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: ''bar''>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -487,7 +487,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: nil>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).
+		self assert: result pragmas first keywordsPositions equals: #(12).
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -540,7 +540,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: true>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -550,7 +550,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('< + 1>' )."
-		self assert: result pragmas first keywordsPositions equals: #(10).		
+		self assert: result pragmas first keywordsPositions equals: #(13).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -580,7 +580,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: #bar>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -773,7 +773,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: #()>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -783,7 +783,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: #bar>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -793,7 +793,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: 1 bar: 2>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9 16).		
+		self assert: result pragmas first keywordsPositions equals: #(12 19).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -967,7 +967,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 	testPragma3 = (
 		super testPragma3.
 		"self assert: result pragmas format: #('<foo>')."
-		self assert: result pragmas first keywordsPositions equals: #(15).
+		self assert: result pragmas first keywordsPositions equals: #(18).
 		self assert: result body temporaries length equals: 1.
 		self assert: result body statements isEmpty
 	)
@@ -1057,7 +1057,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 		"self 
 			assert: result pragmas
 			format: #('<foo: 1.2>' )."
-		self assert: result pragmas first keywordsPositions equals: #(9).		
+		self assert: result pragmas first keywordsPositions equals: #(12).		
 		self assert: result body temporaries isEmpty.
 		self assert: result body statements isEmpty
 	)
@@ -1114,7 +1114,7 @@ PPSmalltalkParserTest = PPSmalltalkGrammarTest (
 	testPragma4 = (
 		super testPragma4.
 		"self assert: result pragmas format: #('<foo>')."
-		self assert: result pragmas first keywordsPositions equals: #(9).	
+		self assert: result pragmas first keywordsPositions equals: #(12).	
 		self assert: result body temporaries length equals: 1.
 		self assert: result body statements isEmpty
 	)
