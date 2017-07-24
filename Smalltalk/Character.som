@@ -36,7 +36,7 @@ Character = (
     isUppercase	   = primitive
     isLowercase	   = primitive
     isCharacter	   = (^true)
-    isSpecial = (^'+-/\*~<>=@,%|&?!' includes: self)
+    isSpecial = (^'+-/\\*~<>=@,%|&?!' includes: self)
     between: min and: max = (^self >= min and: [self <= max])
     compareWith: anotherChar	   = primitive
     asSymbol = (^self asString asSymbol)

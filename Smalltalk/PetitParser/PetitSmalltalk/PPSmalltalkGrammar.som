@@ -18,7 +18,7 @@ PPSmalltalkGrammar = PPCompositeParser (
 	)
 	
 	binary = (
-		^ (PPPredicateObjectParser anyOf: '!%&*+,-/<=>?@\|~') plus
+		^ (PPPredicateObjectParser anyOf: '!%&*+,-/<=>?@\\|~') plus
 	)
 	
 	period = (
