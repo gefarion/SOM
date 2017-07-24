@@ -11,20 +11,20 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma18 = (
 		self 
-			parse: 'method <foo: 1 bar: 2  baz: b>'
+			parse: 'method = (<foo: 1 bar: 2  baz: b>)'
 			rule: #method
 	)
 	
 	testMethod2 = (
 		"Spaces at the beginning of the method."
 		self 
-			parse: '	  negated ^ 0 - self'
+			parse: '	  negated = (^ 0 - self)'
 			rule: #method
 	)
 	
 	testUnaryMethod2 = (
 		self 
-			parse: 'abs | a |'
+			parse: 'abs = (| a |)'
 			rule: #method
 	)
 	
@@ -54,7 +54,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma12 = (
 		self 
-			parse: 'method <foo: false>'
+			parse: 'method = (<foo: false>)'
 			rule: #method
 	)
 	
@@ -96,7 +96,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma1 = (
 		self 
-			parse: 'method <foo>'
+			parse: 'method = (<foo>)'
 			rule: #method
 	)
 	
@@ -130,7 +130,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma5 = (
 		self 
-			parse: 'method <foo> | a | <bar>'
+			parse: 'method = (<foo> | a | <bar>)'
 			rule: #method
 	)
 	
@@ -142,7 +142,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testUnaryMethod3 = (
 		self 
-			parse: 'abs a'
+			parse: 'abs = (a)'
 			rule: #method
 	)
 	
@@ -222,7 +222,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma2 = (
 		self 
-			parse: 'method <foo> <bar>'
+			parse: 'method = (<foo> <bar>)'
 			rule: #method
 	)
 	
@@ -264,7 +264,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma6 = (
 		self 
-			parse: 'method <foo: 1>'
+			parse: 'method = (<foo: 1>)'
 			rule: #method
 	)
 	
@@ -276,7 +276,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testMethod1 = (
 		self 
-			parse: 'negated ^ 0 - self'
+			parse: 'negated = (^ 0 - self)'
 			rule: #method
 	)
 	
@@ -288,7 +288,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma15 = (
 		self 
-			parse: 'method <foo: #()>'
+			parse: 'method = (<foo: #()>)'
 			rule: #method
 	)
 	
@@ -312,13 +312,13 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma8 = (
 		self 
-			parse: 'method <foo: \'bar\'>'
+			parse: 'method = (<foo: \'bar\'>)'
 			rule: #method
 	)
 	
 	testPragma13 = (
 		self 
-			parse: 'method <foo: nil>'
+			parse: 'method = (<foo: nil>)'
 			rule: #method
 	)
 	
@@ -336,7 +336,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testUnaryMethod5 = (
 		self 
-			parse: 'abs | a |'
+			parse: 'abs = (| a |)'
 			rule: #method
 	)
 	
@@ -354,13 +354,13 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma11 = (
 		self 
-			parse: 'method <foo: true>'
+			parse: 'method = (<foo: true>)'
 			rule: #method
 	)
 	
 	testPragma16 = (
 		self 
-			parse: 'method < + 1 >'
+			parse: 'method = (< + 1 >)'
 			rule: #method
 	)
 	
@@ -378,7 +378,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma9 = (
 		self 
-			parse: 'method <foo: #\'bar\'>'
+			parse: 'method = (<foo: #\'bar\'>)'
 			rule: #method
 	)
 	
@@ -475,7 +475,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testBinaryMethod2 = (
 		self 
-			parse: '+ a | b |'
+			parse: '+ a = (| b |)'
 			rule: #method
 	)
 	
@@ -499,19 +499,19 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma14 = (
 		self 
-			parse: 'method <foo: ()>'
+			parse: 'method = (<foo: ()>)'
 			rule: #method
 	)
 	
 	testPragma10 = (
 		self 
-			parse: 'method <foo: bar>'
+			parse: 'method = (<foo: bar>)'
 			rule: #method
 	)
 	
 	testPragma17 = (
 		self 
-			parse: 'method <foo: 1 bar: 2>'
+			parse: 'method = (<foo: 1 bar: 2>)'
 			rule: #method
 	)
 	
@@ -523,13 +523,13 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testBinaryMethod5 = (
 		self 
-			parse: '-- a'
+			parse: '-- a = ()'
 			rule: #method
 	)
 	
 	testBinaryMethod4 = (
 		self 
-			parse: '+ a | b | c'
+			parse: '+ a = (| b | c)'
 			rule: #method
 	)
 	
@@ -565,14 +565,14 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testKeywordMethod4 = (
 		self 
-			parse: 'to: a do: b by: c | d | e'
+			parse: 'to: a do: b by: c = (| d | e)'
 			rule: #method
 	)
 	
 	testMethod3 = (
 		"Spaces at the end of the method."
 		self 
-			parse: '	negated ^ 0 - self  '
+			parse: '	negated = (^ 0 - self  )'
 			rule: #method
 	)
 	
@@ -620,7 +620,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma3 = (
 		self 
-			parse: 'method | a | <foo>'
+			parse: 'method = (| a | <foo>)'
 			rule: #method
 	)
 	
@@ -656,7 +656,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testBinaryMethod1 = (
 		self 
-			parse: '+ a'
+			parse: '+ a = ()'
 			rule: #method
 	)
 	
@@ -674,7 +674,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma7 = (
 		self 
-			parse: 'method <foo: 1.2>'
+			parse: 'method = (<foo: 1.2>)'
 			rule: #method
 	)
 	
@@ -698,7 +698,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testKeywordMethod2 = (
 		self 
-			parse: 'to: a do: b | c |'
+			parse: 'to: a do: b = (| c |)'
 			rule: #method
 	)
 	
@@ -710,7 +710,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testPragma4 = (
 		self 
-			parse: 'method <foo> | a |'
+			parse: 'method = (<foo> | a |)'
 			rule: #method
 	)
 	
@@ -722,7 +722,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testKeywordMethod1 = (
 		self 
-			parse: 'to: a'
+			parse: 'to: a = ()'
 			rule: #method
 	)
 	
@@ -734,7 +734,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testUnaryMethod1 = (
 		self 
-			parse: 'abs'
+			parse: 'abs = ()'
 			rule: #method
 	)
 	
@@ -746,7 +746,7 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testBinaryMethod3 = (
 		self 
-			parse: '+ a b'
+			parse: '+ a = (b)'
 			rule: #method
 	)
 	
@@ -837,13 +837,13 @@ PPSmalltalkGrammarTest = PPCompositeParserTest (
 	
 	testUnaryMethod4 = (
 		self 
-			parse: 'abs | a | b'
+			parse: 'abs = (| a | b)'
 			rule: #method
 	)
 	
 	testKeywordMethod3 = (
 		self 
-			parse: 'to: a do: b by: c d'
+			parse: 'to: a do: b by: c = (d)'
 			rule: #method
 	)
 	
