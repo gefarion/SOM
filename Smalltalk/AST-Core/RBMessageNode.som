@@ -201,8 +201,7 @@ Instance Variables:
 	receiver: aValueNode selector: aSelector keywordsPositions: positionList arguments: valueNodes = (
 		aSelector numArgs == valueNodes length
 			ifFalse: 
-				[aSelector println.
-		self error: 'Attempting to assign selector with wrong number of arguments.'].
+				[self error: 'Attempting to assign selector with wrong number of arguments.'].
 	
 		self receiver: aValueNode.
 		self arguments: valueNodes.
