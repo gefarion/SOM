@@ -160,7 +160,8 @@ Stream = Object (
 	)
 	
 	flush = (
-		"Do nothing by default" 
+		"Do nothing by default"
+		^self 
 	)
 	
 	readOnly = (
