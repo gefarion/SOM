@@ -95,7 +95,7 @@ BasicOperationsTest = TestCase (
 
         self uninstallMetaobject.
 
-        self assert: 7 equals: testField.
+        self assert: 10 equals: testField.
     )
 
     testMessageLookup = (
@@ -109,7 +109,7 @@ BasicOperationsTest = TestCase (
 
         self uninstallMetaobject.
 
-        self assert: 14 equals: testField.
+        self assert: 11 equals: testField.
     )
 
     argsTest: aValue = (

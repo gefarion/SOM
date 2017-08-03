@@ -1,7 +1,7 @@
 MessageSemanticsForTestingMethodActivation = MessageMO (
 
-	activate: method withArguments: arguments = (
+	activate: method withArguments: arguments withSemantics: metaObject = (
 		self instVarNamed: 'testField' put: ((self instVarNamed: 'testField') + 1).
-		^method invokeOn: self with: arguments
+		^method invokeMateOn: self with: arguments
 	)
 )
