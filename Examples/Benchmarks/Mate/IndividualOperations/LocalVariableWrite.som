@@ -1,0 +1,16 @@
+LocalVariableWrite = Benchmark (
+    | object value |
+    
+    oneTimeSetup = (
+    	object := PairTest new.
+    	object key: 1.
+    )
+    
+    benchmark = (
+    	^object testLocalVar.
+    )
+    
+    verifyResult: result = (
+      ^object key = result
+    )
+)    

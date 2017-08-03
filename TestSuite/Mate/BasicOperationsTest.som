@@ -112,6 +112,24 @@ BasicOperationsTest = TestCase (
         self assert: 11 equals: testField.
     )
 
+    testLayoutRead = (
+        testField := 1.
+        self assert: 1 equals: testField.
+        self installLayoutMetaobject.
+        self assert: 2 equals: testField.
+        self uninstallMetaobject.
+        self assert: 1 equals: testField.
+    )
+
+    testLayoutWrite = (
+        testField := 1.
+        self assert: 1 equals: testField.
+        self installLayoutMetaobject.
+        testField := 1.
+        self uninstallMetaobject.
+        self assert: 2 equals: testField.
+    )
+
     argsTest: aValue = (
         ^aValue
     )
@@ -135,13 +153,17 @@ BasicOperationsTest = TestCase (
         self installEnvironment: self class messageLookupMetaobject.
     )
 
+    installLayoutMetaobject = (
+        self installEnvironment: self class layoutMetaobject.
+    )
+
     uninstallMetaobject = (
         self installEnvironment: nil.
     )
 
     ------------------------------
 
-    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject implicitReturnMetaobject |
+    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject implicitReturnMetaobject layoutMetaobject|
 
     localMetaobject = (^localMetaobject)
     argumentsMetaobject = (^argumentsMetaobject)
@@ -149,6 +171,7 @@ BasicOperationsTest = TestCase (
     implicitReturnMetaobject = (^implicitReturnMetaobject)
     fieldsMetaobject = (^fieldsMetaobject)
     messageLookupMetaobject = (^messageLookupMetaobject)
+    layoutMetaobject = (^layoutMetaobject)
 
     initialize = (
         localMetaobject := (EnvironmentMO
@@ -180,5 +203,10 @@ BasicOperationsTest = TestCase (
                 operationalSemantics: nil
                 message: MessageSemanticsForTestingMessageLookupMO new
                 layout: nil).
+
+        layoutMetaobject := (EnvironmentMO
+                operationalSemantics: nil
+                message: nil
+                layout: LayoutSemanticsForTestingLayout new).
     )
  )

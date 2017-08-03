@@ -1,0 +1,19 @@
+PairTest = Pair (
+    initialize = (
+    	super initialize.
+    	Random initialize.
+    )
+    
+    testLocalVar = (
+    	| local |
+    	"All the code beyond the local var write is needed to avoid the optimization 
+    	of the removal of the local write operation by the optimizing compiler"
+    	self key: (Random next rem: 100) + 1.
+    	local := self key.
+    	^local.
+    )
+    
+    testArgRead: anArg = (
+    	^anArg
+    )
+)    

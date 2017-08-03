@@ -1,0 +1,25 @@
+Person = (
+	| name surname ssn address tel cel profession gender birth job |
+    
+    name = (^name)
+    surname = (^surname)
+    ssn = (^ssn)
+    address = (^address)
+    tel = (^tel)
+    cel = (^cel)
+    profession = (^profession)
+    gender = (^gender)
+    birth = (^birth)
+    job = (^job)
+    
+    name: aName = (name := aName)
+    surname: aSurname = (surname := aSurname)
+    ssn: aSSN = (ssn := aSSN)
+    address: anAddress = (address := anAddress)
+    tel: aTel = (tel := aTel)
+    cel: aCel = (cel := aCel)
+    profession: aProfession = (profession := aProfession)
+    gender: aGender = (gender := aGender)
+    birth: aBirth = (birth := aBirth)
+    job: aJob = (job := aJob)
+)

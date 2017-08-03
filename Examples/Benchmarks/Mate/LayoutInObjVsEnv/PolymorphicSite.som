@@ -1,0 +1,22 @@
+PolymorphicSite = Benchmark (
+    | pairs size |
+    
+    oneTimeSetup = (
+    	size := 20.
+    	pairs := Array new: size.
+    	1 to: size / 2 do: [:i | pairs at: i put: (PairExample withKey: 1 andValue: 1)].
+    	(size / 2) + 1 to: (size / 2) + (size / 4) do: [:i | pairs at: i put: (PairExample1 withKey: 2 andValue: 2)] 
+    	(size / 2) + (size / 4) + 1 to: size do: [:i | pairs at: i put: (PairExample2 withKey: 3 andValue: 3)]
+    )
+    
+    benchmark = (
+    	| i accum |
+    	accum := 0.
+    	1 to: size do: [:i | accum := accum + ((pairs at: i) absolutValue)].
+    	^accum
+    )
+    
+    verifyResult: result = (
+      ^result = ((2 * (size / 2)) + (4 * (size / 4)) + (6 * (size / 4)))
+    )
+)    

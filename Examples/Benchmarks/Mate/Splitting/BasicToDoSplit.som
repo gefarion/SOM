@@ -1,0 +1,9 @@
+BasicToDoSplit = BasicToDo (
+    iterationOne = (
+    	| ast send |
+    	ast := (BasicToDo>>#benchmark) compilation.
+    	send := (ast messageSendsWithSelector: 'collect:').
+    	(send at: 1) dispatchChain activeSpecializations first firstInstance split.
+    	(send at: 2) dispatchChain activeSpecializations first firstInstance split.
+    )
+)    

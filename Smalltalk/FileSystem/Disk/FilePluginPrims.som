@@ -1,5 +1,5 @@
 FilePluginPrims = Object (
-	"I provide an interface to the primitives in the FilePlugin."
+	"I provide an interface to the primitives in the FilePlugin."
 	
 	
 	decode: aString = (

@@ -1,0 +1,40 @@
+HashFieldsSemanticsMO = LayoutMO (
+    read: aNumber = (
+		| index |
+		index := HashFieldsSemanticsMO indexForField: aNumber on: self.
+		^index isNil 
+			ifTrue:	 [nil]
+			ifFalse: [self instVarAt: index]
+	)
+		
+	write: aNumber value: anObject = (
+		| index |
+		index := HashFieldsSemanticsMO indexForField: aNumber on: self. 
+		index isNil
+			ifTrue:	[
+				index := HashFieldsSemanticsMO indexForField: nil on: self.
+				index isNil ifTrue:[
+					'Wrong side of the moon, no more space' println.
+					"NoMoreSpaceException new throw"
+				] ifFalse: [
+					self instVarAt: index + 1 put: aNumber.
+				]
+			].
+		^self instVarAt: index put: anObject.
+	)
+	
+	fieldsCount =  ( ^self class instVarsSize )
+	
+	---------------------------------
+	
+	indexForField: aNumber on: anObject = (
+		| index |
+		index := 2.
+		[index <= anObject shape fieldsCount] whileTrue: [
+			(anObject instVarAt: index) = aNumber 
+				ifTrue: [^index - 1]
+				ifFalse:[index := index + 2]
+		].
+		^nil	 
+	)
+)

@@ -1,0 +1,3 @@
+FieldReadNode = ASTNode (
+    fieldIndex = primitive
+)

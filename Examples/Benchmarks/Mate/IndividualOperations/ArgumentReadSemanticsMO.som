@@ -1,0 +1,5 @@
+ArgumentReadSemanticsMO = LayoutMO (
+	readLocalArgument: anIndex inFrame: aFrame = (
+    	^(aFrame argAt: anIndex)
+    )
+)

@@ -10,12 +10,12 @@ JsonBig = Json (
 	)
     
     verifyResult: result = (
-      result class = ParseException ifTrue: [ result println ].
+      result class = ParseException ifTrue: [ result println. ^false ].
       result isObject ifFalse: [^ false].
       ^true
     )
     
     filename = (
-    	^'core-lib/Examples/Benchmarks/Mate/Tracing/AllSets-xCleaned.json'
+    	^'Mate/Tracing/AllSets-xCleaned.json'
     )
 )

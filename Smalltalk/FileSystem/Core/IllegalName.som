@@ -1,5 +1,5 @@
 IllegalName = FileSystemError (
-	"I am raised on an attempt to use an illegal file name"
+	"I am raised on an attempt to use an illegal file name"
 	| name |
 	
 	name = (

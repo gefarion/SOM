@@ -1,0 +1,5 @@
+CachedDispatchNode = Specialization (
+	| |
+	targetNode = primitive
+	split 	   = primitive
+)

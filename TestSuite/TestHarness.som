@@ -49,8 +49,7 @@ TestHarness = (
           SuperTest,
           SymbolTest, 
           SystemTest,
-          VectorTest,
-          BasicOperationsTest
+          VectorTest
     )
     
     
