@@ -1,9 +1,9 @@
 OperationalSemanticsForTestingLocals = OperationalSemanticsMO (
-    readLocal: anIdentifier inFrame: aFrame = (
-    	^(aFrame localAt: anIdentifier) + 1
+    readLocal: index inFrame: aFrame = (
+    	^(aFrame localAt: index) + 1
     )
-    
-    writeLocal: anIdentifier inFrame: aFrame value: aValue = (
-    	^aFrame localAt: anIdentifier put: aValue + 1 
+
+    writeLocal: index inFrame: aFrame value: aValue = (
+    	^aFrame localAt: index put: aValue + 1
     )
 )
