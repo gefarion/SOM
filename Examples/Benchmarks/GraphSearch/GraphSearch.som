@@ -33,7 +33,7 @@ GraphSearch = Benchmark (
     graph doIndexes: [:i |
       | noOfEdges |
       noOfEdges := (graph at: i) size.
-      graphNodes at: i put: (Node newWith: totalEdges + 1 and: noOfEdges).
+      graphNodes at: i put: (GSNode newWith: totalEdges + 1 and: noOfEdges).
       totalEdges := totalEdges + noOfEdges
     ].
 
