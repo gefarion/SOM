@@ -1,3 +1,3 @@
 LayoutFieldWriteSemanticsMO = LayoutMO (
-	write: anIndex value: aValue = (^self instVarAt: anIndex + 1 put: aValue)
+	write: anIndex value: aValue = (^self instVarAt: anIndex put: aValue)
 )
