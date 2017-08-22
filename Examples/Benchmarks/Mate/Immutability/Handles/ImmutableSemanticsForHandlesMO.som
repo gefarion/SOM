@@ -1,4 +1,4 @@
 ImmutableSemanticsForHandlesMO = OperationalSemanticsMO (
-    read: anIndex = (^(self targetSPECIAL instVarAt: anIndex + 1) readOnly)
+    read: anIndex = (^(self targetSPECIAL instVarAt: anIndex) readOnly)
     write: anIndex value: aValue = (^aValue)
 )

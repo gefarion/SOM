@@ -1,9 +1,9 @@
 OperationalSemanticsForTestingFields = OperationalSemanticsMO (
     read: anIndex = (
-    	^(self instVarAt: anIndex + 1) + 1
+    	^(self instVarAt: anIndex) + 1
     )
 
     write: anIndex value: aValue = (
-    	^self instVarAt: anIndex + 1 put: (aValue + 1)
+    	^self instVarAt: anIndex put: (aValue + 1)
     )
 )
