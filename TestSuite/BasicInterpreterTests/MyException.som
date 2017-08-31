@@ -1,0 +1,14 @@
+MyException = Exception (
+    | msg |
+    
+    msg: aMsg = ( msg := aMsg )
+    msg = ( ^msg )
+    
+    signal: aMsg = (
+    	(self msg: aMsg) signal
+    )
+    ------------------
+    signal: aMsg = (
+    	(self new msg: aMsg) signal
+    ) 
+)  

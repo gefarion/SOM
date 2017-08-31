@@ -1,0 +1,17 @@
+MessageNotUnderstood = Exception (
+	| receiver selector arguments |
+    
+    public asString = (
+      ^ 'MessageNotUnderstood (' + receiver class asString + '>>#' + selector asString + ')'
+    )
+    
+    --------------
+    signalWith: obj selector: sel arguments: args = (
+    	exception := self new 
+    		receiver: obj;
+    		selector: sel;
+    		arguments: args.
+    	exception signal 
+    ) 
+
+  )

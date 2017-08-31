@@ -102,6 +102,10 @@ Object = nil (
             ('Method ' + selector + ' not found in class ' + self class name)
     )
     
+    doesNotUnderstand: selector arguments: arguments = (
+    	MessageNotUnderstood signalWith: self selector: selector arguments: arguments.
+    )
+    
     escapedBlock: block = (
         self error: 'Block has escaped and cannot be executed'
     )
