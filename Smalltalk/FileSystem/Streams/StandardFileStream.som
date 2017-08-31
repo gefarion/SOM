@@ -30,7 +30,7 @@ StandardFileStream = FileStream (
 			ifNil: [ 
 				newN := count.
 				newStartIndex := startIndex ]
-			ifNotNil: [
+			ifNotNil: [ :collection |
 				byteArray class isBytes 
 					ifTrue: [
 						(available := readLimit - position) > 0 
@@ -75,7 +75,7 @@ StandardFileStream = FileStream (
 	
 	position: pos = (
 		"Set the receiver's position as indicated."
-		collection ifNotNil: [
+		collection ifNotNil: [ :collection |
 			position < readLimit ifTrue: [
 				| newPosition |
 				newPosition := pos - (self primGetPosition: fileID) + readLimit.
@@ -277,7 +277,7 @@ StandardFileStream = FileStream (
 	
 	position = (
 		"Return the receiver's current file position."
-		collection ifNotNil: [
+		collection ifNotNil: [ :collection |
 			position < readLimit ifTrue: [
 				^(self primGetPosition: fileID) - readLimit + position ] ].
 		^self primGetPosition: fileID
@@ -324,8 +324,8 @@ StandardFileStream = FileStream (
 	close = (
 		"Close this file."
 	
-		fileID ifNotNil: [
-			collection ifNotNil: [
+		fileID ifNotNil: [ :fileID |
+			collection ifNotNil: [ :collection |
 				readLimit := position := 0 ].
 			self primClose: fileID.
 			self unregister.
@@ -474,7 +474,7 @@ StandardFileStream = FileStream (
 	
 	enableReadBuffering = (
 		collection ifNil: [
-			buffer1 ifNotNil: [
+			buffer1 ifNotNil: [:buffer |
 				collection := self collectionSpecies new: 2048 ] ].
 		readLimit := position := 0
 	)

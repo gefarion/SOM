@@ -22,7 +22,7 @@ LayoutTest = TestCase (
 		self assert: person2 class fields length equals: 10.
 		self assert: person2 shape fieldsCount equals: 6.
 		usedSlots := 0.
-		1 to: 10 do: [:index | (person2 instVarAt: index) ifNotNil:[usedSlots := usedSlots + 1]].
+		1 to: 10 do: [:index | (person2 instVarAt: index) ifNotNil: [:person | usedSlots := usedSlots + 1]].
 		self assert: usedSlots equals: 3.
 		self assert: person2 shape fieldsCount equals: 6.
     )
