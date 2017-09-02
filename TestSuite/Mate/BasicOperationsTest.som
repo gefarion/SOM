@@ -81,7 +81,7 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self implicitReturnTest returnTest.
     )
 
-    testMethodActivacion = (
+    testMethodActivation = (
         | messageMO |
 
         testField := 0.
@@ -99,9 +99,16 @@ BasicOperationsTest = TestCase (
     )
 
     testMessageLookup = (
+        | i |
         testField := 0.
+        i := 0.
 
         self installMessageLookupMetaobject.
+
+        [
+            self returnTest.
+            i < 1.
+        ] whileTrue: [ self returnTest. i := i + 1 ].
 
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
@@ -109,7 +116,7 @@ BasicOperationsTest = TestCase (
 
         self uninstallMetaobject.
 
-        self assert: 11 equals: testField.
+        self assert: 14 equals: testField.
     )
 
     testLayoutRead = (
