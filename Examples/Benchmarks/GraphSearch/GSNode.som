@@ -1,4 +1,4 @@
-Node = (
+GSNode = (
   | starting noOfEdges |
   
   starting  = ( ^ starting )

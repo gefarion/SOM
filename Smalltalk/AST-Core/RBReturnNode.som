@@ -1,5 +1,11 @@
 RBReturnNode = RBProgramNode (
-	"RBReturnNode is an AST node that represents a return expression.Instance Variables:	return	<Integer>	the position of the ^ character	value	<RBValueNode>	the value that is being returned"
+	"RBReturnNode is an AST node that represents a return expression.
+
+Instance Variables:
+	return	<Integer>	the position of the ^ character
+	value	<RBValueNode>	the value that is being returned
+
+"
 	| return value |
 	asReturnNode = ()
 	hash = (^self value hash)

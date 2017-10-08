@@ -1,0 +1,19 @@
+IndexOutOfBounds = Exception (
+    | target index |
+	
+	target = ( ^target)
+	index = (^index)
+	
+	target: anObject = ( target := anObject )
+	index: anIndex = ( index := anIndex )
+	
+	---------------
+	
+	on: anObject forIndex: anIndex = (
+		| exception |
+		exception := self new.
+		exception target: anObject.
+		exception index: anIndex.
+		^exception
+	)	
+)

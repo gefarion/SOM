@@ -104,6 +104,10 @@ Object = nil (
             ('Method ' + selector + ' not found in class ' + self class name)
     )
     
+    doesNotUnderstand: selector arguments: arguments = (
+    	MessageNotUnderstood signalWith: self selector: selector arguments: arguments.
+    )
+    
     escapedBlock: block = (
         self error: 'Block has escaped and cannot be executed'
     )
@@ -131,9 +135,10 @@ Object = nil (
     perform: aSymbol inSuperclass: cls = primitive
     perform: aSymbol withArguments: args inSuperclass: cls = primitive
     
-    instVarAt: idx          = primitive
-    instVarAt: idx put: obj = primitive
-    instVarNamed: sym       = primitive
+    instVarAt: idx             = primitive
+    instVarAt: idx put: obj    = primitive
+    instVarNamed: sym          = primitive
+    instVarNamed: sym put: obj = primitive
     
     "Delegation Proxies"
     instVarNamed: sym myself: anObject = (^self instVarNamed: sym)

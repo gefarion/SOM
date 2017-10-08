@@ -1,0 +1,11 @@
+Exception = (
+    "Exception does not have any state on purpose.
+       It is good practice to have distinct exceptions for separate issues.
+       Thus, subclassing is encouraged."
+	
+	signal = primitive
+
+ 	----------------
+	
+	 signal = (self new signal)
+)

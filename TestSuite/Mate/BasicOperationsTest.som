@@ -81,24 +81,27 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self implicitReturnTest returnTest.
     )
 
-    testMethodActivation = (
-        | messageMO |
-
+    testMessageLookup = (
         testField := 0.
 
-        messageMO := MessageSemanticsForTestingMethodActivation new.
-        self installEnvironment: (EnvironmentMO operationalSemantics: nil message: messageMO layout: nil).
+        self installMessageLookupMetaobject.
+
+        "Note that assert:equals: call assert:description.
+        But the lookup for the assert:description within that method is done only the first time because the lookup
+        share the same behavior of the lookup at vm-side, if the receiver holds the lookup caches the value.
+        uninstallMetaobject sums 2 lookups"
 
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
 
         self uninstallMetaobject.
-
-        self assert: 10 equals: testField.
+        (system inTruffle)
+            ifTrue: [ self assert: 9 equals: testField ]
+            ifFalse: [ self assert: 11 equals: testField ].
     )
 
-    testMessageLookup = (
+    testMessageLookupInLoop = (
         | i |
         testField := 0.
         i := 0.
@@ -110,13 +113,32 @@ BasicOperationsTest = TestCase (
             i < 1.
         ] whileTrue: [ self returnTest. i := i + 1 ].
 
+        self uninstallMetaobject.
+        (system inTruffle)
+            ifTrue: [ self assert: 3 equals: testField ]
+            ifFalse: [ self assert: 5 equals: testField ].
+    )
+
+    testMethodActivacion = (
+        | messageMO |
+
+        testField := 0.
+
+        "Disimilar to the lookup, the method activation is not cached and is done always. That
+        is the reason for the two extra values in the expected result (11 vs 9)"
+
+        (system inTruffle)
+            ifTrue: [ messageMO := MessageSemanticsForTestingMethodActivation new ]
+            ifFalse: [ messageMO := RTM_MessageSemanticsForTestingMethodActivation new ].
+
+        self installEnvironment: (EnvironmentMO operationalSemantics: nil message: messageMO layout: nil).
+
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
 
         self uninstallMetaobject.
-
-        self assert: 14 equals: testField.
+        self assert: 10 equals: testField.
     )
 
     testLayoutRead = (
@@ -164,18 +186,23 @@ BasicOperationsTest = TestCase (
         self installEnvironment: self class layoutMetaobject.
     )
 
+    installLayoutMetaobject = (
+        self installEnvironment: self class layoutMetaobject.
+    )
+
     uninstallMetaobject = (
         self installEnvironment: nil.
     )
 
     ------------------------------
 
-    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject implicitReturnMetaobject layoutMetaobject|
+    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject layoutMetaobject implicitReturnMetaobject|
 
     localMetaobject = (^localMetaobject)
     argumentsMetaobject = (^argumentsMetaobject)
     returnMetaobject = (^returnMetaobject)
     implicitReturnMetaobject = (^implicitReturnMetaobject)
+
     fieldsMetaobject = (^fieldsMetaobject)
     messageLookupMetaobject = (^messageLookupMetaobject)
     layoutMetaobject = (^layoutMetaobject)

@@ -1,0 +1,6 @@
+RTM_MessageSemanticsForTestingMethodActivation = MessageMO (
+	activate: method withArguments: arguments withSemantics: metaObject = (
+		self instVarNamed: #testField put: ((self instVarNamed: #testField) + 1).
+		^method invokeMateOn: self with: arguments
+	)
+)

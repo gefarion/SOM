@@ -1,3 +1,3 @@
 LayoutFieldReadSemanticsMO = LayoutMO (
-	read: anIndex = (^self instVarAt: anIndex + 1)
+	read: anIndex = (^self instVarAt: anIndex)
 )

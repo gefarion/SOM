@@ -1,0 +1,55 @@
+Exceptions = (
+  ----
+  
+  testSignalOnDo = (
+    | b |
+    b := 1.
+
+    [ Exception signal ]
+      on: Exception
+      do: [:e | b := 4 ].
+
+    ^ b
+  )
+  
+  doThrow = (
+    Exception signal.
+    ^ 44
+  )
+  
+  doCatch = (
+    [ ^ self doThrow ]
+      on: Exception
+      do: [:e | ^ 5 ]
+  )
+  
+  testSignalOnDoMethod = (
+    ^ self doCatch
+  )
+
+  testNestedSignalOnDo = (
+    [ [ Exception signal.
+         ^ 44 ]
+        on: IndexOutOfBounds
+        do: [:e | ^ 33 ] ]
+      on: Exception
+      do: [:e | ^ 22 ].
+    ^ 11
+  )
+  
+  testCustomExceptionSignalOnDo = (
+    | exp |
+    [ MyException signal: 343 ]
+      on: MyException
+      do: [:e | ^ e msg ].
+    ^ 66
+  )
+  
+  testEnsure = (
+    [ ^ 666 ] ensure: [ ^ 444 ]
+  )
+  
+  testEnsureWithSignal = (
+    [ Exception signal ] ensure: [ ^ 66 ]
+  )
+)

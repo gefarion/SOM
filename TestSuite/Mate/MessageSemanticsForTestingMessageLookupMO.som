@@ -2,7 +2,7 @@ MessageSemanticsForTestingMessageLookupMO = MessageLookupMO (
     find: aSymbol since: aClass = (
 		| class |
 
-		self instVarNamed: 'testField' put: ((self instVarNamed: 'testField') + 1).
+		self instVarNamed: #testField put: ((self instVarNamed: #testField) + 1).
 
 		class := aClass.
 		[class isNil or: [(class hasMethod: aSymbol)]] whileFalse: [

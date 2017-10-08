@@ -29,7 +29,7 @@ System = (
     global: name            = primitive
     global: name put: value = primitive
     hasGlobal: name         = primitive
-    
+
     "Initializing"
     initialize: arguments = (
         | application |
@@ -91,6 +91,7 @@ System = (
     "Export Global Symbols"
     export: aMethod as: aString = primitive
     
+    inTruffle               = primitive
     ----------------------------------
     
     "Allocation"

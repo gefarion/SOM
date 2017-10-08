@@ -50,10 +50,17 @@ Block = (
 			ifTrue: [self value]
 			ifFalse: [self value: anArg]
 	)
+	
+	"Exception support"
+    on: exception do: aBlock = (
+      ^ self doTry: exception onCatchDo: aBlock
+    )
+	
+	ensurePrimitive: aBlock = primitive
+    ensure: aBlock = (
+      ^ self ensurePrimitive: aBlock
+    )
     
     " Petit Parser" 
     asParser = (^ PPPluggableParser on: self)
-    "TODO: Must implement properly this method for exception handling"
-    on: exception do: handler = (^self value)
-    
 )

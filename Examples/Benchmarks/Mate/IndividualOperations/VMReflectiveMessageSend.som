@@ -10,6 +10,6 @@ VMReflectiveMessageSend = MessageSend (
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 2
+      ^self assert: 2 equals: result
     )
 )    
