@@ -2,14 +2,28 @@ JsonTrace = JsonBig (
 	| parser | 
 	
 	oneTimeSetup = (
-		| metaobject |
+		| metaobject semantics |
 		super oneTimeSetup.
 		Counter initialize.
-		metaobject := (EnvironmentMO 
-				operationalSemantics: nil 
-				message: TracingMessageMO new
-				layout: nil). 
-      	TracingMessageMO instrumentationMO: metaobject.
-      	parser installEnvironment: metaobject.
+
+        (system inTruffle)
+            ifTrue: [semantics := TracingMessageMO new]
+            ifFalse: [semantics := RTM_TracingMessageMO new].
+
+		metaobject := (EnvironmentMO
+				operationalSemantics: nil
+				message: semantics
+				layout: nil).
+
+
+        (system inTruffle)
+            ifTrue: [
+                PropagationMessageMO instrumentationMO: metaobject.
+                self installEnvironment: PropagationMessageMO instrumentationMO.
+            ]
+            ifFalse: [
+                RTM_PropagationMessageMO instrumentationMO: metaobject.
+                self installEnvironment: RTM_PropagationMessageMO instrumentationMO.
+            ].
     )
 )

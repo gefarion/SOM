@@ -1,21 +1,39 @@
 QuickSortTrace = QuickSort (
 	oneTimeSetup = (
-		| metaobject |
+		| metaobject semantics |
 		super oneTimeSetup.
 		Counter initialize.
+
+        (system inTruffle)
+            ifTrue: [semantics := TracingMessageMO new]
+            ifFalse: [semantics := RTM_TracingMessageMO new].
+
     	metaobject := (EnvironmentMO 
 				operationalSemantics: nil 
-				message: TracingMessageMO new
+				message: semantics
 				layout: nil). 
-      	TracingMessageMO instrumentationMO: metaobject.
-      	self installEnvironment: metaobject.
+
+        (system inTruffle)
+            ifTrue: [
+                PropagationMessageMO instrumentationMO: metaobject.
+            ]
+            ifFalse: [
+                RTM_PropagationMessageMO instrumentationMO: metaobject.
+            ].
     )
     
-    "innerBenchmarkLoop: innerIterations = (
+    innerBenchmarkLoop: innerIterations = (
     	| result |
-    	self installEnvironment: TracingMessageMO instrumentationMO.
+
+        (system inTruffle)
+            ifTrue: [ self installEnvironment: PropagationMessageMO instrumentationMO.]
+            ifFalse: [ self installEnvironment: RTM_PropagationMessageMO instrumentationMO.].
+
     	result := super innerBenchmarkLoop: innerIterations.
+        "Counter methodCalls println."
+
     	self installEnvironment: nil.
+
     	^result
-    )"
+    )
 )
