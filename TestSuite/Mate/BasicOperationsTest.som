@@ -70,34 +70,67 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self returnTest.
     )
 
+    testImplicitReturn = (
+        | value |
+
+        self assert: self implicitReturnTest returnTest equals: 1.
+        self installEnvironment: self class implicitReturnMetaobject.
+        value := self implicitReturnTest.
+        self uninstallMetaobject.
+        self assert: 2 equals: value.
+        self assert: 1 equals: self implicitReturnTest returnTest.
+    )
+
     testMessageLookup = (
         testField := 0.
 
         self installMessageLookupMetaobject.
 
-        "Note that assert:equals: call assert:description. 
+        "Note that assert:equals: call assert:description.
         But the lookup for the assert:description within that method is done only the first time because the lookup
         share the same behavior of the lookup at vm-side, if the receiver holds the lookup caches the value.
         uninstallMetaobject sums 2 lookups"
-        	
+
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
 
         self uninstallMetaobject.
-
-        self assert: 9 equals: testField.
+        (system inTruffle)
+            ifTrue: [ self assert: 9 equals: testField ]
+            ifFalse: [ self assert: 11 equals: testField ].
     )
-    
+
+    testMessageLookupInLoop = (
+        | i |
+        testField := 0.
+        i := 0.
+
+        self installMessageLookupMetaobject.
+
+        [
+            self returnTest.
+            i < 1.
+        ] whileTrue: [ self returnTest. i := i + 1 ].
+
+        self uninstallMetaobject.
+        (system inTruffle)
+            ifTrue: [ self assert: 3 equals: testField ]
+            ifFalse: [ self assert: 5 equals: testField ].
+    )
+
     testMethodActivacion = (
         | messageMO |
 
         testField := 0.
 
-        "Disimilar to the lookup, the method activation is not cached and is done always. That 
+        "Disimilar to the lookup, the method activation is not cached and is done always. That
         is the reason for the two extra values in the expected result (11 vs 9)"
-         
-        messageMO := MessageSemanticsForTestingMethodActivation new.
+
+        (system inTruffle)
+            ifTrue: [ messageMO := MessageSemanticsForTestingMethodActivation new ]
+            ifFalse: [ messageMO := RTM_MessageSemanticsForTestingMethodActivation new ].
+
         self installEnvironment: (EnvironmentMO operationalSemantics: nil message: messageMO layout: nil).
 
         self assert: 1 equals: self returnTest.
@@ -105,8 +138,7 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self returnTest.
 
         self uninstallMetaobject.
-
-        self assert: 11 equals: testField.
+        self assert: 10 equals: testField.
     )
 
     testLayoutRead = (
@@ -132,6 +164,7 @@ BasicOperationsTest = TestCase (
     )
 
     returnTest = (^1)
+    implicitReturnTest = ()
 
     installLocalsMetaobject = (
         self installEnvironment: self class localMetaobject.
@@ -148,7 +181,7 @@ BasicOperationsTest = TestCase (
     installMessageLookupMetaobject = (
         self installEnvironment: self class messageLookupMetaobject.
     )
-    
+
     installLayoutMetaobject = (
         self installEnvironment: self class layoutMetaobject.
     )
@@ -160,14 +193,16 @@ BasicOperationsTest = TestCase (
     uninstallMetaobject = (
         self installEnvironment: nil.
     )
-    
+
     ------------------------------
 
-    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject layoutMetaobject|
+    | localMetaobject argumentsMetaobject returnMetaobject fieldsMetaobject messageLookupMetaobject layoutMetaobject implicitReturnMetaobject|
 
     localMetaobject = (^localMetaobject)
     argumentsMetaobject = (^argumentsMetaobject)
     returnMetaobject = (^returnMetaobject)
+    implicitReturnMetaobject = (^implicitReturnMetaobject)
+
     fieldsMetaobject = (^fieldsMetaobject)
     messageLookupMetaobject = (^messageLookupMetaobject)
     layoutMetaobject = (^layoutMetaobject)
@@ -188,6 +223,11 @@ BasicOperationsTest = TestCase (
                 message: "MessageSemanticsForTest new" nil
                 layout: nil).
 
+        implicitReturnMetaobject := (EnvironmentMO
+                operationalSemantics: OperationalSemanticsForTestingImplicitReturn new
+                message: "MessageSemanticsForTest new" nil
+                layout: nil).
+
         fieldsMetaobject := (EnvironmentMO
                 operationalSemantics: OperationalSemanticsForTestingFields new
                 message: "MessageSemanticsForTest new" nil
@@ -197,10 +237,10 @@ BasicOperationsTest = TestCase (
                 operationalSemantics: nil
                 message: MessageSemanticsForTestingMessageLookupMO new
                 layout: nil).
-                
+
         layoutMetaobject := (EnvironmentMO
                 operationalSemantics: nil
                 message: nil
-                layout: LayoutSemanticsForTestingLayout new).        
+                layout: LayoutSemanticsForTestingLayout new).
     )
  )

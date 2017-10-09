@@ -15,6 +15,11 @@ ClassD = (
 	^self.
   )
 
+  incSelf = (
+    c := c + 1.
+    ^self.
+  )
+
   get = (
     ^c.
   )

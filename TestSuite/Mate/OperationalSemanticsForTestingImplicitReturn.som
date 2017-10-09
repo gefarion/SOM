@@ -1,0 +1,5 @@
+OperationalSemanticsForTestingImplicitReturn = OperationalSemanticsMO (
+    return: aValue = (
+    	^2
+    )
+)

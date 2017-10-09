@@ -1,22 +1,37 @@
 DeltaBlueTrace = DeltaBlue (
+    | a |
+
 	oneTimeSetup = ( 
-    	| metaobject |
+    	| metaobject semantics |
     	Counter initialize.
     	super oneTimeSetup.
+
+        (system inTruffle)
+            ifTrue: [semantics := TracingMessageMO new]
+            ifFalse: [semantics := RTM_TracingMessageMO new].
+
     	metaobject := (EnvironmentMO 
 			operationalSemantics: nil 
-			message: TracingMessageMO new
+			message: semantics
 			layout: nil).
-		PropagationMessageMO instrumentationMO: metaobject. 
+
+        (system inTruffle)
+            ifTrue: [ PropagationMessageMO instrumentationMO: metaobject. ]
+            ifFalse: [ RTM_PropagationMessageMO instrumentationMO: metaobject. ].
     )
 
     innerBenchmarkLoop: innerIterations = (
-        self installEnvironment: PropagationMessageMO instrumentationMO.
+
+        (system inTruffle)
+            ifTrue: [ self installEnvironment: PropagationMessageMO instrumentationMO.]
+            ifFalse: [ self installEnvironment: RTM_PropagationMessageMO instrumentationMO.].
+
         self runIterations: innerIterations.
-        "self installEnvironment: nil.
-        Counter methodCalls println.
-        Counter methods do: [:name | name println.]. 
-        self verifyResult ifFalse: [ ^ false ]."
+        self installEnvironment: nil.
+
+        "Counter methodCalls println."
+        "Counter methods do: [:name | name println.]."
+        "self verifyResult ifFalse: [ ^ false ]."
         ^ true
     )
     
@@ -25,7 +40,7 @@ DeltaBlueTrace = DeltaBlue (
         Planner projectionTest: innerIterations.
     )
     
-    "verifyResult = (
+    verifyResult = (
     	^(Counter methodCalls - 2 % self iterationOperations) = 0.
     )
     
@@ -33,7 +48,7 @@ DeltaBlueTrace = DeltaBlue (
     	^1351
     )
     
-    oneIteration = (
+    "oneIteration = (
     	^3866 + 5217 + 6998 + 8233 + 3033
     )"
 )

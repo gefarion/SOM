@@ -41,7 +41,6 @@ TestHarness = (
           GlobalTest,
           HashTest,
           IntegerTest,
-          MethodCascadeTest,
           PreliminaryTest,
           ReflectionTest,
           SelfBlockTest,
@@ -50,11 +49,9 @@ TestHarness = (
           SuperTest,
           SymbolTest, 
           SystemTest,
-          VectorTest,
-          BasicOperationsTest
+          VectorTest
     )
-    
-    
+
     runAllSuites = (
       |  totalTestNum successfulTestNum |
       totalTestNum := 0.

@@ -36,6 +36,8 @@ Nil = (
     ifNil: aBlock = (^aBlock value)
     ifNotNil: aBlock = (^self)
     ifNil: goBlock ifNotNil: noGoBlock = (^goBlock value)
+    ifTrue: aBlock = (^self)
+    ifTrue: aBlock ifFalse: otherBlock = (^self)
     
     "Delegation Proxies"
     proxyClass = (
@@ -43,6 +45,13 @@ Nil = (
     )
     
     readOnly = (^nil)
+    *  argument = (^nil)
+    &  argument = (^nil)
+    +  argument = (^nil)
+    -  argument = (^nil)
+    >  argument = (^nil)
+    <  argument = (^nil)
+    %  argument = (^nil)
     
     "Petit Parser"
     asParser = (^ PPEpsilonParser new)

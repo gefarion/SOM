@@ -1,4 +1,5 @@
 Mock = Object (
+	| a |
     key = (^1)
     reflectivekey = (^2)
 )    

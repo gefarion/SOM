@@ -1,9 +1,12 @@
 Context = (
-	method 						 	  = primitive
-	sender 						 	  = primitive
-	receiver 					 	  = primitive
-	localAt: anIdentifier 			  = primitive
-	argAt: anIndex 			 	  	  = primitive
+	method                            = primitive
+	sender                            = primitive
+	receiver                          = primitive
+	localAt: anIdentifier             = primitive
+	argAt: anIndex                    = primitive
 	localAt: anIdentifier put: aValue = primitive
+	hasMetaObjectEnvironment          = primitive
+	inMeta                            = primitive
+	getMetaObjectEnvironment          = primitive
 )
 

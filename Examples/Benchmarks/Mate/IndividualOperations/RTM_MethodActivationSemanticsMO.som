@@ -1,6 +1,6 @@
 "
 
-$Id: MateTestHarness.som 30 20015-04-22 12:20:25Z guido.chari $
+$Id: Environment.som 29 2005-04-17 11:28:44Z guido.chari $
 
 Copyright (c) 2001-2013 see AUTHORS file
 
@@ -22,10 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 "
-
-MateTestHarness = TestHarness (
-    tests = ( "Now ordered by alphabetical order to improve maintainability"
-        ^ BasicOperationsTest, ImmutabilityTest
-          "LayoutTest"
-    )
+RTM_MethodActivationSemanticsMO = MessageMO (
+	activate: method withArguments: arguments withSemantics: metaObject = (
+		^method invokeMateOn: self with: arguments
+	)
 )

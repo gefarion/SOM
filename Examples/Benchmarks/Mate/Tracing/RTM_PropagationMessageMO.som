@@ -1,0 +1,14 @@
+RTM_PropagationMessageMO = MessageMO (
+
+	activate: method withArguments: arguments withSemantics: metaObject = (
+		^method invokeMateOn: self with: arguments withSemantics: (RTM_PropagationMessageMO instrumentationMO).
+	)
+
+	----------------------------
+	| instrumentationMO |
+
+	instrumentationMO = (^instrumentationMO)
+    instrumentationMO: aMetaobject = (
+    	instrumentationMO := aMetaobject
+    )
+)
