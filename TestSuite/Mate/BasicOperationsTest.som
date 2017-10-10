@@ -115,7 +115,7 @@ BasicOperationsTest = TestCase (
 
         self uninstallMetaobject.
         (system inTruffle)
-            ifTrue: [ self assert: 3 equals: testField ]
+            ifTrue: [ self assert: 4 equals: testField ]
             ifFalse: [ self assert: 5 equals: testField ].
     )
 
@@ -138,7 +138,7 @@ BasicOperationsTest = TestCase (
         self assert: 1 equals: self returnTest.
 
         self uninstallMetaobject.
-        self assert: 10 equals: testField.
+        self assert: 11 equals: testField.
     )
 
     testLayoutRead = (
