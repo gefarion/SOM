@@ -1,16 +1,17 @@
 ArgumentRead = Benchmark (
-    | object |
+    | object random iterValue |
     
     oneTimeSetup = (
+    	random := Random initialize.
     	object := PairTest new.
-    	object key: 1.
     )
     
     benchmark = (
-    	^object testArgRead: 1.
+    	iterValue := random next 
+    	^object testArgRead: iterValue.
     )
     
     verifyResult: result = (
-      ^result = 1
+      ^result = iterValue
     )
 )    

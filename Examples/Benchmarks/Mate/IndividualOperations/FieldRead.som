@@ -8,7 +8,7 @@ FieldRead = Benchmark (
     )
     
     benchmark = (
-    	object key: (Random next rem: 100)  + 1.
+    	object key: (Random next rem: 100) + 1.
 		^object key.
     )
     

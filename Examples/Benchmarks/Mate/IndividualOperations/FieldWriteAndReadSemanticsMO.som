@@ -1,4 +1,10 @@
 FieldWriteAndReadSemanticsMO = FieldWriteSemanticsMO (
 	read: anIndex = (^self instVarAt: anIndex)
 	return: aValue = (^aValue)
+	readLocal: anIdentifier inFrame: aFrame = (
+    	^aFrame localAt: anIdentifier
+    )
+    writeLocal: anIdentifier inFrame: aFrame value: aValue = (
+    	^aFrame localAt: anIdentifier put: aValue
+    )
 )

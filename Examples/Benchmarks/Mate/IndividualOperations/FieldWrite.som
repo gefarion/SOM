@@ -2,14 +2,16 @@ FieldWrite = Benchmark (
     | object |
     
     oneTimeSetup = (
+    	Random initialize.
     	object := Pair new.
     )
     
     benchmark = (
-		object key: 1.
+		object key: (Random next rem: 100) + 1.
+		^object key
     )
     
     verifyResult: result = (
-      ^self assert: object key equals: 1
+      ^result <= 100
     )
 )    

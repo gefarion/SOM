@@ -1,17 +1,18 @@
 AllOperations = Benchmark (
-    | object |
+    | object valueIter |
     
     oneTimeSetup = (
-    	object := Pair new.
-    	object key: 1.
+    	Random initialize.
+    	object := PairTest new.
     )
     
     benchmark = (
-		object key: 1.
-		^object key.
+		valueIter := (Random next rem: 100) + 1.
+		object key: valueIter.
+		^object key + valueIter.
     )
     
     verifyResult: result = (
-      ^self assert: result equals: 1
+      ^result = (valueIter * 2)
     )
-)    
+)

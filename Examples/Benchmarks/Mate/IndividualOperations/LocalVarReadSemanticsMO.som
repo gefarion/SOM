@@ -1,4 +1,4 @@
-LocalVarReadSemanticsMO = LayoutMO (
+LocalVarReadSemanticsMO = OperationalSemanticsMO (
 	readLocal: anIdentifier inFrame: aFrame = (
     	^aFrame localAt: anIdentifier
     )
