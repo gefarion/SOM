@@ -1,7 +1,7 @@
-ReadonlySumKeysEnvInObj = ReadonlySumKeys (
+ReadonlySumKeysEnvInObj = DelegationProxiesSumKeys (
    	oneTimeSetup = (
+    	HandleEnvInObj initialize.
     	super oneTimeSetup.
-   		HandleEnvInObj initialize.
     )
    	
    	makeHeadOfListReadOnly = (
