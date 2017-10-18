@@ -44,7 +44,8 @@ Nil = (
     	^NoProxy
     )
     
-    readOnly = (^nil)
+    readOnly         = (^nil)
+    readOnlyEnvInObj = (^nil)
     *  argument = (^nil)
     &  argument = (^nil)
     +  argument = (^nil)

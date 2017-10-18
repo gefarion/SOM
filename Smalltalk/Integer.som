@@ -137,6 +137,7 @@ Integer = (
     
 	"Readonly"
 	readOnly = (^self)
+	readOnlyEnvInObj = (^self)
 	
 	"Petit Parser"
 	isZero = (^self = 0)

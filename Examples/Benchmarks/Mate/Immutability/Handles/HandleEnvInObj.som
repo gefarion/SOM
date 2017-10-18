@@ -13,9 +13,9 @@ HandleEnvInObj = Handle (
     
     targetSPECIAL: anObject = (
     	| object |
-    	object := self basicNew.
+    	object := self basicNew: self semantics.
     	object targetSPECIAL: anObject.
-    	object installEnvironment: self semantics.
+    	"object installEnvironment: ." 
     	^object
     )
  )
