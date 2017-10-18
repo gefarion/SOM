@@ -1,0 +1,10 @@
+ReadonlySumKeysEnvInObj = ReadonlySumKeys (
+   	oneTimeSetup = (
+    	super oneTimeSetup.
+   		HandleEnvInObj initialize.
+    )
+   	
+   	makeHeadOfListReadOnly = (
+    	pairs := pairs readOnlyEnvInObj.
+    )
+)

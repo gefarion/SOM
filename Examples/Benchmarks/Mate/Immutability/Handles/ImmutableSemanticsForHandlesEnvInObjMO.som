@@ -1,0 +1,3 @@
+ImmutableSemanticsForHandlesEnvInObjMO = ImmutableSemanticsForHandlesMO (
+    read: anIndex = (^(self targetSPECIAL instVarAt: anIndex) readOnlyEnvInObj)
+)

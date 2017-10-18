@@ -145,7 +145,8 @@ Object = nil (
     instVarAt: anIndex myself: anObject = (^self instVarAt: anIndex)
     
     "Extension for the MOP"
-	readOnly = ( ^Handle targetSPECIAL: self )
+	readOnly 		 = ( ^Handle targetSPECIAL: self )
+	readOnlyEnvInObj = ( ^HandleEnvInObj targetSPECIAL: self )
 	changeShape: aShape = primitive
 	shape = primitive
 	
