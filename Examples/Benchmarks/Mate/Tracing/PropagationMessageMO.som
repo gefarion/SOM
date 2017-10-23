@@ -1,18 +1,9 @@
 PropagationMessageMO = MessageMO (
-    find: aSymbol since: aClass = (	
-		| class |
-		class := aClass.
-		[class isNil or: (class hasMethod: aSymbol)] whileFalse: [
-			class := class superclass.
-		].
-		class isNil ifFalse: [ ^(class methods select:[:m | m signature = aSymbol]) at: 1].
-		^nil.
-	)
-	
-	activate: aMethod withArguments: arguments = (
+    activate: aMethod withArguments: arguments = (
 		| realArguments | 
 		realArguments := arguments copy.
 		realArguments at: 1 put: PropagationMessageMO instrumentationMO.
+		realArguments at: 2 put: system baseExecutionLevel.
 		^realArguments.
 	)
 	
