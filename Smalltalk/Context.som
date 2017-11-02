@@ -5,8 +5,9 @@ Context = (
 	localAt: anIdentifier             = primitive
 	argAt: anIndex                    = primitive
 	localAt: anIdentifier put: aValue = primitive
-	hasMetaObjectEnvironment          = primitive
-	inMeta                            = primitive
-	getMetaObjectEnvironment          = primitive
+
+	getEnvironment                    = primitive
+	installEnvironment: anEnvironment = primitive
+	hasEnvironment                    = primitive
 )
 

@@ -34,6 +34,7 @@ Class = (
     "Allocation"
     new = ( ^ self basicNew initialize )
     basicNew = primitive
+    basicNew: anEnvironment = primitive
     
     "Meta Information"
     superclass = primitive

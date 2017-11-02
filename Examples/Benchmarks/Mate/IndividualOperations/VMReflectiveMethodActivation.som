@@ -2,14 +2,13 @@ VMReflectiveMethodActivation = MessageSend (
     oneTimeSetup = (
     	| environment semantics |
     	super oneTimeSetup.
-    	(system inTruffle)
-    		ifTrue: [ semantics := MethodActivationSemanticsMO new ]
-    		ifFalse: [ semantics := RTM_MethodActivationSemanticsMO new ].
 
-    	environment := EnvironmentMO 
-							operationalSemantics: nil 
+        semantics := MethodActivationSemanticsMO new.
+
+    	environment := EnvironmentMO
+							operationalSemantics: nil
 							message: semantics
 							layout: nil.
 		object installEnvironment: environment.
     )
-)    
+)

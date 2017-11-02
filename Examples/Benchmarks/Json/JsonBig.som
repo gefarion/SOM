@@ -4,9 +4,15 @@ JsonBig = Json (
 		super oneTimeSetup.
 	)
 	contents = (
-		| content |
-		content := (FileSystem * (self filename)) readStream contents.
-		^content asString 
+		| content file stream |
+		file := (FileSystem * (self filename)).
+
+		stream := file readStream.
+		content :=  stream contents.
+
+		(system inTruffle)
+            ifTrue: [ ^content asString ]
+            ifFalse: [ ^'' join: content ].
 	)
     
     verifyResult: result = (

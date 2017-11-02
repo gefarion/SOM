@@ -1,29 +1,26 @@
 JsonTrace = JsonBig (
-	| parser | 
-	
+	| parser |
+
 	oneTimeSetup = (
 		| metaobject semantics |
 		super oneTimeSetup.
 		Counter initialize.
 
-        (system inTruffle)
-            ifTrue: [semantics := TracingMessageMO new]
-            ifFalse: [semantics := RTM_TracingMessageMO new].
+        semantics := TracingMessageMO new.
 
 		metaobject := (EnvironmentMO
 				operationalSemantics: nil
 				message: semantics
 				layout: nil).
 
+        PropagationMessageMO instrumentationMO: metaobject.
+        self installEnvironment: PropagationMessageMO instrumentationMO.
+    )
 
-        (system inTruffle)
-            ifTrue: [
-                PropagationMessageMO instrumentationMO: metaobject.
-                self installEnvironment: PropagationMessageMO instrumentationMO.
-            ]
-            ifFalse: [
-                RTM_PropagationMessageMO instrumentationMO: metaobject.
-                self installEnvironment: RTM_PropagationMessageMO instrumentationMO.
-            ].
+    innerBenchmarkLoop: innerIterations = (
+        | value |
+        value := super innerBenchmarkLoop: innerIterations.
+        "Counter methodCalls println."
+        ^value.
     )
 )

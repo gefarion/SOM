@@ -1,36 +1,32 @@
 DeltaBlueTrace = DeltaBlue (
     | a |
 
-	oneTimeSetup = ( 
+	oneTimeSetup = (
     	| metaobject semantics |
     	Counter initialize.
     	super oneTimeSetup.
 
-        (system inTruffle)
-            ifTrue: [semantics := TracingMessageMO new]
-            ifFalse: [semantics := RTM_TracingMessageMO new].
+        semantics := TracingMessageMO new.
 
-    	metaobject := (EnvironmentMO 
-			operationalSemantics: nil 
+    	metaobject := (EnvironmentMO
+			operationalSemantics: nil
 			message: semantics
 			layout: nil).
 
-        (system inTruffle)
-            ifTrue: [ PropagationMessageMO instrumentationMO: metaobject. ]
-            ifFalse: [ RTM_PropagationMessageMO instrumentationMO: metaobject. ].
+         PropagationMessageMO instrumentationMO: metaobject.
     )
 
     innerBenchmarkLoop: innerIterations = (
 
-        (system inTruffle)
-            ifTrue: [ self installEnvironment: PropagationMessageMO instrumentationMO.]
-            ifFalse: [ self installEnvironment: RTM_PropagationMessageMO instrumentationMO.].
+        self installEnvironment: PropagationMessageMO instrumentationMO.
 
         self runIterations: innerIterations.
+
         self installEnvironment: nil.
 
-        "Counter methodCalls println."
+        Counter methodCalls println.
         "Counter methods do: [:name | name println.]."
+
         "self verifyResult ifFalse: [ ^ false ]."
         ^ true
     )

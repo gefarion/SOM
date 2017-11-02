@@ -86,20 +86,14 @@ BasicOperationsTest = TestCase (
 
         self installMessageLookupMetaobject.
 
-        "Note that assert:equals: call assert:description.
-        But the lookup for the assert:description within that method is done only the first time because the lookup
-        share the same behavior of the lookup at vm-side, if the receiver holds the lookup caches the value.
-        uninstallMetaobject sums 2 lookups"
-
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
 
         self uninstallMetaobject.
-        (system inTruffle)
-            ifTrue: [ self assert: 9 equals: testField ]
-            ifFalse: [ self assert: 11 equals: testField ].
+        self assert: 9 equals: testField.
     )
+
 
     testMessageLookupInLoop = (
         | i |
@@ -114,9 +108,7 @@ BasicOperationsTest = TestCase (
         ] whileTrue: [ self returnTest. i := i + 1 ].
 
         self uninstallMetaobject.
-        (system inTruffle)
-            ifTrue: [ self assert: 4 equals: testField ]
-            ifFalse: [ self assert: 5 equals: testField ].
+        self assert: 3 equals: testField.
     )
 
     testMethodActivacion = (
@@ -124,21 +116,17 @@ BasicOperationsTest = TestCase (
 
         testField := 0.
 
-        "Disimilar to the lookup, the method activation is not cached and is done always. That
-        is the reason for the two extra values in the expected result (11 vs 9)"
-
-        (system inTruffle)
-            ifTrue: [ messageMO := MessageSemanticsForTestingMethodActivation new ]
-            ifFalse: [ messageMO := RTM_MessageSemanticsForTestingMethodActivation new ].
+        messageMO := MessageSemanticsForTestingMethodActivation new.
 
         self installEnvironment: (EnvironmentMO operationalSemantics: nil message: messageMO layout: nil).
 
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
         self assert: 1 equals: self returnTest.
+        self hashcode.
 
         self uninstallMetaobject.
-        self assert: 11 equals: testField.
+        self assert: 12 equals: testField.
     )
 
     testLayoutRead = (
@@ -164,6 +152,7 @@ BasicOperationsTest = TestCase (
     )
 
     returnTest = (^1)
+
     implicitReturnTest = ()
 
     installLocalsMetaobject = (

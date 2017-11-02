@@ -1,6 +1,0 @@
-RTM_TracingMessageMO = RTM_PropagationMessageMO (
-	activate: aMethod withArguments: arguments withSemantics: metaObject = (
-		Counter addMethodCall.
-		^super activate: aMethod withArguments: arguments withSemantics: metaObject.
-	)
-)

@@ -30,6 +30,7 @@ System = (
     global: name put: value = primitive
     hasGlobal: name         = primitive
     getContext = primitive
+    inMeta = primitive
 
     "Initializing"
     initialize: arguments = (

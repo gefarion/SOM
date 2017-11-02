@@ -4,24 +4,15 @@ NBodyTrace = NBody (
     	super oneTimeSetup.
     	Counter initialize.
 
-        (system inTruffle)
-            ifTrue: [semantics := TracingMessageMO new]
-            ifFalse: [semantics := RTM_TracingMessageMO new].
+        semantics := TracingMessageMO new.
 
     	metaobject := (EnvironmentMO
 			operationalSemantics: nil
 			message: semantics
 			layout: nil).
 
-        (system inTruffle)
-            ifTrue: [
-                PropagationMessageMO instrumentationMO: metaobject.
-                self installEnvironment: metaobject.
-            ]
-            ifFalse: [
-                RTM_PropagationMessageMO instrumentationMO: metaobject.
-                self installEnvironment: metaobject.
-            ].
+        PropagationMessageMO instrumentationMO: metaobject.
+        self installEnvironment: metaobject.
     )
     
     innerBenchmarkLoop: innerIterations = (

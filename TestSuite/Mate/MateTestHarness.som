@@ -1,5 +1,5 @@
 MateTestHarness = TestHarness (
     tests = ( "Now ordered by alphabetical order to improve maintainability"
-        ^ BasicOperationsTest, ImmutabilityTest, LayoutTest
+        ^ BasicOperationsTest, EmptyTest
     )
 )
