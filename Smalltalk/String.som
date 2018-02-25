@@ -84,6 +84,10 @@ String = (
     asInteger = (
         ^ Integer fromString: self
     )
+
+    asDouble = (
+        ^ Double fromString: self
+    )
     
     at: index = primitive
     "Just needed to run Json cross-language benchmark"

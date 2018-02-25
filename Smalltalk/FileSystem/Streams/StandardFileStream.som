@@ -185,7 +185,7 @@ StandardFileStream = FileStream (
 	readWrite = (rwmode := true)
 	setToEnd = (self position: self size)
 	nextBytesPutAll: aCollection = (self nextPutAll: aCollection)
-	next: n = (^ self nextInto: (self collectionSpecies new: n))
+	next: n = (^ self next: n into: (self collectionSpecies new: n) startingAt: self position)
 	size = (^ self primSize: fileID)
 	fullName = (^ name)
 	name = (^ name)

@@ -8,12 +8,12 @@ MoviesAggregate = Movies (
     )
     
     verifyResult: result = (
-     	self problemSize = 1000 ifTrue:[^result = 3.777].
-     	self problemSize = 10000 ifTrue:[^result = 3.6339].
-     	self problemSize = 50000 ifTrue:[^result = 3.58554].
-     	self problemSize = 100000 ifTrue:[^result = 3.61014].
-     	self problemSize = 500000 ifTrue:[^result = 3.574588].
-     	self problemSize = 1000000 ifTrue:[^result = 3.581559].
+     	self problemSize = 1000 ifTrue:[^result = 3.7145].
+     	self problemSize = 10000 ifTrue:[^result = 3.71435].
+     	self problemSize = 50000 ifTrue:[^result = 3.71429].
+     	self problemSize = 100000 ifTrue:[^result = 3.714295].
+     	self problemSize = 500000 ifTrue:[^result = 3.714286].
+     	self problemSize = 1000000 ifTrue:[^result = 3.7142855].
      	^false.
     )
 )

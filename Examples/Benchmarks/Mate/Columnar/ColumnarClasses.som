@@ -1,9 +1,10 @@
 ColumnarClasses = (
     | columnarData |
     
-    initialize = (columnarData := Hashtable new)
+    initialize = (columnarData := Hashtable new. self println.)
     
     newInstanceFor: aClass = (
+        self println.
     	(columnarData containsKey: aClass) ifFalse: [
     		columnarData at: aClass put: 
     			(ColumnarData fromDescriptor: aClass columnarDescriptor)	

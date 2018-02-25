@@ -28,6 +28,7 @@ Block1 = Block (
     "For the creation of Block instances, see Universe_new_block()."
     "Evaluating"
     value = primitive
+    value: aObject = ( self value )
     ensure: aBlock = (
     	"Implemented for FileSystem support. It still does not comply with ensure behavior when the block fails"
     	| returnValue |

@@ -41,12 +41,14 @@ ColumnarMessageMO = MessageMO (
 		| extended |
 		(aMethod signature = #newInstanceFor: and: [arguments length < 4]) ifTrue: [
 			"Todo: Optimize!!! Probably primitively resizing arrays"
-			extended := Array new: arguments length + 1. 
+			extended := Array new: arguments length + 1.
 			1 to: arguments length - 1 do: [:i | extended at: i put: (arguments at: i)].
 			extended at: arguments length put: ColumnarClasses current.
 			extended at: arguments length + 1 put: self.
+			extended at: 2 put: system baseExecutionLevel.
 			^extended.
 		]
+		arguments at: 2 put: system baseExecutionLevel.
 		^arguments.
 	)
 )

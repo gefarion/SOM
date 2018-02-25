@@ -1,45 +1,45 @@
 Movies = Benchmark (
     | ratings problemSize |
-    
+
     oneTimeSetup = (
     	UnixStore initialize.
     	ratings := Vector new.
     	self loadMovies.
     )
-    
+
     initialize = (
     	| harness |
-    	harness := thisContext sender sender receiver.
+    	harness := system getContext sender sender receiver.
     	self problemSize: harness innerIterations.
     	harness innerIterations: 2.
     	super initialize.
     )
-    
+
     benchmark = (
 		self subclassResponsibility.
     )
-    
+
     loadMovies = (
-    	| i file stream ratingForMovie rating |
-    	file := FileSystem * 'core-lib/Examples/Benchmarks/Mate/Columnar/MovieLens/ratings.dat'.
-    	stream := file readStream.
+    	| i file line stream ratingForMovie rating |
+    	file := FileSystem * 'RTruffleMate/core-lib/Examples/Benchmarks/Mate/Columnar/MovieLens/ratings.dat'.
+        stream := file readStream.
     	i := 0.
     	[stream atEnd or: [i >= self problemSize]] whileFalse: [
-    		ratingForMovie := self delimitor split: (stream nextLine asString).
+            line := stream nextLine.
+    		ratingForMovie := self delimitor split: (line asString).
     		ratingForMovie size = 4 ifTrue: [
 	    		rating := Rating new.
 	    		rating movie: (ratingForMovie at: self movieIndex).
-	    		rating rating: (ratingForMovie at: self ratingIndex) asInteger.
+	    		rating rating: (ratingForMovie at: self ratingIndex) asDouble.
 	    		ratings append: rating.
 	    		i := i + 1.
 	    	]
     	].
-    	i println.	    			    		
     )
-    
-    delimitor = (^'::')
+
+    delimitor = (^',')
     movieIndex = (^2)
     ratingIndex = (^3)
     problemSize = (^problemSize)
     problemSize: aNumber = (problemSize := aNumber)
-)    
+)
