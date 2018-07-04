@@ -3,7 +3,10 @@ ColumnarDescriptor = (
     
     initialize = (
     	descriptor := Vector new.
-    	initialSize := thisContext sender sender sender sender sender receiver problemSize println.  
+        "
+        initialSize := thisContext sender sender sender sender sender receiver problemSize.
+        "
+    	initialSize := 100000.
     )
     
     "Accessing"
