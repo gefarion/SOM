@@ -27,7 +27,7 @@ ListElementForProxies = ListElement (
     lengthMyself: slf = ( 
     	| length current |
     	length := 1.
-    	current := self.
+    	current := slf.
     	[(current nextMyself: slf) isNil] whileFalse: [
     		length := length + 1. 
     		current := (current nextMyself: slf)

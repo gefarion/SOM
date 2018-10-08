@@ -1,5 +1,4 @@
 "
-
 $Id: ListElement.som 31 2009-07-31 12:25:18Z michael.haupt $
 
 Copyright (c) 2001-2013 see AUTHORS file
@@ -25,21 +24,26 @@ THE SOFTWARE.
 
 ListElementProxy = Proxy (
     length = (
-    	^self lengthMyself: self
+        ^self lengthMyself: self
     )
-    
-    lengthMyself: slf = ( 
-    	^handler handleMessage: #length withArguments: #() myself: slf target: target 
+
+    lengthMyself: slf = (
+        | args |
+        args := Array new: 1.
+        args at: 1 put: slf.
+        ^handler handleMessage: #lengthMyself: withArguments: args myself: slf target: target.
     )
-    
+
     next = (^self nextMyself: self)
-    next: aValue = (^self next: aValue myself: self)
     nextMyself: slf = ( ^handler handleReadField: #next myself: slf target: target)
+
+    next: aValue = (^self next: aValue myself: self)
     next: anElement myself: slf = ( ^handler handleWriteField: #next value: anElement myself: slf target: target )
-    
+
     val = (^self valMyself: self)
-    val: aValue = (^self val: aValue myself: self)
     valMyself: slf    = ( ^handler handleReadField: #val myself: slf target: target )
+
+    val: aValue = (^self val: aValue myself: self)
     val: n myself: slf = ( ^handler handleWriteField: #val value: n myself: slf target: target )
 )
 
